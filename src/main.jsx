@@ -1,5 +1,6 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App.jsx';
+import ReactDOM from 'react-dom/client'; // Importa la nueva API
+import App from './App'; // Tu componente principal
 
-ReactDOM.render(<App />, document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
