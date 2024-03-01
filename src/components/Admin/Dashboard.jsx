@@ -1,5 +1,7 @@
 import React from 'react';
 import { FaList, FaUsers, FaUserTie, FaChartPie, FaRegUserCircle} from 'react-icons/fa';
+import { Link, Outlet } from 'react-router-dom';
+
 
 
 import { IoIosLogOut } from "react-icons/io";
@@ -29,16 +31,33 @@ const Dashboard = () => {
             <p className='fw-bold'  style={{color: 'grey', padding: '5px'}}  >  Gestión   </p>
 
             <li className="nav-item">
-              <a className="nav-link d-flex align-items-center " href="#">
-               
-                <FaList style={{ color: '#2D7541', marginRight: '20px', fontSize: '1.2em' }}/> <span style={{ color: '#2D7541' }}>Divisiones</span>
-       
-              </a>
+ 
+
+            <Link
+                className="nav-link d-flex align-items-center"
+                to="/dashboard/divisiones"
+              >
+                <FaList style={{ color: '#2D7541', marginRight: '20px', fontSize: '1.2em' }} />
+                <span style={{ color: '#2D7541' }}>Divisiones</span>
+              </Link>
+
+
             </li>
+
+
+           
+
             <li className="nav-item">
-              <a className="nav-link d-flex align-items-center" href="#">
-                <FaUsers style={{ color: '#2D7541', marginRight: '20px', fontSize: '1.2em' }}/> <span style={{ color: '#2D7541' }}>Trabajadores</span>
-              </a>
+
+            <Link
+                className="nav-link d-flex align-items-center"
+                to="/dashboard/trabajadores"
+              >
+                <FaUsers style={{ color: '#2D7541', marginRight: '20px', fontSize: '1.2em' }} />
+                <span style={{ color: '#2D7541' }}>Trabajadores</span>
+              </Link>
+
+
             </li>
             <li className="nav-item">
               <a className="nav-link d-flex align-items-center" href="#">
@@ -83,10 +102,17 @@ const Dashboard = () => {
             </div>
           </nav>
 
+
+          <div className="container-fluid">
+
           <div className="content" style={{ padding: '20px' }}>
+
+          <Outlet />  {/* Outlet para rutas hijas */}
+
 
 
             
+          </div>
           </div>
         </div>
       </div>

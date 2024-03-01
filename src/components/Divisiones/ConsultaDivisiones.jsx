@@ -1,9 +1,296 @@
-import React from 'react'
+import React from 'react';
+import { Button, Container, Modal, Row  } from 'react-bootstrap';
+import { AiFillEdit  } from "react-icons/ai";
+import { HiArrowSmRight, HiArrowSmLeft  } from "react-icons/hi";
+import { FaPlus } from "react-icons/fa";
+import { useState } from 'react';
+import Form from 'react-bootstrap/Form';
 
-function ConsultaDivisiones() {
+
+
+
+
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { useTable, usePagination, useGlobalFilter } from 'react-table';
+
+const ConsultaDivisiones = () => {
+
+
+
+  
+  const data = React.useMemo(
+    () => [
+      {
+        division: 'División 1',
+        sigla: 'D1',
+        monto: 1000,
+        estatus: 'Activo',
+      },
+      {
+        division: 'División 23',
+        sigla: 'D2',
+        monto: 2000,
+        estatus: 'Inactivo',
+      },
+      {
+        division: 'División 4',
+        sigla: 'D2',
+        monto: 2000,
+        estatus: 'Inactivo',
+      },
+      {
+        division: 'División 5',
+        sigla: 'D2',
+        monto: 2000,
+        estatus: 'Inactivo',
+      },
+      {
+        division: 'División 6',
+        sigla: 'D2',
+        monto: 2000,
+        estatus: 'Inactivo',
+      },
+      {
+        division: 'División 7',
+        sigla: 'D2',
+        monto: 2000,
+        estatus: 'Inactivo',
+      },
+      {
+        division: 'División 8',
+        sigla: 'D2',
+        monto: 2000,
+        estatus: 'Inactivo',
+      },
+      {
+        division: 'División 9',
+        sigla: 'D2',
+        monto: 2000,
+        estatus: 'Inactivo',
+      },
+       {
+        division: 'División 10',
+        sigla: 'D2',
+        monto: 2000,
+        estatus: 'Inactivo',
+      },
+      // Agrega más datos si es necesario
+    ],
+    []
+  );
+
+  const columns = React.useMemo(
+    () => [
+      {
+        Header: 'División',
+        accessor: 'division',
+      },
+      {
+        Header: 'Sigla',
+        accessor: 'sigla',
+      },
+      {
+        Header: 'Monto',
+        accessor: 'monto',
+      },
+      {
+        Header: 'Estatus',
+        accessor: 'estatus',
+      },
+      {
+        Header: 'Acciones',
+        Cell: () => (
+          <Button variant="success" size="sm">
+<AiFillEdit />
+
+          </Button>
+        ),
+      },
+      {
+        Header: 'Estado de cuenta',
+        Cell: () => (
+          <Button variant="success" size="sm">
+            Generar estado de cuenta 
+          </Button>
+        ),
+      },
+    ],
+    []
+  );
+
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    prepareRow,
+    page,
+    nextPage,
+    previousPage,
+    canNextPage,
+    canPreviousPage,
+    pageOptions,
+    state,
+    setGlobalFilter,
+  } = useTable(
+    {
+      columns,
+      data,
+      initialState: { pageSize: 5 }, // Cantidad de filas por página
+    },
+    useGlobalFilter,
+    usePagination
+  );
+
+  const { globalFilter, pageIndex } = state;
+
+
+  const [show, setShow] = useState(false);
+
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+
   return (
-    <div>ConsultaDivisiones</div>
-  )
-}
+    <>
+      <div className='container-fluid  p-3 my-3'>
+        <div className='row'>
+          <div className='col-6'>
+            <Button variant="success"   onClick={handleShow}   >Añadir División   <FaPlus /></Button>
+          </div>
 
-export default ConsultaDivisiones
+          <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+
+         
+            <Modal.Title>
+            Añadir división  
+            </Modal.Title>
+
+        </Modal.Header>
+        <Modal.Body>
+
+        <Container>
+            <Row>
+
+            <label>Nombre:</label>
+            
+            <Form.Control type="text" placeholder="name@example.com" />
+
+              
+            </Row>
+
+            <Row>
+
+<label>Nombre:</label>
+
+<Form.Control type="text" placeholder="name@example.com" />
+
+  
+</Row>
+
+<Row>
+
+<label>Nombre:</label>
+
+<Form.Control type="text" placeholder="name@example.com" />
+
+  
+</Row>
+
+          </Container>
+
+         
+
+
+  
+
+
+
+
+          
+          </Modal.Body>
+        <Modal.Footer>
+       
+          <Button variant="success" onClick={handleClose}>
+            Crear
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+          <div className='col-6 d-flex justify-content-end'>
+            <p>Buscar división:</p>
+            <input
+              type="text"
+              value={globalFilter || ''}
+              onChange={e => setGlobalFilter(e.target.value)}
+              placeholder="Buscar..."
+              style={{ marginLeft: '10px' }}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className='container-fluid  p-3 my-3'>
+
+        <div className='row'>
+
+          <div col className='col-12'>
+
+            <table {...getTableProps()} style={{ borderCollapse: 'collapse', width: '100%', marginTop: '20px' }}>
+              <thead>
+                {headerGroups.map(headerGroup => (
+                  <tr {...headerGroup.getHeaderGroupProps()}>
+                    {headerGroup.headers.map(column => (
+                      <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+              <tbody {...getTableBodyProps()}>
+                {page.map(row => {
+                  prepareRow(row);
+                  return (
+                    <>
+                      <tr {...row.getRowProps()}>
+                        {row.cells.map(cell => {
+                          return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>;
+                        })}
+                      </tr>
+                      <tr>
+                        <td colSpan={6} style={{ borderBottom: '1px solid #ccc' }}></td>
+                      </tr>
+                    </>
+                  );
+                })}
+              </tbody>
+            </table>
+
+          </div>
+
+          {pageOptions.length > 1 && (
+            <div className='col-12 p-3 mt-3 d-flex justify-content-end'>
+              <Button variant='success' onClick={() => previousPage()} disabled={!canPreviousPage}>
+              <HiArrowSmLeft />
+
+              </Button>{' '}
+              <Button variant='success' onClick={() => nextPage()} disabled={!canNextPage}>
+              <HiArrowSmRight />
+
+              </Button>{' '}
+              <span style={{ marginLeft: '10px' }}>
+                Página{' '}
+                <strong>
+                  {pageIndex + 1} de {pageOptions.length}
+                </strong>{' '}
+              </span>
+            </div>
+          )}
+
+        </div>
+
+      </div>
+    </>
+  );
+};
+
+export default ConsultaDivisiones;
