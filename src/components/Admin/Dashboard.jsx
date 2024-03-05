@@ -59,11 +59,21 @@ const Dashboard = () => {
 
 
             </li>
+
             <li className="nav-item">
-              <a className="nav-link d-flex align-items-center" href="#">
+
+            <Link  className="nav-link d-flex align-items-center"
+                to="/dashboard/administradores"
+            
+            >
+            
                 <FaUserTie style={{ color: '#2D7541', marginRight: '20px', fontSize: '1.2em' }}/> <span style={{ color: '#2D7541' }}>Administradores</span>
-              </a>
+             
+
+            </Link>
             </li>
+
+
             <li className="nav-item">
               <a className="nav-link d-flex align-items-center" href="#">
                 <FaChartPie style={{ color: '#2D7541', marginRight: '20px', fontSize: '1.2em' }}/> <span style={{ color: '#2D7541' }}>Centro de Reporte</span>
