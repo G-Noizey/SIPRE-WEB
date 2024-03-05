@@ -1,23 +1,14 @@
-import React from 'react';
-import { Button, Container, Modal, Row  } from 'react-bootstrap';
-import { AiFillEdit  } from "react-icons/ai";
-import { HiArrowSmRight, HiArrowSmLeft  } from "react-icons/hi";
+import React, { useState } from 'react';
+import { Button, Container, Modal, Row, Form } from 'react-bootstrap';
+import { AiFillEdit } from "react-icons/ai";
+import { HiArrowSmRight, HiArrowSmLeft } from "react-icons/hi";
 import { FaPlus } from "react-icons/fa";
-import { useState } from 'react';
-import Form from 'react-bootstrap/Form';
-
-
-
-
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useTable, usePagination, useGlobalFilter } from 'react-table';
 
 const ConsultaDivisiones = () => {
-
-
-
   
+  // Arrego de datos estaticos mostrados en la tabla.
   const data = React.useMemo(
     () => [
       {
@@ -27,52 +18,75 @@ const ConsultaDivisiones = () => {
         estatus: 'Activo',
       },
       {
-        division: 'División 23',
-        sigla: 'D2',
-        monto: 2000,
-        estatus: 'Inactivo',
+        division: 'División 2',
+        sigla: 'D1',
+        monto: 1000,
+        estatus: 'Activo',
+      },
+
+      {
+        division: 'División 3',
+        sigla: 'D1',
+        monto: 1000,
+        estatus: 'Activo',
       },
       {
         division: 'División 4',
-        sigla: 'D2',
-        monto: 2000,
-        estatus: 'Inactivo',
+        sigla: 'D1',
+        monto: 1000,
+        estatus: 'Activo',
       },
+
       {
         division: 'División 5',
-        sigla: 'D2',
-        monto: 2000,
-        estatus: 'Inactivo',
+        sigla: 'D1',
+        monto: 1000,
+        estatus: 'Activo',
       },
       {
         division: 'División 6',
-        sigla: 'D2',
-        monto: 2000,
-        estatus: 'Inactivo',
+        sigla: 'D1',
+        monto: 1000,
+        estatus: 'Activo',
       },
+
       {
         division: 'División 7',
-        sigla: 'D2',
-        monto: 2000,
-        estatus: 'Inactivo',
+        sigla: 'D1',
+        monto: 1000,
+        estatus: 'Activo',
       },
       {
         division: 'División 8',
-        sigla: 'D2',
-        monto: 2000,
-        estatus: 'Inactivo',
+        sigla: 'D1',
+        monto: 1000,
+        estatus: 'Activo',
       },
+
       {
         division: 'División 9',
-        sigla: 'D2',
-        monto: 2000,
-        estatus: 'Inactivo',
+        sigla: 'D1',
+        monto: 1000,
+        estatus: 'Activo',
       },
-       {
+      {
         division: 'División 10',
-        sigla: 'D2',
-        monto: 2000,
-        estatus: 'Inactivo',
+        sigla: 'D1',
+        monto: 1000,
+        estatus: 'Activo',
+      },
+
+      {
+        division: 'División 11',
+        sigla: 'D1',
+        monto: 1000,
+        estatus: 'Activo',
+      },
+      {
+        division: 'División 12',
+        sigla: 'D1',
+        monto: 1000,
+        estatus: 'Activo',
       },
       // Agrega más datos si es necesario
     ],
@@ -100,9 +114,8 @@ const ConsultaDivisiones = () => {
       {
         Header: 'Acciones',
         Cell: () => (
-          <Button variant="success" size="sm">
-<AiFillEdit />
-
+          <Button variant="success" size="sm" onClick={handleEditShow}>
+            <AiFillEdit />
           </Button>
         ),
       },
@@ -110,7 +123,7 @@ const ConsultaDivisiones = () => {
         Header: 'Estado de cuenta',
         Cell: () => (
           <Button variant="success" size="sm">
-            Generar estado de cuenta 
+            Generar estado de cuenta
           </Button>
         ),
       },
@@ -135,7 +148,7 @@ const ConsultaDivisiones = () => {
     {
       columns,
       data,
-      initialState: { pageSize: 5 }, // Cantidad de filas por página
+      initialState: { pageSize: 10 }, 
     },
     useGlobalFilter,
     usePagination
@@ -143,79 +156,79 @@ const ConsultaDivisiones = () => {
 
   const { globalFilter, pageIndex } = state;
 
-
   const [show, setShow] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
+  const handleEditClose = () => setShowEdit(false);
+  const handleEditShow = () => setShowEdit(true);
 
   return (
     <>
-      <div className='container-fluid  p-3 my-3'>
+      <div className='container-fluid p-3 my-3'>
         <div className='row'>
           <div className='col-6'>
-            <Button variant="success"   onClick={handleShow}   >Añadir División   <FaPlus /></Button>
+            <Button variant="success" onClick={handleShow}>Añadir División <FaPlus /></Button>
           </div>
 
           <Modal show={show} onHide={handleClose}>
-        <Modal.Header closeButton>
+            <Modal.Header closeButton>
+              <Modal.Title>Añadir división</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Container>
+                <Row>
+                  <label>Nombre de la división:</label>
+                  <Form.Control type="text" placeholder=" " />
+                </Row>
+                <Row>
+                  <label>Siglas:</label>
+                  <Form.Control type="text" placeholder="" />
+                </Row>
+                <Row>
+                  <label>Monto:</label>
+                  <Form.Control type="text" placeholder="" />
+                </Row>
+              </Container>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="success" onClick={handleClose}>Crear</Button>
+            </Modal.Footer>
+          </Modal>
 
-         
-            <Modal.Title>
-            Añadir división  
-            </Modal.Title>
-
-        </Modal.Header>
-        <Modal.Body>
-
-        <Container>
-            <Row>
-
-            <label>Nombre:</label>
-            
-            <Form.Control type="text" placeholder="name@example.com" />
-
-              
-            </Row>
-
-            <Row>
-
-<label>Nombre:</label>
-
-<Form.Control type="text" placeholder="name@example.com" />
-
-  
-</Row>
-
-<Row>
-
-<label>Nombre:</label>
-
-<Form.Control type="text" placeholder="name@example.com" />
-
-  
-</Row>
-
-          </Container>
-
-         
-
-
-  
-
-
-
-
-          
-          </Modal.Body>
-        <Modal.Footer>
-       
-          <Button variant="success" onClick={handleClose}>
-            Crear
-          </Button>
-        </Modal.Footer>
-      </Modal>
+          <Modal show={showEdit} onHide={handleEditClose}>
+            <Modal.Header closeButton>
+              <Modal.Title>Modificar división</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Container>
+                <Row>
+                  <label>Nombre de la división:</label>
+                  <Form.Control type="text" placeholder=" " />
+                </Row>
+                <Row>
+                  <label>Siglas:</label>
+                  <Form.Control type="text" placeholder="" />
+                </Row>
+                <Row>
+                  <label>Monto:</label>
+                  <Form.Control type="text" placeholder="" />
+                </Row>
+                <Row>
+                  <label>Estatus:</label>
+                  <Form.Control as="select" defaultValue="Activo">
+                    <option>Activo</option>
+                    <option>Inactivo</option>
+                  </Form.Control>
+                </Row>
+              </Container>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="success" onClick={handleEditClose}>Guardar cambios</Button>
+            </Modal.Footer>
+          </Modal>
 
           <div className='col-6 d-flex justify-content-end'>
             <p>Buscar división:</p>
@@ -230,12 +243,9 @@ const ConsultaDivisiones = () => {
         </div>
       </div>
 
-      <div className='container-fluid  p-3 my-3'>
-
+      <div className='container-fluid p-3 my-3'>
         <div className='row'>
-
-          <div col className='col-12'>
-
+          <div className='col-12'>
             <table {...getTableProps()} style={{ borderCollapse: 'collapse', width: '100%', marginTop: '20px' }}>
               <thead>
                 {headerGroups.map(headerGroup => (
@@ -250,32 +260,29 @@ const ConsultaDivisiones = () => {
                 {page.map(row => {
                   prepareRow(row);
                   return (
-                    <>
+                    <React.Fragment key={row.id}>
                       <tr {...row.getRowProps()}>
                         {row.cells.map(cell => {
                           return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>;
                         })}
                       </tr>
-                      <tr>
+                      <tr key={`${row.id}-divider`}>
                         <td colSpan={6} style={{ borderBottom: '1px solid #ccc' }}></td>
                       </tr>
-                    </>
+                    </React.Fragment>
                   );
                 })}
               </tbody>
             </table>
-
           </div>
 
           {pageOptions.length > 1 && (
             <div className='col-12 p-3 mt-3 d-flex justify-content-end'>
               <Button variant='success' onClick={() => previousPage()} disabled={!canPreviousPage}>
-              <HiArrowSmLeft />
-
+                <HiArrowSmLeft />
               </Button>{' '}
               <Button variant='success' onClick={() => nextPage()} disabled={!canNextPage}>
-              <HiArrowSmRight />
-
+                <HiArrowSmRight />
               </Button>{' '}
               <span style={{ marginLeft: '10px' }}>
                 Página{' '}
@@ -285,9 +292,7 @@ const ConsultaDivisiones = () => {
               </span>
             </div>
           )}
-
         </div>
-
       </div>
     </>
   );

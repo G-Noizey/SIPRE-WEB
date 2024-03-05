@@ -14,14 +14,14 @@ const Dashboard = () => {
         {/* Sidebar */}
         <div className="col-lg-2 sidebar" style={{ backgroundColor: 'white', borderRight: '2px solid #ddd', height: '100vh', paddingTop: '30px', boxShadow: '2px 0px 4px rgba(0,0,0,0.1)' }}>
 
-          <div className="mb-4 ">
-            <div className="row ">
+          <div className="  container-fluid ">
+            <div className="row  ">
               <div className="col-2">
-                <img src="../../../public/assets/images/SIPRE 1.png" alt="Logo" style={{ width: '100px'  }} />
+                <img src="../../../public/assets/images/SIPRE 1.png" alt="Logo" style={{ width: '100px', marginBottom: '10px', paddingRight: '30px'   }} />
               </div>
               <div className="col-10">
-                <h2 className="text-center fw-bold">SIPRE</h2>
-                <p className="text-center" style={{ color: 'grey' }}>Prestamos empresariales</p>
+                <h2 className="text-center fw-bold" style={{ fontSize: '1.7em', marginBottom: '5px', marginLeft: '40px', marginBottom: '10px' }}  >SIPRE</h2>
+                <p className="text-center" style={{ color: 'grey', fontSize: '0.7em', marginLeft: '40px'}}>Prestamos empresariales</p>
               </div>
             </div>
           </div>
@@ -86,7 +86,7 @@ const Dashboard = () => {
         <div className="col-lg-10">
           <nav className="navbar navbar-light" style={{ backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
             <div className="container-fluid">
-              <h2 className="navbar-brand" style={{ color: '#2D7541', padding: '10px', margin: '20px'  }}>Consultar Divisiones</h2>
+              <h2 className="navbar-brand" style={{ color: '#2D7541', padding: '10px', margin: '20px'  }}>Administración</h2>
               
               
               <div>
