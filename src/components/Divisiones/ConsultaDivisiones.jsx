@@ -231,13 +231,12 @@ const ConsultaDivisiones = () => {
           </Modal>
 
           <div className='col-6 d-flex justify-content-end'>
-            <p>Buscar división:</p>
             <input
               type="text"
               value={globalFilter || ''}
               onChange={e => setGlobalFilter(e.target.value)}
-              placeholder="Buscar..."
-              style={{ marginLeft: '10px' }}
+              placeholder="Buscar Division"
+              style={{ marginLeft: "10px", borderRadius: "5px", border: "1px solid #ccc"}}
             />
           </div>
         </div>
@@ -251,12 +250,12 @@ const ConsultaDivisiones = () => {
                 {headerGroups.map(headerGroup => (
                   <tr {...headerGroup.getHeaderGroupProps()}>
                     {headerGroup.headers.map(column => (
-                      <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+                      <th className='text-center' {...column.getHeaderProps()}>{column.render('Header')}</th>
                     ))}
                   </tr>
                 ))}
               </thead>
-              <tbody {...getTableBodyProps()}>
+              <tbody className='text-center' {...getTableBodyProps()}>
                 {page.map(row => {
                   prepareRow(row);
                   return (

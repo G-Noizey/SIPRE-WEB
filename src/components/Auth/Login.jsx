@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 
 const Login = () => {
@@ -16,6 +16,10 @@ const Login = () => {
 
   const handleIniciar = () => {
     navigate('/dashboard');
+  };
+
+  const handleRecuperar = () => {
+    navigate('/recuperar');
   };
 
 
@@ -46,10 +50,12 @@ const Login = () => {
                         <label className="form-label" htmlFor="form2Example27">Contraseña</label>
                       </div>
                       <div className="form-outline mb-4">
-                        <a className="small text-muted" href="#!">¿Olvidaste tu contraseña?</a>
+                        
+                        <Link className="small text-muted" to="/recuperar" > ¿Olvidaste tu contraseña? </Link>
+
                       </div>
                       <div className="pt-1 mb-4">
-<button className="btn btn-lg shadow-lg" type="button" style={{ backgroundColor: '#2D7541', color: 'white', padding: '5px 150px', margin: '10px' }} onClick={handleIniciar}>Iniciar</button>
+                        <button className="btn btn-lg shadow-lg" type="button" style={{ backgroundColor: '#2D7541', color: 'white', padding: '5px 150px', margin: '10px' }} onClick={handleIniciar}>Iniciar</button>
                       </div>
                     </form>
                   </div>
@@ -60,9 +66,6 @@ const Login = () => {
         </div>
       </div>
     </section>
-
-
-
   );
 };
 
