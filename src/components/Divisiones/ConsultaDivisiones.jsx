@@ -1,122 +1,71 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Container, Modal, Row, Form } from 'react-bootstrap';
 import { AiFillEdit } from "react-icons/ai";
 import { HiArrowSmRight, HiArrowSmLeft } from "react-icons/hi";
 import { FaPlus } from "react-icons/fa";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useTable, usePagination, useGlobalFilter } from 'react-table';
+import axios from 'axios';
+import Swal from 'sweetalert2';
+
 
 const ConsultaDivisiones = () => {
+  const [divisiones, setDivisiones] = useState([]);
+  const [editDivisionId, setEditDivisionId] = useState(null); // Estado para almacenar el ID de la división en edición
+  const [selectedDivision, setSelectedDivision] = useState(null); // Estado para almacenar la división seleccionada para edición
+
+  useEffect(() => {
+    const fetchDivisiones = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/division/');
+        setDivisiones(response.data.body);
+      } catch (error) {
+        console.error('Error al obtener las divisiones:', error);
+      }
+    };
+
+    fetchDivisiones();
+  }, []);
+
+
+
+  const [formData, setFormData] = useState({
+    name: '',
+    siglas: '',
+    saldo: '',
+    status: true, // Establecer el status por defecto como true
+  });
   
-  // Arrego de datos estaticos mostrados en la tabla.
-  const data = React.useMemo(
-    () => [
-      {
-        division: 'División 1',
-        sigla: 'D1',
-        monto: 1000,
-        estatus: 'Activo',
-      },
-      {
-        division: 'División 2',
-        sigla: 'D1',
-        monto: 1000,
-        estatus: 'Activo',
-      },
-
-      {
-        division: 'División 3',
-        sigla: 'D1',
-        monto: 1000,
-        estatus: 'Activo',
-      },
-      {
-        division: 'División 4',
-        sigla: 'D1',
-        monto: 1000,
-        estatus: 'Activo',
-      },
-
-      {
-        division: 'División 5',
-        sigla: 'D1',
-        monto: 1000,
-        estatus: 'Activo',
-      },
-      {
-        division: 'División 6',
-        sigla: 'D1',
-        monto: 1000,
-        estatus: 'Activo',
-      },
-
-      {
-        division: 'División 7',
-        sigla: 'D1',
-        monto: 1000,
-        estatus: 'Activo',
-      },
-      {
-        division: 'División 8',
-        sigla: 'D1',
-        monto: 1000,
-        estatus: 'Activo',
-      },
-
-      {
-        division: 'División 9',
-        sigla: 'D1',
-        monto: 1000,
-        estatus: 'Activo',
-      },
-      {
-        division: 'División 10',
-        sigla: 'D1',
-        monto: 1000,
-        estatus: 'Activo',
-      },
-
-      {
-        division: 'División 11',
-        sigla: 'D1',
-        monto: 1000,
-        estatus: 'Activo',
-      },
-      {
-        division: 'División 12',
-        sigla: 'D1',
-        monto: 1000,
-        estatus: 'Activo',
-      },
-      // Agrega más datos si es necesario
-    ],
-    []
-  );
 
   const columns = React.useMemo(
     () => [
       {
         Header: 'División',
-        accessor: 'division',
+        accessor: 'name',
       },
       {
         Header: 'Sigla',
-        accessor: 'sigla',
+        accessor: 'siglas',
       },
       {
         Header: 'Monto',
-        accessor: 'monto',
+        accessor: 'saldo',
       },
       {
         Header: 'Estatus',
-        accessor: 'estatus',
+        accessor: 'status',
+        Cell: ({ value }) => (value ? 'Activo' : 'Inactivo'),
       },
       {
         Header: 'Acciones',
-        Cell: () => (
-          <Button variant="success" size="sm" onClick={handleEditShow}>
+        Cell: ({ row }) => (
+          <Button variant="success" size="sm" onClick={() => {
+            console.log('Edit ID:', row.original.id);
+            handleEditShow(row.original.id);
+          }}>
             <AiFillEdit />
           </Button>
+          
         ),
       },
       {
@@ -147,13 +96,15 @@ const ConsultaDivisiones = () => {
   } = useTable(
     {
       columns,
-      data,
-      initialState: { pageSize: 10 }, 
+      data: divisiones,
+      initialState: { pageSize: 10 },
     },
     useGlobalFilter,
     usePagination
   );
 
+
+  
   const { globalFilter, pageIndex } = state;
 
   const [show, setShow] = useState(false);
@@ -162,8 +113,87 @@ const ConsultaDivisiones = () => {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const handleEditClose = () => setShowEdit(false);
-  const handleEditShow = () => setShowEdit(true);
+  const handleAdd = async () => {
+    try {
+      await axios.post('http://localhost:8080/division/', formData);
+      // Mostrar alerta de éxito
+      await Swal.fire({
+        icon: 'success',
+        title: 'División agregada',
+        text: 'La división se agregó correctamente.',
+        confirmButtonColor: '#2D7541',
+        didClose: () => {
+          // Recargar la página después de cerrar la alerta
+          window.location.reload();
+        }
+      });
+    } catch (error) {
+      console.error('Error al agregar la división:', error);
+      // Mostrar alerta de error
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Ocurrió un error al agregar la división. Por favor, inténtalo de nuevo.',
+        confirmButtonColor: '#2D7541',
+      });
+    }
+    setShow(false);
+  };
+
+  const handleEditClose = () => {
+    setShowEdit(false);
+    setEditDivisionId(null); // Limpiar el ID de la división en edición
+    setFormData({
+      name: '',
+      siglas: '',
+      saldo: '',
+      status: true,
+    });
+  };
+
+  const handleEditShow = async (id) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/division/${id}`);
+      setSelectedDivision(response.data.body);
+      setEditDivisionId(id);
+      setShowEdit(true);
+    } catch (error) {
+      console.error('Error al obtener la división para editar:', error);
+    }
+  };
+
+  
+  
+  
+  
+  
+
+  const handleEditSave = async () => {
+    try {
+      await axios.put(`http://localhost:8080/division/${editDivisionId}`, selectedDivision);
+      // Mostrar alerta de éxito
+      await Swal.fire({
+        icon: 'success',
+        title: 'División modificada',
+        text: 'La división se modificó correctamente.',
+        confirmButtonColor: '#2D7541',
+        didClose: () => {
+          // Recargar la página después de cerrar la alerta
+          window.location.reload();
+        }
+      });
+    } catch (error) {
+      console.error('Error al modificar la división:', error);
+      // Mostrar alerta de error
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Ocurrió un error al modificar la división. Por favor, inténtalo de nuevo.',
+        confirmButtonColor: '#2D7541',
+      });
+    }
+    setShowEdit(false);
+  };
 
   return (
     <>
@@ -173,6 +203,8 @@ const ConsultaDivisiones = () => {
             <Button variant="success" onClick={handleShow}>Añadir División <FaPlus /></Button>
           </div>
 
+          {/* Modal para agregar división */}
+
           <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton>
               <Modal.Title>Añadir división</Modal.Title>
@@ -181,54 +213,90 @@ const ConsultaDivisiones = () => {
               <Container>
                 <Row>
                   <label>Nombre de la división:</label>
-                  <Form.Control type="text" placeholder=" " />
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  />
                 </Row>
                 <Row>
                   <label>Siglas:</label>
-                  <Form.Control type="text" placeholder="" />
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={formData.siglas}
+                    onChange={(e) => setFormData({ ...formData, siglas: e.target.value })}
+                  />
                 </Row>
                 <Row>
                   <label>Monto:</label>
-                  <Form.Control type="text" placeholder="" />
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={formData.saldo}
+                    onChange={(e) => setFormData({ ...formData, saldo: e.target.value })}
+                  />
                 </Row>
               </Container>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="success" onClick={handleClose}>Crear</Button>
+              <Button variant="success" onClick={handleAdd}>Crear</Button>
             </Modal.Footer>
           </Modal>
 
-          <Modal show={showEdit} onHide={handleEditClose}>
-            <Modal.Header closeButton>
-              <Modal.Title>Modificar división</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Container>
-                <Row>
-                  <label>Nombre de la división:</label>
-                  <Form.Control type="text" placeholder=" " />
-                </Row>
-                <Row>
-                  <label>Siglas:</label>
-                  <Form.Control type="text" placeholder="" />
-                </Row>
-                <Row>
-                  <label>Monto:</label>
-                  <Form.Control type="text" placeholder="" />
-                </Row>
-                <Row>
-                  <label>Estatus:</label>
-                  <Form.Control as="select" defaultValue="Activo">
-                    <option>Activo</option>
-                    <option>Inactivo</option>
-                  </Form.Control>
-                </Row>
-              </Container>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="success" onClick={handleEditClose}>Guardar cambios</Button>
-            </Modal.Footer>
-          </Modal>
+
+           {/* Modal de edición */}
+      <Modal show={showEdit} onHide={handleEditClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Modificar división</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Container>
+            <Row>
+              <label>Nombre de la división:</label>
+              <Form.Control
+                type="text"
+                placeholder=""
+                value={selectedDivision?.name || ''}
+                onChange={(e) => setSelectedDivision({ ...selectedDivision, name: e.target.value })}
+              />
+            </Row>
+            <Row>
+              <label>Siglas:</label>
+              <Form.Control
+                type="text"
+                placeholder=""
+                value={selectedDivision?.siglas || ''}
+                onChange={(e) => setSelectedDivision({ ...selectedDivision, siglas: e.target.value })}
+              />
+            </Row>
+            <Row>
+              <label>Monto:</label>
+              <Form.Control
+                type="text"
+                placeholder=""
+                value={selectedDivision?.saldo || ''}
+                onChange={(e) => setSelectedDivision({ ...selectedDivision, saldo: e.target.value })}
+              />
+            </Row>
+            <Row>
+              <label>Estatus:</label>
+              <Form.Control
+                as="select"
+                value={selectedDivision?.status ? 'Activo' : 'Inactivo'}
+                onChange={(e) => setSelectedDivision({ ...selectedDivision, status: e.target.value === 'Activo' })}
+              >
+                <option>Activo</option>
+                <option>Inactivo</option>
+              </Form.Control>
+            </Row>
+          </Container>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="success" onClick={handleEditSave}>Guardar cambios</Button>
+        </Modal.Footer>
+      </Modal>
 
           <div className='col-6 d-flex justify-content-end'>
             <input

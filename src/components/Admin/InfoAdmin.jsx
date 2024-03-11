@@ -24,20 +24,33 @@ function InfoAdmin() {
         <div className="row">
           <Form>
             {data.map((persona, index) => (
-                <Form.Group className="mb-3" controlId="formBasicEmail">
-                <Form.Label>Nombre:</Form.Label><br/>
-                <Form.Control value={persona.nombre}/><br/>
-                <Form.Label>Apellidos:</Form.Label><br/>
-                <Form.Control value={persona.apellido}/><br/>
-                <Form.Label>Usuario:</Form.Label><br/>
-                <Form.Control value={persona.usuario}/><br/>
-                <Form.Label>Telefono:</Form.Label><br/>
-                <Form.Control value={persona.telefono}/><br/>
-                <Form.Label>Direccion:</Form.Label><br/>
-                <Form.Control value={persona.direccion}/><br/>
-                <Form.Label>Correo:</Form.Label><br/>
-                <Form.Control value={persona.correo}/><br/>
-              </Form.Group>
+              <fieldset key={index}>
+                <legend>Información de Administrador</legend>
+                <div className="mb-3">
+                  <label htmlFor="nombre" className="form-label">Nombre:</label>
+                  <input type="text" className="form-control" id="nombre" value={persona.nombre} readOnly />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="apellido" className="form-label">Apellidos:</label>
+                  <input type="text" className="form-control" id="apellido" value={persona.apellido} readOnly />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="usuario" className="form-label">Usuario:</label>
+                  <input type="text" className="form-control" id="usuario" value={persona.usuario} readOnly />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="telefono" className="form-label">Teléfono:</label>
+                  <input type="text" className="form-control" id="telefono" value={persona.telefono} readOnly />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="direccion" className="form-label">Dirección:</label>
+                  <input type="text" className="form-control" id="direccion" value={persona.direccion} readOnly />
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="correo" className="form-label">Correo:</label>
+                  <input type="text" className="form-control" id="correo" value={persona.correo} readOnly />
+                </div>
+              </fieldset>
             ))}
           </Form>
         </div>
@@ -45,5 +58,6 @@ function InfoAdmin() {
     </>
   );
 }
+
 
 export default InfoAdmin;

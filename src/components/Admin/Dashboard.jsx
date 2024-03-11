@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { FaList, FaUsers, FaUserTie, FaChartPie, FaRegUserCircle } from 'react-icons/fa';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { IoIosLogOut } from "react-icons/io";
-
+import Swal from 'sweetalert2'; // Importa SweetAlert
 
 const Dashboard = () => {
+
+
+  const navigate = useNavigate();
+  
   const [isDivisionHover, setIsDivisionHover] = useState(false);
   const [isTrabajadoresHover, setIsTrabajadoresHover] = useState(false);
   const [isAdministradoresHover, setIsAdministradoresHover] = useState(false);
@@ -19,6 +23,31 @@ const Dashboard = () => {
   const handleMouseOut = (stateSetter) => {
     stateSetter(false);
   }
+const handleLogout = () => {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción cerrará tu sesión actual',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#2D7541',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, cerrar sesión',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      
+      if (result.isConfirmed) {
+        localStorage.removeItem('name');
+        localStorage.removeItem('apellido');
+        localStorage.removeItem('email');
+        localStorage.removeItem('role');
+        localStorage.removeItem('token');
+        navigate('/'); // Redirige al usuario a la pantalla de inicio de sesión
+      }
+    });
+  }
+  // Obtener el nombre y apellido del localStorage
+  const storedName = localStorage.getItem('name');
+  const storedApellido = localStorage.getItem('apellido');
 
   return (
     <div className="container-fluid">
@@ -98,23 +127,25 @@ const Dashboard = () => {
                 onMouseLeave={() => handleMouseOut(setIsUsuarioHover)}
                 style={{ borderLeft: isUsuarioHover ? '6px solid #2D7541' : '#2D7541', backgroundColor: isUsuarioHover ? '#f4f4f4' : 'transparent', paddingLeft: '16px' }}
               >
-                <FaRegUserCircle style={{ color: '#2D7541', marginRight: '20px', fontSize: '1.2em' }} /> <span style={{ color: '#2D7541' }}>Nombre de usuario logeado</span>
+                <FaRegUserCircle style={{ color: '#2D7541', marginRight: '20px', fontSize: '1.2em' }} /> <span style={{ color: '#2D7541' }}>{storedName} {storedApellido}     </span>
               </Link>
             </li>
 
+          
           </ul>
         </div>
 
         {/* Main content */}
         <div className="col-lg-10">
           <nav className="navbar navbar-light" style={{ backgroundColor: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-            <div className="container-fluid">
+          <div className="container-fluid">
               <h2 className="navbar-brand" style={{ color: '#2D7541', padding: '10px', margin: '20px' }}>Administración</h2>
 
               <div>
-                <a
-                
-                
+
+                <button
+
+               onClick={handleLogout}
                 onMouseEnter={() => handleHover(setIsLogoutHover)}
                 onMouseLeave={() => handleMouseOut(setIsLogoutHover)}
                 style={{
@@ -128,20 +159,16 @@ const Dashboard = () => {
                   display: 'block'
                 }}
                 >
-                  <IoIosLogOut style={{ marginRight: '10px', fontSize: '1.5em' }} /> <span>Cerrar Sesión</span>
-                </a>
+                  <IoIosLogOut style={{ marginRight: '10px', fontSize: '1.5em' }}      /> <span>Cerrar Sesión</span>
+                </button>
               </div>
 
             </div>
           </nav>
 
           <div className="container-fluid">
-
             <div className="content" style={{ padding: '20px' }}>
-              
-
               <Outlet />  {/* Outlet para rutas hijas */}
-
             </div>
           </div>
         </div>
