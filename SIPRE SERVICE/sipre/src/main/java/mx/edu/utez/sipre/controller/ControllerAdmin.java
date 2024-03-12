@@ -30,7 +30,9 @@ public class ControllerAdmin {
         return ResponseEntity.ok(serviceAdmin.save(admin));
     }
 
-    @PutMapping("/")
+
+    @CrossOrigin(origins = {"*"})
+    @PutMapping("/{id}")
     public ResponseEntity<?> update(@RequestBody BeanAdmin admin){
         return ResponseEntity.ok(serviceAdmin.update(admin));
     }

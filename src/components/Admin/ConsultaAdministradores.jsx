@@ -1,186 +1,211 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Container, Modal, Row, Form } from "react-bootstrap";
 import { AiFillEdit } from "react-icons/ai";
 import { HiArrowSmRight, HiArrowSmLeft } from "react-icons/hi";
 import { FaPlus } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useTable, usePagination, useGlobalFilter } from "react-table";
+import axios from 'axios';
+import Swal from 'sweetalert2';
 
+// HOOKS PARA EL MANEJO DE ESTADOS DE ADMINISTRADORES AL MOMENTO DE EDITAR Y SELECCIONAR
 const ConsultaAdministradores = () => {
-  const data = React.useMemo(
-    () => [
-      {
-        nombre: "Luis",
-        apellido: "Perez",
-        usuario: "wuichoperez",
-        estatus: "Activo",
-        correo: "admin1@sipre.company.mx"
-      },
+  const [administradores, setAdministradores] = useState([]);
+  const [editAdministradorId, setEditAdministradorId] = useState(null); 
+  const [selectedAdministrador, setSelectedAdministrador] = useState(null);
+
+  // CONSUMO DEL API - GET EN ADMINISTRADORES PARA LA OBTENCIION DE DATOS Y PINTARLOS EN LA TABLA
+  useEffect(() => {
+    const fetchAdministradores = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/admin/');
+        setAdministradores(response.data.body);
+      } catch (error) {
+        console.error('Error al obtener las divisiones:', error);
+      }
+    };
+
+    fetchAdministradores();
+  }, []);
 
 
-      {
-        nombre: "Luis",
-        apellido: "Perez",
-        usuario: "wuichoperez",
-        estatus: "Activo",
-        correo: "admin1@sipre.company.mx"
-      },
-
-      {
-        nombre: "Luis",
-        apellido: "Perez",
-        usuario: "wuichoperez",
-        estatus: "Activo",
-        correo: "admin1@sipre.company.mx"
-      },
-
-      {
-        nombre: "Luis",
-        apellido: "Perez",
-        usuario: "wuichoperez",
-        estatus: "Activo",
-        correo: "admin1@sipre.company.mx"
-      },
-
-      {
-        nombre: "Luis",
-        apellido: "Perez",
-        usuario: "wuichoperez",
-        estatus: "Activo",
-        correo: "admin1@sipre.company.mx"
-      },
-
-      {
-        nombre: "Luis",
-        apellido: "Perez",
-        usuario: "wuichoperez",
-        estatus: "Activo",
-        correo: "admin1@sipre.company.mx"
-      },
-
-      {
-        nombre: "Luis",
-        apellido: "Perez",
-        usuario: "wuichoperez",
-        estatus: "Activo",
-        correo: "admin1@sipre.company.mx"
-      },
-
-      {
-        nombre: "Luis",
-        apellido: "Perez",
-        usuario: "wuichoperez",
-        estatus: "Activo",
-        correo: "admin1@sipre.company.mx"
-      },
-
-      {
-        nombre: "Luis",
-        apellido: "Perez",
-        usuario: "wuichoperez",
-        estatus: "Activo",
-        correo: "admin1@sipre.company.mx"
-      },
-
-      {
-        nombre: "Luis",
-        apellido: "Perez",
-        usuario: "wuichoperez",
-        estatus: "Activo",
-        correo: "admin1@sipre.company.mx"
-      },
-
-
-      {
-        nombre: "Luis",
-        apellido: "Perez",
-        usuario: "wuichoperez",
-        estatus: "Activo",
-        correo: "admin1@sipre.company.mx"
-      },
-
-      {
-        nombre: "Luis",
-        apellido: "Perez",
-        usuario: "wuichoperez",
-        estatus: "Activo",
-        correo: "admin1@sipre.company.mx"
-      },
-    ],
-    []
-  );
-
+   // Estado para el formulario de añadir/editar administrador
+  const [formData, setFormData] = useState({
+    name: '',
+    apellido: '',
+    userAdmin: '',
+    email: '',
+    status: true, 
+  });
+  
+  // ESTRUCTURACIÓN DE LA TABLA
+    
   const columns = React.useMemo(
     () => [
       {
-        Header: "Nombre",
-        accessor: "nombre",
+        Header: 'Nombre',
+        accessor: 'name',
       },
       {
-        Header: "Apellido",
-        accessor: "apellido",
+        Header: 'Apellido',
+        accessor: 'apellido',
       },
       {
-        Header: "Usuario",
-        accessor: "usuario",
+        Header: 'Usuario',
+        accessor: 'userAdmin',
       },
       {
-        Header: "Estatus",
-        accessor: "estatus",
+        Header: 'Correo',
+        accessor: 'email',
       },
       {
-        Header: "Correo",
-        accessor: "correo",
+        Header: 'Estatus',
+        accessor: 'status',
+        Cell: ({ value }) => (value ? 'Activo' : 'Inactivo'),
       },
       {
-        Header: "Modificar",
-        Cell: () => (
-          <Button variant="success" size="sm" onClick={handleEditShow}>
+        Header: 'Acciones',
+        Cell: ({ row }) => (
+          <Button variant="success" size="sm" onClick={() => {
+            console.log('Edit ID:', row.original.id);
+            handleEditShow(row.original.id);
+          }}>
             <AiFillEdit />
           </Button>
+          
         ),
       },
+   
     ],
     []
   );
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    prepareRow,
-    page,
-    nextPage,
-    previousPage,
-    canNextPage,
-    canPreviousPage,
-    pageOptions,
-    state,
-    setGlobalFilter,
-  } = useTable(
-    {
-      columns,
-      data,
-      initialState: { pageSize: 10 },
-    },
-    useGlobalFilter,
-    usePagination
-  );
 
-  const { globalFilter, pageIndex } = state;
 
-  const [show, setShow] = useState(false);
-  const [showEdit, setShowEdit] = useState(false);
-  const [showMore, setShowMore] = useState(false);
+    // Hooks de react-table para configurar la tabla y la paginación
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+    const {
+      getTableProps,
+      getTableBodyProps,
+      headerGroups,
+      prepareRow,
+      page,
+      nextPage,
+      previousPage,
+      canNextPage,
+      canPreviousPage,
+      pageOptions,
+      state,
+      setGlobalFilter,
+    } = useTable(
+      {
+        columns,
+        data: administradores,
+        initialState: { pageSize: 10 },
+      },
+      useGlobalFilter,
+      usePagination
+    );
 
-  const handleEditClose = () => setShowEdit(false);
-  const handleEditShow = () => setShowEdit(true);
+    const { globalFilter, pageIndex } = state;
 
-  const handleMoreClose = () => setShowMore(false);
-  const handleMoreShow = () => setShowMore(true);
+
+    // Estado y funciones para manejar modales
+
+    const [show, setShow] = useState(false);
+    const [showEdit, setShowEdit] = useState(false);
+
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
+
+
+  //CONSUMO DEL API - POST EN ADMINISTRADORES PARA AÑADIR NUEVOS DATOS DENTRO DEL MODAL
+  const handleAdd = async () => {
+    try {
+      await axios.post('http://localhost:8080/admin/', formData);
+      // Mostrar alerta de éxito
+      await Swal.fire({
+        icon: 'success',
+        title: 'Administrador agregado',
+        text: 'El administrador se agregó correctamente.',
+        confirmButtonColor: '#2D7541',
+        didClose: () => {
+          // Recargar la página después de cerrar la alerta
+          window.location.reload();
+        }
+      });
+    } catch (error) {
+      console.error('Error al agregar el administrador:', error);
+      // Mostrar alerta de error
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Ocurrió un error al agregar al administrador. Por favor, inténtalo de nuevo.',
+        confirmButtonColor: '#2D7541',
+      });
+    }
+    setShow(false);
+  };
+
+
+  // FUNCION PARA CERRAR MODAL DE EDICIÓN DE ADMINISTRADORES Y LIMPIAR LOS INPUTS
+
+  const handleEditClose = () => {
+    setShowEdit(false);
+    setEditAdministradorId(null); // Limpiar el ID de la división en edición
+    setFormData({
+    name: '',
+    apellido: '',
+    userAdmin: '',
+    email: '',
+    status: true, 
+    });
+  };
+
+
+  //CONSUMO DEL API - GET BY ID EN ADMINISTRADORES PARA LA OBTENCIÓN DE DATOS EN EL MODAL
+  const handleEditShow = async (id) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/admin/${id}`);
+      setSelectedAdministrador(response.data.body);
+      setEditAdministradorId(id);
+      setShowEdit(true);
+    } catch (error) {
+      console.error('Error al obtener el administrador para editar:', error);
+    }
+  };
+
+   // CONSUMO DEL API - PUT EN ADMINISTRADORES
+  const handleEditSave = async () => {
+    try {
+      await axios.put(`http://localhost:8080/admin/${editAdministradorId}`, selectedAdministrador);
+      // Mostrar alerta de éxito
+      await Swal.fire({
+        icon: 'success',
+        title: 'Administrador modificada',
+        text: 'El administrador se modificó correctamente.',
+        confirmButtonColor: '#2D7541',
+        didClose: () => {
+          // Recargar la página después de cerrar la alerta
+          window.location.reload();
+        }
+      });
+    } catch (error) {
+      console.error('Error al modificar el administrador:', error);
+      // Mostrar alerta de error
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Ocurrió un error al modificar al administrador. Por favor, inténtalo de nuevo.',
+        confirmButtonColor: '#2D7541',
+      });
+    }
+    setShowEdit(false);
+  };
+
+
+  // RENDERIZACIÓN DEL COMPONENTE
 
   return (
     <>
@@ -200,28 +225,54 @@ const ConsultaAdministradores = () => {
               <Container>
                 <Row>
                   <label>Nombre:</label>
-                  <Form.Control type="text" placeholder=" " />
+                  <Form.Control 
+                  type="text" 
+                  placeholder=" " 
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  />
                 </Row>
                 <Row>
                   <label>Apellidos:</label>
-                  <Form.Control type="text" placeholder="" />
+                  <Form.Control 
+                  type="text" 
+                  placeholder="" 
+                  value={formData.apellido}
+                   onChange={(e) => setFormData({ ...formData, apellido: e.target.value })}
+                  />
                 </Row>
                 <Row>
                   <label>Usuario:</label>
-                  <Form.Control type="text" placeholder="" />
+                  <Form.Control 
+                  type="text" 
+                  placeholder="" 
+                  value={formData.userAdmin}
+                  onChange={(e) => setFormData({ ...formData, userAdmin: e.target.value })}
+                  />
                 </Row>
                 <Row>
                   <label>Correo Electrónico:</label>
-                  <Form.Control type="text" placeholder="" />
+                  <Form.Control 
+                  type="text" 
+                  placeholder="" 
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
                 </Row>
                 <Row>
                   <label>Contraseña:</label>
-                  <Form.Control type="password" placeholder="" />
+                  <Form.Control 
+                  type="text" 
+                  placeholder="" 
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  />
                 </Row>
+             
               </Container>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="success" onClick={handleClose}>
+              <Button variant="success" onClick={handleAdd}>
                 Crear
               </Button>
             </Modal.Footer>
@@ -233,71 +284,63 @@ const ConsultaAdministradores = () => {
             </Modal.Header>
             <Modal.Body>
               <Container>
-                <Row>
-                  <label>Nombre:</label>
-                  <Form.Control type="text" placeholder=" " />
-                </Row>
-                <Row>
-                  <label>Apellidos:</label>
-                  <Form.Control type="text" placeholder="" />
-                </Row>
-                <Row>
-                  <label>Teléfono:</label>
-                  <Form.Control type="text" placeholder="" />
-                </Row>
-                <Row>
-                  <label>Dirección:</label>
-                  <Form.Control type="text" placeholder="" />
-                </Row>
-                <Row>
-                  <label>Correo Electrónico:</label>
-                  <Form.Control type="text" placeholder="" />
-                </Row>
-                <Row>
-                  <label>Contraseña:</label>
-                  <Form.Control type="password" placeholder="" />
-                </Row>
+              <Row>
+              <label>Nombre de el administrador:</label>
+              <Form.Control
+                type="text"
+                placeholder=""
+                value={selectedAdministrador?.name || ''}
+                onChange={(e) => setSelectedAdministrador({ ...selectedAdministrador, name: e.target.value })}
+              />
+            </Row>
+            <Row>
+              <label>Apellido de el administrador:</label>
+              <Form.Control
+                type="text"
+                placeholder=""
+                value={selectedAdministrador?.apellido   || ''}
+                onChange={(e) => setSelectedAdministrador({ ...selectedAdministrador, apellido: e.target.value })}
+              />
+            </Row>
+            <Row>
+              <label>Usuario:</label>
+              <Form.Control
+                type="text"
+                placeholder=""
+                value={selectedAdministrador?.userAdmin || ''}
+                onChange={(e) => setSelectedAdministrador({ ...selectedAdministrador, userAdmin: e.target.value })}
+              />
+            </Row>
+            <Row>
+              <label>Correo Electrónico:</label>
+              <Form.Control
+                type="text"
+                placeholder=""
+                value={selectedAdministrador?.email || ''}
+                onChange={(e) => setSelectedAdministrador({ ...selectedAdministrador, email: e.target.value })}
+              />
+            </Row>
+           
+            <Row>
+              <label>Estatus:</label>
+              <Form.Control
+                as="select"
+                value={selectedAdministrador?.status ? 'Activo' : 'Inactivo'}
+                onChange={(e) => setSelectedAdministrador({ ...selectedAdministrador, status: e.target.value === 'Activo' })}
+              >
+                <option>Activo</option>
+                <option>Inactivo</option>
+              </Form.Control>
+            </Row>
               </Container>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="success" onClick={handleEditClose}>
-                Actualizar
+              <Button variant="success" onClick={handleEditSave}>
+                Guardar cambios
               </Button>
             </Modal.Footer>
           </Modal>
 
-
-    
-
-          <Modal show={showMore} onHide={handleMoreClose}>
-            <Modal.Header closeButton>
-              <Modal.Title>Detalles del Administrador</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Container>
-                <Row>
-                  <label>Nombre:</label>
-                  <span>For each</span>
-                </Row>
-                <Row>
-                  <label>Apellidos:</label>
-                  <span>For each </span>
-                </Row>
-                <Row>
-                  <label>Usuario:</label>
-                  <span>For each</span>
-                </Row>
-                <Row>
-                  <label>Estatus:</label>
-                  <span>For each </span>
-                </Row>
-                <Row>
-                  <label>Correo Electrónico:</label>
-                  <span>For each </span>
-                </Row>
-              </Container>
-            </Modal.Body>
-          </Modal>
           <div className="col-6 d-flex justify-content-end">
             <input
               type="text"
@@ -388,5 +431,6 @@ const ConsultaAdministradores = () => {
     </>
   );
 };
+
 
 export default ConsultaAdministradores;
