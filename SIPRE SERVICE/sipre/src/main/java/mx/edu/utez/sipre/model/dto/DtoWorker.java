@@ -13,7 +13,7 @@ public class DtoWorker {
     private String lastname;
     private String email;
     private String password;
-    private int status;
+    private Boolean status;
     private String userWorker;
     private double saldo;
     private int telefono;

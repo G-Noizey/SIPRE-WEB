@@ -1,6 +1,5 @@
     package mx.edu.utez.sipre.service;
 
-    import jakarta.persistence.EntityNotFoundException;
     import lombok.RequiredArgsConstructor;
     import mx.edu.utez.sipre.model.bean.BeanAdmin;
     import mx.edu.utez.sipre.model.repositories.RepoAdmin;
@@ -84,6 +83,7 @@
             }
 
             Map<String, String> responseData = new HashMap<>();
+
             responseData.put("token", generateToken()); // Método para generar token
             responseData.put("name", storedAdmin.getName());
             responseData.put("role", String.valueOf(storedAdmin.getRole()));

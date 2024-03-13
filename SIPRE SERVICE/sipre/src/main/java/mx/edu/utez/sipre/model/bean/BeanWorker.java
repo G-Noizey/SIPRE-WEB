@@ -26,7 +26,7 @@ public class BeanWorker {
     @Column(name = "password", length = 100, nullable = false)
     private String password;
     @Column(name = "status", length = 1, nullable = false)
-    private int status;
+    private Boolean status;
     @Column(name = "userWorker", length = 100, nullable = false, unique = true)
     private String userWorker;
     @Column(name = "saldo", length = 9, nullable = false)
@@ -38,10 +38,9 @@ public class BeanWorker {
 
     @ManyToOne
     @JoinColumn(name = "idDivision", nullable = false)
-    @JsonIgnore
+
     private BeanDivision division;
 
     @OneToMany(mappedBy = "beanWorker")
-    @JsonIgnore
     private List<BeanBuys> buys;
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import Swal from 'sweetalert2'; // Importa SweetAlert
+import Swal from 'sweetalert2'; 
 
 const Login = () => {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ const Login = () => {
 
        
         }).then(() => {
-          navigate('/dashboard');
+          navigate('/dashboard/divisiones');
         });
       })
       .catch(error => {

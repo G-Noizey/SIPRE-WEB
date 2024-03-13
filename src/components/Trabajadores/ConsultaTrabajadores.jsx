@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Container, Modal, Row, Form } from "react-bootstrap";
 import { AiFillEdit } from "react-icons/ai";
 import { HiArrowSmRight, HiArrowSmLeft } from "react-icons/hi";
@@ -6,195 +6,125 @@ import { FaPlus } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useTable, usePagination, useGlobalFilter } from "react-table";
 
+import axios from "axios";
+import Swal from "sweetalert2";
+
 const ConsultaTrabajadores = () => {
-  // Array de datos de ejemplo para los trabajadores
-  const data = React.useMemo(
-    () => [
-      {
-        nombre: "Juan",
-        usuario: "juanito",
-        division: "División 1",
-        apellidos: "Pérez",
-        telefono: "1234567890",
-        correo: "juanito@example.com",
-        direccion: "Calle 123",
-        monto: 1000,
-        estatus: "Activo",
-      },
-
-      {
-        nombre: "Juan",
-        usuario: "juanito",
-        division: "División 1",
-        apellidos: "Pérez",
-        telefono: "1234567890",
-        correo: "juanito@example.com",
-        direccion: "Calle 123",
-        monto: 1000,
-        estatus: "Activo",
-      },
-
-      {
-        nombre: "Juan",
-        usuario: "juanito",
-        division: "División 1",
-        apellidos: "Pérez",
-        telefono: "1234567890",
-        correo: "juanito@example.com",
-        direccion: "Calle 123",
-        monto: 1000,
-        estatus: "Activo",
-      },
-
-      {
-        nombre: "Juan",
-        usuario: "juanito",
-        division: "División 1",
-        apellidos: "Pérez",
-        telefono: "1234567890",
-        correo: "juanito@example.com",
-        direccion: "Calle 123",
-        monto: 1000,
-        estatus: "Activo",
-      },
-
-      {
-        nombre: "Juan",
-        usuario: "juanito",
-        division: "División 1",
-        apellidos: "Pérez",
-        telefono: "1234567890",
-        correo: "juanito@example.com",
-        direccion: "Calle 123",
-        monto: 1000,
-        estatus: "Activo",
-      },
-
-      {
-        nombre: "Juan",
-        usuario: "juanito",
-        division: "División 1",
-        apellidos: "Pérez",
-        telefono: "1234567890",
-        correo: "juanito@example.com",
-        direccion: "Calle 123",
-        monto: 1000,
-        estatus: "Activo",
-      },
-      
-
-      {
-        nombre: "Juan",
-        usuario: "juanito",
-        division: "División 1",
-        apellidos: "Pérez",
-        telefono: "1234567890",
-        correo: "juanito@example.com",
-        direccion: "Calle 123",
-        monto: 1000,
-        estatus: "Activo",
-      },
-
-      {
-        nombre: "Juan",
-        usuario: "juanito",
-        division: "División 1",
-        apellidos: "Pérez",
-        telefono: "1234567890",
-        correo: "juanito@example.com",
-        direccion: "Calle 123",
-        monto: 1000,
-        estatus: "Activo",
-      },
+  const [trabajadores, setTrabajadores] = useState([]);
+  const [editTrabajadorId, setEditTrabajadorId] = useState(null);
+  const [selectedTrabajador, setSelectedTrabajador] = useState(null);
+  const [divisiones, setDivisiones] = useState([]); // Agregar este estado
+  const [divisionMap, setDivisionMap] = useState({});
+  
+  useEffect(() => {
+    const fetchDivisiones = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/division/');
+        setDivisiones(response.data.body);
+        
+        // Crear un mapa de divisiones para asociar nombres con IDs
+        const map = {};
+        response.data.body.forEach(division => {
+          map[division.name] = division.id;
+        });
+        setDivisionMap(map);
+      } catch (error) {
+        console.error('Error al obtener las divisiones:', error);
+      }
+    };
+  
+    fetchDivisiones();
+  }, []);
 
 
-      {
-        nombre: "Juan",
-        usuario: "juanito",
-        division: "División 1",
-        apellidos: "Pérez",
-        telefono: "1234567890",
-        correo: "juanito@example.com",
-        direccion: "Calle 123",
-        monto: 1000,
-        estatus: "Activo",
-      },
 
-      {
-        nombre: "Juan",
-        usuario: "juanito",
-        division: "División 1",
-        apellidos: "Pérez",
-        telefono: "1234567890",
-        correo: "juanito@example.com",
-        direccion: "Calle 123",
-        monto: 1000,
-        estatus: "Activo",
-      },
+  useEffect(() => {
+    const fetchTrabajadores = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/worker/");
+        setTrabajadores(response.data.body);
+      } catch (error) {
+        console.error("Error al obtener los trabajadores:", error);
+      }
+    };
 
-      {
-        nombre: "Juan",
-        usuario: "juanito",
-        division: "División 1",
-        apellidos: "Pérez",
-        telefono: "1234567890",
-        correo: "juanito@example.com",
-        direccion: "Calle 123",
-        monto: 1000,
-        estatus: "Activo",
-      },
+    fetchTrabajadores();
+   
+  }, []);
 
-      {
-        nombre: "Juan",
-        usuario: "juanito",
-        division: "División 1",
-        apellidos: "Pérez",
-        telefono: "1234567890",
-        correo: "juanito@example.com",
-        direccion: "Calle 123",
-        monto: 1000,
-        estatus: "Activo",
-      },
-      // Agrega más datos si es necesario
-    ],
-    []
-  );
+  // Resto del código del componente...
+
+// Manejar el cambio en el select del nombre de la división
+  const handleDivisionChange = (selectedDivisionName) => {
+    const selectedDivisionId = divisionMap[selectedDivisionName];
+    setFormData({ ...formData, idDivision: selectedDivisionId });
+  };
+  
+  const [formData, setFormData] = useState({
+    name: "",
+    lastname: "",
+    email: "",
+    password: "",
+    status: true,
+    userWorker: "",
+    saldo: "",
+    telefono: "",
+    direccion: "",
+    division: { id: "", name: "" }, // Asegúrate de inicializar con un objeto vacío
+  });
+  
 
   const columns = React.useMemo(
     () => [
       {
         Header: "Nombre",
-        accessor: "nombre",
+        accessor: "name",
+      },
+      {
+        Header: "Apellido",
+        accessor: "lastname",
+      },
+      {
+        Header: "Email",
+        accessor: "email",
+      },
+      {
+        Header: "Estatus",
+        accessor: "status",
+        Cell: ({ value }) => (value ? "Activo" : "Inactivo"),
       },
       {
         Header: "Usuario",
-        accessor: "usuario",
+        accessor: "userWorker",
       },
       {
-        Header: "División",
-        accessor: "division",
+        Header: "Saldo",
+        accessor: "saldo",
+      },
+      {
+        Header: "Telefono",
+        accessor: "telefono",
+      },
+      {
+        Header: "Direccion",
+        accessor: "direccion",
+      },
+      {
+        Header: "Division",
+        accessor: "division.name",
       },
       {
         Header: "Acciones",
-        Cell: () => (
-          <Button variant="success" size="sm" onClick={handleEditShow}>
+        Cell: ({ row }) => (
+          <Button
+            variant="success"
+            size="sm"
+            onClick={() => {
+              console.log("Edit ID:", row.original.id);
+              handleEditShow(row.original.id);
+            }}
+          >
             <AiFillEdit />
-          </Button>
-        ),
-      },
-      {
-        Header: "Estado de cuenta",
-        Cell: () => (
-          <Button variant="success" size="sm">
-            Generar estado de cuenta
-          </Button>
-        ),
-      },
-      {
-        Header: "Ver más",
-        Cell: () => (
-          <Button variant="success" onClick={handleMoreShow}>
-            Ver más
           </Button>
         ),
       },
@@ -218,7 +148,7 @@ const ConsultaTrabajadores = () => {
   } = useTable(
     {
       columns,
-      data,
+      data: trabajadores,
       initialState: { pageSize: 10 },
     },
     useGlobalFilter,
@@ -229,16 +159,107 @@ const ConsultaTrabajadores = () => {
 
   const [show, setShow] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
-  const [showMore, setShowMore] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const handleEditClose = () => setShowEdit(false);
-  const handleEditShow = () => setShowEdit(true);
+  const handleAdd = async () => {
+    try {
+      const data = {
+        name: formData.name,
+        lastname: formData.lastname,
+        email: formData.email,
+        password: formData.password,
+        status: formData.status ? 1 : 0, // Convertir a 1 si es true, 0 si es false
+        userWorker: formData.userWorker,
+        saldo: parseFloat(formData.saldo), // Convertir a número
+        telefono: parseInt(formData.telefono), // Convertir a número entero
+        direccion: formData.direccion,
+        idDivision: parseInt(formData.division.id), // Convertir a número entero
+      };
+  
+      await axios.post("http://localhost:8080/worker/", data);
+  
+      // Mostrar alerta de éxito
+      await Swal.fire({
+        icon: "success",
+        title: "Trabajador agregado",
+        text: "El trabajador se agregó correctamente.",
+        confirmButtonColor: "#2D7541",
+        didClose: () => {
+          window.location.reload();
+        },
+      });
+    } catch (error) {
+      console.error("Error al agregar el trabajador:", error);
+  
+      // Mostrar alerta de error
+      await Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Ocurrió un error al agregar al trabajador. Por favor, inténtalo de nuevo.",
+        confirmButtonColor: "#2D7541",
+      });
+    }
+    setShow(false);
+  };
+  
 
-  const handleMoreClose = () => setShowMore(false);
-  const handleMoreShow = () => setShowMore(true);
+  const handleEditClose = () => {
+    setShowEdit(false);
+    setEditTrabajadorId(null);
+    setFormData({
+      name: "",
+      lastname: "",
+      email: "",
+      status: true,
+      userWorker: "",
+      saldo: "",
+      telefono: "",
+      direccion: "",
+      division: { name: "" },
+    });
+  };
+
+  const handleEditShow = async (id) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/worker/${id}`);
+      setSelectedTrabajador(response.data.body);
+      setEditTrabajadorId(id);
+      setShowEdit(true);
+    } catch (error) {
+      console.error("Error al obtener el trabajador para editar:", error);
+    }
+  };
+
+  const handleEditSave = async () => {
+    try {
+      await axios.put(
+        `http://localhost:8080/worker/${editTrabajadorId}`,
+        selectedTrabajador
+      );
+
+      await Swal.fire({
+        icon: "success",
+        title: "Trabajador modificado",
+        text: "El trabajador se modificó correctamente.",
+        confirmButtonColor: "#2D7541",
+        didClose: () => {
+          window.location.reload();
+        },
+      });
+    } catch (error) {
+      console.error("Error al modificar el trabajador:", error);
+      // Mostrar alerta de error
+      await Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Ocurrió un error al modificar al trabajador. Por favor, inténtalo de nuevo.",
+        confirmButtonColor: "#2D7541",
+      });
+    }
+    setShowEdit(false);
+  };
 
   return (
     <>
@@ -252,53 +273,129 @@ const ConsultaTrabajadores = () => {
 
           <Modal show={show} onHide={handleClose}>
             <Modal.Header closeButton>
-              <Modal.Title>Añadir trabajador</Modal.Title>
+              <Modal.Title>Añadir Trabajador</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Container>
                 <Row>
                   <label>Nombre:</label>
-                  <Form.Control type="text" placeholder=" " />
-                </Row>
-                <Row>
-                  <label>Usuario:</label>
-                  <Form.Control type="text" placeholder="" />
-                </Row>
-                <Row>
-                  <label>División:</label>
-                  <Form.Control as="select">
-                    <option>División 1</option>
-                    {/* Agregar más opciones según tus necesidades */}
-                  </Form.Control>
-                </Row>
-                <Row>
-                  <label>Contraseña:</label>
-                  <Form.Control type="password" placeholder="" />
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                  />
                 </Row>
                 <Row>
                   <label>Apellidos:</label>
-                  <Form.Control type="text" placeholder="" />
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={formData.lastname}
+                    onChange={(e) =>
+                      setFormData({ ...formData, lastname: e.target.value })
+                    }
+                  />
                 </Row>
                 <Row>
-                  <label>Teléfono:</label>
-                  <Form.Control type="text" placeholder="" />
+                  <label>Usuario:</label>
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={formData.userWorker}
+                    onChange={(e) =>
+                      setFormData({ ...formData, userWorker: e.target.value })
+                    }
+                  />
                 </Row>
                 <Row>
                   <label>Correo Electrónico:</label>
-                  <Form.Control type="text" placeholder="" />
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                  />
                 </Row>
                 <Row>
-                  <label>Dirección:</label>
-                  <Form.Control type="text" placeholder="" />
+                  <label>Contraseña:</label>
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                  />
                 </Row>
                 <Row>
-                  <label>Monto:</label>
-                  <Form.Control type="text" placeholder="" />
+                  <label>Saldo:</label>
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={formData.saldo}
+                    onChange={(e) =>
+                      setFormData({ ...formData, saldo: e.target.value })
+                    }
+                  />
                 </Row>
+                <Row>
+                  <label>Telefono:</label>
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={formData.telefono}
+                    onChange={(e) =>
+                      setFormData({ ...formData, telefono: e.target.value })
+                    }
+                  />
+                </Row>
+                <Row>
+                  <label>Direccion:</label>
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={formData.direccion}
+                    onChange={(e) =>
+                      setFormData({ ...formData, direccion: e.target.value })
+                    }
+                  />
+                </Row>
+                <Row>
+  <label>División:</label>
+  <Form.Control
+  as="select"
+  value={formData.division.id}
+  onChange={(e) => {
+    const selectedDivisionId = e.target.value;
+    const selectedDivisionName = divisiones.find(
+      (division) => division.id === parseInt(selectedDivisionId)
+    ).name;
+    setFormData({
+      ...formData,
+      division: { id: selectedDivisionId, name: selectedDivisionName },
+    });
+  }}
+>
+
+    <option value="">Selecciona una división</option>
+    {divisiones.map((division) => (
+      <option key={division.id} value={division.id}>
+        {division.name}
+      </option>
+    ))}
+  </Form.Control>
+</Row>
+
+
               </Container>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="success" onClick={handleClose}>
+              <Button variant="success" onClick={handleAdd}>
                 Crear
               </Button>
             </Modal.Footer>
@@ -306,159 +403,158 @@ const ConsultaTrabajadores = () => {
 
           <Modal show={showEdit} onHide={handleEditClose}>
             <Modal.Header closeButton>
-              <Modal.Title>Modificar trabajador</Modal.Title>
+              <Modal.Title>Modificar administrador</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <Container>
                 <Row>
-                  <label>Nombre:</label>
-                  <Form.Control type="text" placeholder=" " />
+                  <label>Nombre de el administrador:</label>
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={selectedTrabajador?.name || ""}
+                    onChange={(e) =>
+                      setTrabajadores({
+                        ...selectedTrabajador,
+                        name: e.target.value,
+                      })
+                    }
+                  />
                 </Row>
                 <Row>
-                  <label>Usuario:</label>
-                  <Form.Control type="text" placeholder="" />
-                </Row>
-                <Row>
-                  <label>División:</label>
-                  <Form.Control as="select">
-                    <option>División 1</option>
-                    {/* Agregar más opciones según tus necesidades */}
-                  </Form.Control>
-                </Row>
-                <Row>
-                  <label>Contraseña:</label>
-                  <Form.Control type="password" placeholder="" />
-                </Row>
-                <Row>
-                  <label>Apellidos:</label>
-                  <Form.Control type="text" placeholder="" />
-                </Row>
-                <Row>
-                  <label>Teléfono:</label>
-                  <Form.Control type="text" placeholder="" />
+                  <label>Apellido:</label>
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={selectedTrabajador?.lastname || ""}
+                    onChange={(e) =>
+                      setTrabajadores({
+                        ...selectedTrabajador,
+                        lastname: e.target.value,
+                      })
+                    }
+                  />
                 </Row>
                 <Row>
                   <label>Correo Electrónico:</label>
-                  <Form.Control type="text" placeholder="" />
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={selectedTrabajador?.email || ""}
+                    onChange={(e) =>
+                      setTrabajadores({
+                        ...selectedTrabajador,
+                        email: e.target.value,
+                      })
+                    }
+                  />
                 </Row>
                 <Row>
-                  <label>Dirección:</label>
-                  <Form.Control type="text" placeholder="" />
+                  <label>Usuario:</label>
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={selectedTrabajador?.userWorker || ""}
+                    onChange={(e) =>
+                      setTrabajadores({
+                        ...selectedTrabajador,
+                        userWorker: e.target.value,
+                      })
+                    }
+                  />
                 </Row>
                 <Row>
-                  <label>Monto:</label>
-                  <Form.Control type="text" placeholder="" />
+                  <label>Saldo:</label>
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={selectedTrabajador?.saldo || ""}
+                    onChange={(e) =>
+                      setTrabajadores({
+                        ...selectedTrabajador,
+                        saldo: e.target.value,
+                      })
+                    }
+                  />
+                </Row>
+                <Row>
+                  <label>Telefono:</label>
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={selectedTrabajador?.telefono || ""}
+                    onChange={(e) =>
+                      setTrabajadores({
+                        ...selectedTrabajador,
+                        telefono: e.target.value,
+                      })
+                    }
+                  />
+                </Row>
+                <Row>
+                  <label>Direccion:</label>
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={selectedTrabajador?.direccion || ""}
+                    onChange={(e) =>
+                      setTrabajadores({
+                        ...selectedTrabajador,
+                        direccion: e.target.value,
+                      })
+                    }
+                  />
+                </Row>
+                <Row>
+                  <label>ID Division:</label>
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={selectedTrabajador?.idDivision || ""}
+                    onChange={(e) =>
+                      setTrabajadores({
+                        ...selectedTrabajador,
+                        idDivision: e.target.value,
+                      })
+                    }
+                  />
+                </Row>
+                <Row>
+                  <label>Estatus:</label>
+                  <Form.Control
+                    as="select"
+                    value={selectedTrabajador?.status ? "Activo" : "Inactivo"}
+                    onChange={(e) =>
+                      setSelectedTrabajador({
+                        ...selectedTrabajador,
+                        status: e.target.value === "Activo",
+                      })
+                    }
+                  >
+                    <option>Activo</option>
+                    <option>Inactivo</option>
+                  </Form.Control>
                 </Row>
               </Container>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="success" onClick={handleEditClose}>
-                Guardar cambios
-              </Button>
-            </Modal.Footer>
-          </Modal>
-          <Modal show={showEdit} onHide={handleEditClose}>
-            <Modal.Header closeButton>
-              <Modal.Title>Modificar trabajador</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Container>
-                <Row>
-                  <label>Nombre:</label>
-                  <Form.Control type="text" placeholder=" " />
-                </Row>
-                <Row>
-                  <label>Usuario:</label>
-                  <Form.Control type="text" placeholder="" />
-                </Row>
-                <Row>
-                  <label>División:</label>
-                  <Form.Control as="select">
-                    <option>División 1</option>
-                    {/* Agregar más opciones según tus necesidades */}
-                  </Form.Control>
-                </Row>
-                <Row>
-                  <label>Contraseña:</label>
-                  <Form.Control type="password" placeholder="" />
-                </Row>
-                <Row>
-                  <label>Apellidos:</label>
-                  <Form.Control type="text" placeholder="" />
-                </Row>
-                <Row>
-                  <label>Teléfono:</label>
-                  <Form.Control type="text" placeholder="" />
-                </Row>
-                <Row>
-                  <label>Correo Electrónico:</label>
-                  <Form.Control type="text" placeholder="" />
-                </Row>
-                <Row>
-                  <label>Dirección:</label>
-                  <Form.Control type="text" placeholder="" />
-                </Row>
-                <Row>
-                  <label>Monto:</label>
-                  <Form.Control type="text" placeholder="" />
-                </Row>
-              </Container>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="success" onClick={handleEditClose}>
+              <Button variant="success" onClick={handleEditSave}>
                 Guardar cambios
               </Button>
             </Modal.Footer>
           </Modal>
 
-          <Modal show={showMore} onHide={handleMoreClose}>
-            <Modal.Header closeButton>
-              <Modal.Title>Detalles del Trabajador</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Container>
-                <Row>
-                  <label>Nombre:</label>
-                  <span>For each</span>
-                </Row>
-                <Row>
-                  <label>Usuario:</label>
-                  <span>For each</span>
-                </Row>
-                <Row>
-                  <label>División:</label>
-                  <span>For each </span>
-                </Row>
-                <Row>
-                  <label>Apellidos:</label>
-                  <span>For each </span>
-                </Row>
-                <Row>
-                  <label>Teléfono:</label>
-                  <span>For each </span>
-                </Row>
-                <Row>
-                  <label>Correo Electrónico:</label>
-                  <span>For each </span>
-                </Row>
-                <Row>
-                  <label>Dirección:</label>
-                  <span>For each </span>
-                </Row>
-                <Row>
-                  <label>Monto:</label>
-                  <span></span>
-                </Row>
-              </Container>
-            </Modal.Body>
-          </Modal>
           <div className="col-6 d-flex justify-content-end">
             <input
               type="text"
               value={globalFilter || ""}
               onChange={(e) => setGlobalFilter(e.target.value)}
-              placeholder="Buscar Trabajador"
-              style={{ marginLeft: "10px", borderRadius: "5px", border: "1px solid #ccc"}}
+              placeholder="Buscar Trabajador..."
+              style={{
+                marginLeft: "10px",
+                borderRadius: "5px",
+                border: "1px solid #ccc",
+              }}
             />
           </div>
         </div>
@@ -475,7 +571,7 @@ const ConsultaTrabajadores = () => {
                 marginTop: "20px",
               }}
             >
-              <thead>
+              <thead className="justify-content-center">
                 {headerGroups.map((headerGroup) => (
                   <tr {...headerGroup.getHeaderGroupProps()}>
                     {headerGroup.headers.map((column) => (
@@ -542,5 +638,4 @@ const ConsultaTrabajadores = () => {
     </>
   );
 };
-
 export default ConsultaTrabajadores;
