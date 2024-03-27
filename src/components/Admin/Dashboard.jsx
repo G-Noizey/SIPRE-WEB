@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaList, FaUsers, FaUserTie, FaChartPie, FaRegUserCircle } from 'react-icons/fa';
+import { FaList, FaUsers, FaUserTie, FaChartPie, FaRegUserCircle, FaShoppingBag, FaCreditCard} from 'react-icons/fa';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { IoIosLogOut } from "react-icons/io";
 import Swal from 'sweetalert2'; // Importa SweetAlert
@@ -15,6 +15,8 @@ const Dashboard = () => {
   const [isReporteHover, setIsReporteHover] = useState(false);
   const [isUsuarioHover, setIsUsuarioHover] = useState(false);
   const [isLogoutHover, setIsLogoutHover] = useState(false);
+  const [isComprasHover, setIsComprasHover] = useState(false);
+  const [isTransaccionesHover, setIsTransaccionesHover] = useState(false);
 
   const handleHover = (stateSetter) => {
     stateSetter(true);
@@ -118,6 +120,30 @@ const handleLogout = () => {
                 <FaChartPie style={{ color: '#2D7541', marginRight: '20px', fontSize: '1.2em' }} /> <span style={{ color: '#2D7541' }}>Centro de Reporte</span>
               </Link>
             </li>
+
+
+            <li className="nav-item">
+              <Link className="nav-link d-flex align-items-center"
+                to="/dashboard/compras"
+                onMouseEnter={() => handleHover(setIsComprasHover)}
+                onMouseLeave={() => handleMouseOut(setIsComprasHover)}
+                style={{ borderLeft: isComprasHover ? '6px solid #2D7541' : '#2D7541', backgroundColor: isComprasHover ? '#f4f4f4' : 'transparent', paddingLeft: '16px' }}
+              >
+                <FaShoppingBag style={{ color: '#2D7541', marginRight: '20px', fontSize: '1.2em' }} /> <span style={{ color: '#2D7541' }}>Compras</span>
+              </Link>
+            </li>
+
+            <li className="nav-item">
+              <Link className="nav-link d-flex align-items-center"
+                to="/dashboard/transacciones"
+                onMouseEnter={() => handleHover(setIsTransaccionesHover)}
+                onMouseLeave={() => handleMouseOut(setIsTransaccionesHover)}
+                style={{ borderLeft: isTransaccionesHover ? '6px solid #2D7541' : '#2D7541', backgroundColor: isTransaccionesHover ? '#f4f4f4' : 'transparent', paddingLeft: '16px' }}
+              >
+                <FaCreditCard style={{ color: '#2D7541', marginRight: '20px', fontSize: '1.2em' }} /> <span style={{ color: '#2D7541' }}>Transacciones</span>
+              </Link>
+            </li>
+
 
             <p className='fw-bold' style={{ color: 'grey', padding: '10px' }}>  Usuario:   </p>
             <li className="nav-item">

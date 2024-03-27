@@ -26,6 +26,7 @@ function AppRouter() {
           <Route path="administradores" element={<PrivateRoute element={<ConsultaAdministradores />} />} />
           <Route path="infoadmin" element={<PrivateRoute element={<InfoAdmin />} />} />
           <Route path="reporte" element={<PrivateRoute element={<ReporteCharts />} />} />
+          
           {/* Añade otras rutas hijas según necesites */}
         </Route>
       </Routes>
