@@ -3,6 +3,8 @@ package mx.edu.utez.sipre.model.bean;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @Entity
@@ -16,15 +18,12 @@ public class BeanBuys {
     private Long id;
     @Column(name="descripcion", length = 200, nullable = false)
     private String descripcion;
-    @Column(name="fecha", length = 100, nullable = false)
-    private String fecha;
+    @Column(name="fecha", nullable = false)
+    private LocalDate fecha;
     @Column(name="monto", length = 100, nullable = false)
     private double monto;
-
-    @Lob
-    @Column(name="comprobante", nullable = false)
-    private byte[] comprobante;
-
+    @Column(name="status", length = 20, nullable = false)
+    private String status;
     @ManyToOne
     @JoinColumn(name = "idWorker", nullable = false)
     private BeanWorker beanWorker;
