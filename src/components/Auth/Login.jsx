@@ -11,32 +11,61 @@ const Login = () => {
   const handleIniciar = () => {
     axios.post('http://localhost:8080/admin/login', { userAdmin: username, password })
       .then(response => {
-        const { token, name, role, email, apellido } = response.data; // Suponiendo que el servidor devuelve un objeto con el token, nombre, rol y correo del usuario
-        localStorage.setItem('token', token);
-        localStorage.setItem('name', name);
-        localStorage.setItem('role', role);
-        localStorage.setItem('email', email);
-        localStorage.setItem('apellido', apellido)
-        Swal.fire({
-          icon: 'success',
-          title: '¡Inicio de sesión exitoso!',
-          text: 'Bienvenido',
-          confirmButtonColor: '#2D7541',
+        const { status, ...responseData } = response.data;
 
-       
-        }).then(() => {
-          navigate('/dashboard/divisiones');
-        });
+        if (status === "error") {
+          // Si el servidor devuelve un estado "error", muestra un mensaje de error genérico
+          Swal.fire({
+            icon: 'error',
+            title: '¡Error al iniciar sesión!',
+            text: 'Hubo un problema al intentar iniciar sesión.',
+            confirmButtonColor: '#2D7541',
+          });
+        } else if (status === 0) {
+          // Si el estado es "0" (inactivo), muestra un mensaje de cuenta desactivada
+          Swal.fire({
+            icon: 'warning',
+            title: '¡Acceso denegado!',
+            text: 'Tu cuenta está desactivada. Por favor, contacta al administrador.',
+            confirmButtonColor: '#2D7541',
+          });
+        } else {
+          // Si todo está bien, guarda los datos del usuario en el almacenamiento local y redirige
+          localStorage.setItem('token', responseData.token);
+          localStorage.setItem('name', responseData.name);
+          localStorage.setItem('role', responseData.role);
+          localStorage.setItem('email', responseData.email);
+          localStorage.setItem('apellido', responseData.apellido);
+          
+          // Si la cuenta no está inactiva, muestra el mensaje de inicio de sesión exitoso
+          Swal.fire({
+            icon: 'success',
+            title: '¡Inicio de sesión exitoso!',
+            text: 'Bienvenido',
+            confirmButtonColor: '#2D7541',
+          }).then(() => {
+            navigate('/dashboard/divisiones');
+          });
+        }
       })
       .catch(error => {
-        Swal.fire({
-          icon: 'error',
-          title: '¡Error al iniciar sesión!',
-          text: error.response.data,
-          confirmButtonColor: '#2D7541',
-
-        
-        });
+        if (error.response.status === 403) {
+          // Si el servidor devuelve un estado 403 (Prohibido), muestra un mensaje de cuenta desactivada
+          Swal.fire({
+            icon: 'warning',
+            title: '¡Acceso denegado!',
+            text: 'Tu cuenta está desactivada. Por favor, contacta al administrador.',
+            confirmButtonColor: '#2D7541',
+          });
+        } else {
+          // Manejo de otros errores
+          Swal.fire({
+            icon: 'error',
+            title: '¡Error al iniciar sesión!',
+            text: 'Hubo un problema al intentar iniciar sesión',
+            confirmButtonColor: '#2D7541',
+          });
+        }
       });
   };
 

@@ -157,6 +157,8 @@ useEffect(() => {
         direccion: formData.direccion,
         idDivision: parseInt(formData.division.id), // Convertir a número entero
       };
+
+      
   
       await axios.post("http://localhost:8080/worker/", data);
   

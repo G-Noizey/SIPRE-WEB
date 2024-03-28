@@ -2,6 +2,8 @@ package mx.edu.utez.sipre.model.dto;
 
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -10,9 +12,9 @@ import lombok.*;
 public class DtoBuys {
     private Long id;
     private String descripcion;
-    private String fecha;
+    private LocalDate fecha;
+    private String status;
     private double monto;
     private Long idWorker;
     private Long idDivision;
-    private byte[] comprobante;
 }

@@ -5,9 +5,11 @@ import ConsultaDivisiones from '../components/Divisiones/ConsultaDivisiones';
 import ConsultaTrabajadores from '../components/Trabajadores/ConsultaTrabajadores';
 import Login from '../components/Auth/Login';
 import ConsultaAdministradores from '../components/Admin/ConsultaAdministradores';
+import ConsultaCompras from '../components/Compras/ConsultaCompras';
 import RecuperarContra from '../components/Auth/RecuperarContra';
 import InfoAdmin from '../components/Admin/InfoAdmin';
 import ReporteCharts from '../components/Charts/ReporteCharts';
+
 
 const PrivateRoute = ({ element }) => {
   const isAuthenticated = localStorage.getItem('token') !== null;
@@ -24,6 +26,7 @@ function AppRouter() {
           <Route path="divisiones" element={<PrivateRoute element={<ConsultaDivisiones />} />} />
           <Route path="trabajadores" element={<PrivateRoute element={<ConsultaTrabajadores />} />} />
           <Route path="administradores" element={<PrivateRoute element={<ConsultaAdministradores />} />} />
+          <Route path="compras" element={<PrivateRoute element={<ConsultaCompras />} />} />
           <Route path="infoadmin" element={<PrivateRoute element={<InfoAdmin />} />} />
           <Route path="reporte" element={<PrivateRoute element={<ReporteCharts />} />} />
           

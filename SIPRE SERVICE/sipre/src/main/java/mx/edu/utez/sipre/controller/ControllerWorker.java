@@ -42,10 +42,6 @@ public class ControllerWorker {
         return ResponseEntity.status(responseEntity.getStatusCode()).body(responseEntity.getBody());
     }
 
-
-
-
-
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable("id") Long id) {
         return serviceWorker.deleteWorker(id);

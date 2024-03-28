@@ -74,17 +74,22 @@
         public ResponseEntity<Map<String, String>> authenticate(BeanAdmin admin) {
             Optional<BeanAdmin> adminOptional = repoAdmin.findByUserAdmin(admin.getUserAdmin());
             if (adminOptional.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Usuario no encontrado"));
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("status", "error"));
             }
 
             BeanAdmin storedAdmin = adminOptional.get();
             if (!storedAdmin.getPassword().equals(admin.getPassword())) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Contraseña incorrecta"));
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("status", "error"));
+            }
+
+            if (storedAdmin.getStatus() != null && !storedAdmin.getStatus()) {
+                // Cuenta desactivada
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.singletonMap("status", "inactive"));
             }
 
             Map<String, String> responseData = new HashMap<>();
 
-            responseData.put("token", generateToken()); // Método para generar token
+            responseData.put("token", generateToken());
             responseData.put("name", storedAdmin.getName());
             responseData.put("role", String.valueOf(storedAdmin.getRole()));
             responseData.put("email", storedAdmin.getEmail());
@@ -92,6 +97,7 @@
 
             return ResponseEntity.ok(responseData);
         }
+
 
 
         //FUNCIÓN PARA GENERAR EL TOKEN (NOIZEY)

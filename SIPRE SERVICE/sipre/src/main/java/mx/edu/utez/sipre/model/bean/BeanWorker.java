@@ -42,5 +42,6 @@ public class BeanWorker {
     private BeanDivision division;
 
     @OneToMany(mappedBy = "beanWorker")
+    @JsonIgnore
     private List<BeanBuys> buys;
 }
