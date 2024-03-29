@@ -9,6 +9,7 @@ import ConsultaCompras from '../components/Compras/ConsultaCompras';
 import RecuperarContra from '../components/Auth/RecuperarContra';
 import InfoAdmin from '../components/Admin/InfoAdmin';
 import ReporteCharts from '../components/Charts/ReporteCharts';
+import ConsultaTransacciones from '../components/Transacciones/ConsultaTransacciones';
 
 
 const PrivateRoute = ({ element }) => {
@@ -27,6 +28,7 @@ function AppRouter() {
           <Route path="trabajadores" element={<PrivateRoute element={<ConsultaTrabajadores />} />} />
           <Route path="administradores" element={<PrivateRoute element={<ConsultaAdministradores />} />} />
           <Route path="compras" element={<PrivateRoute element={<ConsultaCompras />} />} />
+          <Route path="transacciones" element={<PrivateRoute element={<ConsultaTransacciones />} />} />
           <Route path="infoadmin" element={<PrivateRoute element={<InfoAdmin />} />} />
           <Route path="reporte" element={<PrivateRoute element={<ReporteCharts />} />} />
           
