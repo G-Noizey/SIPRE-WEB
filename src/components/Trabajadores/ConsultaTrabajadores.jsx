@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Container, Modal, Row, Form } from "react-bootstrap";
+import { Button, Container, Modal, Row, Form, Col } from "react-bootstrap";
 import { AiFillEdit } from "react-icons/ai";
 import { HiArrowSmRight, HiArrowSmLeft } from "react-icons/hi";
 import { FaPlus } from "react-icons/fa";
@@ -13,22 +13,51 @@ const ConsultaTrabajadores = () => {
   const [trabajadores, setTrabajadores] = useState([]);
   const [editTrabajadorId, setEditTrabajadorId] = useState(null);
   const [selectedTrabajador, setSelectedTrabajador] = useState(null);
-  const [divisiones, setDivisiones] = useState([]); // Agregar este estado
+  
+  const [divisiones, setDivisiones] = useState([]); 
   const [divisionMap, setDivisionMap] = useState({});
   
- // En el useEffect para obtener las divisiones, guarda las divisiones en el estado
-useEffect(() => {
-  const fetchDivisiones = async () => {
+  const [selectedDivisionSaldo, setSelectedDivisionSaldo] = useState("");
+
+  const [saldoDisponible, setSaldoDisponible] = useState(0);
+
+  
+
+
+  const actualizarSaldoDivision = async (idDivision, nuevoSaldo) => {
     try {
-      const response = await axios.get("http://localhost:8080/division/");
-      setDivisiones(response.data.body);
+      const response = await axios.put(`http://localhost:8080/division/${idDivision}/saldo`, null, { params: { newSaldo: nuevoSaldo } });
+      return response.data;
     } catch (error) {
-      console.error("Error al obtener las divisiones:", error);
+      console.error("Error al actualizar saldo de la división:", error);
+      throw error;
     }
   };
+  
+  
 
-  fetchDivisiones();
-}, []);
+
+  useEffect(() => {
+    const fetchDivisiones = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/division/");
+        setDivisiones(response.data.body);
+        
+        // Crear un mapa con el ID y el saldo de cada división
+        const divisionMap = {};
+        response.data.body.forEach((division) => {
+          divisionMap[division.id] = division.saldo;
+        });
+        setDivisionMap(divisionMap);
+      } catch (error) {
+        console.error("Error al obtener las divisiones:", error);
+      }
+    };
+  
+    fetchDivisiones();
+  }, []);
+
+
 
   useEffect(() => {
     const fetchTrabajadores = async () => {
@@ -44,13 +73,7 @@ useEffect(() => {
    
   }, []);
 
-  // Resto del código del componente...
 
-// Manejar el cambio en el select del nombre de la división
-  const handleDivisionChange = (selectedDivisionName) => {
-    const selectedDivisionId = divisionMap[selectedDivisionName];
-    setFormData({ ...formData, idDivision: selectedDivisionId });
-  };
   
   const [formData, setFormData] = useState({
     name: "",
@@ -59,14 +82,33 @@ useEffect(() => {
     password: "",
     status: true,
     userWorker: "",
-    saldo: "",
+    saldo: 0,
     telefono: "",
     direccion: "",
-    division: { id: "", name: "" }, // Asegúrate de inicializar con un objeto vacío
+    division: { id: "", name: "", saldo: 0 },
   });
   
+  useEffect(() => {
+    if (formData.division.id && divisionMap[formData.division.id]) {
+      const saldoDisponible = divisionMap[formData.division.id];
+      if (formData.saldo > saldoDisponible) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'El saldo asignado al trabajador supera el saldo disponible en la división.',
+          confirmButtonColor: "#2D7541",
+
+        });
+      } else {
+        setSaldoDisponible(saldoDisponible);
+      }
+    } else {
+      setSaldoDisponible(0);
+    }
+  }, [formData.division.id, formData.saldo, divisionMap]);
 
 
+  
   const columns = React.useMemo(
     () => [
       {
@@ -135,57 +177,74 @@ useEffect(() => {
   const [showViewMore, setShowViewMore] = useState(false);
   const [viewMoreData, setViewMoreData] = useState(null);
 
-
-  const [selectedDivisionId, setSelectedDivisionId] = useState("");
-
-
-
-  
-
-
   const handleAdd = async () => {
     try {
+      // Validar que el saldo asignado no exceda el saldo disponible
+      if (formData.saldo > saldoDisponible) {
+        throw new Error("El saldo asignado no puede exceder el saldo disponible en la división.");
+      }
+
+      // Verificar si ya existe un trabajador con el mismo correo electrónico
+      const emailExists = await axios.get(`http://localhost:8080/worker/email/${formData.email}`);
+      if (emailExists.data) {
+        throw new Error("Ya existe un trabajador con el mismo correo electrónico.");
+      }
+
+      // Verificar si ya existe un trabajador con el mismo nombre de usuario
+      const userWorkerExists = await axios.get(`http://localhost:8080/worker/userWorker/${formData.userWorker}`);
+      if (userWorkerExists.data) {
+        throw new Error("Ya existe un trabajador con el mismo nombre de usuario.");
+      }
+
       const data = {
         name: formData.name,
         lastname: formData.lastname,
         email: formData.email,
         password: formData.password,
-        status: formData.status ? 1 : 0, // Convertir a 1 si es true, 0 si es false
+        status: formData.status ? 1 : 0,
         userWorker: formData.userWorker,
-        saldo: parseFloat(formData.saldo), // Convertir a número
-        telefono: parseInt(formData.telefono), // Convertir a número entero
+        saldo: parseFloat(formData.saldo),
+        telefono: parseInt(formData.telefono),
         direccion: formData.direccion,
-        idDivision: parseInt(formData.division.id), // Convertir a número entero
+        idDivision: parseInt(formData.division.id),
       };
 
-      
-  
+      // Realizar la inserción del trabajador
       await axios.post("http://localhost:8080/worker/", data);
-  
-      // Mostrar alerta de éxito
+
+      // Restar el saldo asignado al trabajador del saldo disponible en la división
+      const updatedSaldoDisponible = saldoDisponible - parseFloat(formData.saldo);
+      setSaldoDisponible(updatedSaldoDisponible);
+
+      // Actualizar el saldo de la división en el backend
+      await actualizarSaldoDivision(formData.division.id, updatedSaldoDisponible);
+
+      // Mostrar mensaje de éxito
       await Swal.fire({
         icon: "success",
         title: "Trabajador agregado",
         text: "El trabajador se agregó correctamente.",
         confirmButtonColor: "#2D7541",
-        didClose: () => {
-          window.location.reload();
-        },
       });
+
+      // Recargar la página
+      window.location.reload();
     } catch (error) {
       console.error("Error al agregar el trabajador:", error);
-  
+
       // Mostrar alerta de error
       await Swal.fire({
         icon: "error",
         title: "Error",
-        text: "Ocurrió un error al agregar al trabajador. Por favor, inténtalo de nuevo.",
+        text: error.message || "Ocurrió un error al agregar al trabajador. Por favor, inténtalo de nuevo.",
         confirmButtonColor: "#2D7541",
       });
     }
     setShow(false);
-  };
+};
+
   
+
 
   const handleEditClose = () => {
     setShowEdit(false);
@@ -203,16 +262,16 @@ useEffect(() => {
     });
   };
 
- // En la función handleEditShow, asigna el nombre de la división al trabajador seleccionado
-const handleEditShow = async (id) => {
+ const handleEditShow = async (id) => {
   try {
     const response = await axios.get(`http://localhost:8080/worker/${id}`);
     const trabajador = response.data.body;
-    const division = divisiones.find((division) => division.id === trabajador.idDivision);
-    if (division) {
-      trabajador.divisionName = division.name;
-    }
-    setSelectedTrabajador(trabajador);
+
+    // Obtener la división correspondiente al trabajador
+    const divisionResponse = await axios.get(`http://localhost:8080/division/${trabajador.division.id}`);
+    const division = divisionResponse.data.body;
+
+    setSelectedTrabajador({ ...trabajador, divisionName: division.name });
     setEditTrabajadorId(id);
     setShowEdit(true);
   } catch (error) {
@@ -220,44 +279,70 @@ const handleEditShow = async (id) => {
   }
 };
 
-  const handleEditSave = async () => {
-    try {
-      const updatedTrabajador = {
-        id: editTrabajadorId,
-        name: selectedTrabajador.name,
-        lastname: selectedTrabajador.lastname,
-        email: selectedTrabajador.email,
-        userWorker: selectedTrabajador.userWorker,
-        saldo: selectedTrabajador.saldo,
-        telefono: selectedTrabajador.telefono,
-        direccion: selectedTrabajador.direccion,
-        idDivision: parseInt(selectedTrabajador.idDivision),
-        status: selectedTrabajador.status,
-        password: selectedTrabajador.password, // Agregar el campo password
-      };
-      await axios.put(`http://localhost:8080/worker/`, updatedTrabajador);
-  
-      await Swal.fire({
-        icon: "success",
-        title: "Trabajador modificado",
-        text: "El trabajador se modificó correctamente.",
-        confirmButtonColor: "#2D7541",
-        didClose: () => {
-          window.location.reload();
-        },
-      });
-    } catch (error) {
-      console.error("Error al modificar el trabajador:", error);
-      // Mostrar alerta de error
-      await Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Ocurrió un error al modificar al trabajador. Por favor, inténtalo de nuevo.",
-        confirmButtonColor: "#2D7541",
-      });
-    }
-    setShowEdit(false);
-  };
+
+
+const handleEditSave = async () => {
+  try {
+    const updatedTrabajador = {
+      id: editTrabajadorId,
+      name: selectedTrabajador.name,
+      lastname: selectedTrabajador.lastname,
+      email: selectedTrabajador.email,
+      userWorker: selectedTrabajador.userWorker,
+      saldo: selectedTrabajador.saldo,
+      telefono: selectedTrabajador.telefono,
+      direccion: selectedTrabajador.direccion,
+      idDivision: parseInt(selectedTrabajador.idDivision),
+      status: selectedTrabajador.status,
+      password: selectedTrabajador.password,
+    };
+
+    // Obtener el trabajador actual
+    const trabajadorActual = trabajadores.find(t => t.id === editTrabajadorId);
+
+    // Actualizar el trabajador en la base de datos
+    await axios.put(`http://localhost:8080/worker/`, updatedTrabajador);
+
+    // Cambiar la división del trabajador
+    await axios.put(`http://localhost:8080/worker/${editTrabajadorId}/division`, null, { params: { idNuevaDivision: selectedTrabajador.idDivision } });
+
+    // Devolver el saldo a la división anterior
+    const saldoDevuelto = parseFloat(trabajadorActual.saldo);
+    const nuevoSaldoDivisionActual = divisionMap[trabajadorActual.division.id] + saldoDevuelto;
+    await axios.put(`http://localhost:8080/division/${trabajadorActual.division.id}/saldo`, null, { params: { newSaldo: nuevoSaldoDivisionActual } });
+
+    // Restar el saldo de la nueva división
+    const nuevoSaldoDivisionNueva = divisionMap[selectedTrabajador.idDivision] - parseFloat(selectedTrabajador.saldo);
+    await axios.put(`http://localhost:8080/division/${selectedTrabajador.idDivision}/saldo`, null, { params: { newSaldo: nuevoSaldoDivisionNueva } });
+
+    // Mostrar mensaje de éxito
+    await Swal.fire({
+      icon: "success",
+      title: "Trabajador modificado",
+      text: "El trabajador se modificó correctamente.",
+      confirmButtonColor: "#2D7541",
+      didClose: () => {
+        window.location.reload();
+      },
+    });
+  } catch (error) {
+    console.error("Error al modificar el trabajador:", error);
+    // Mostrar alerta de error
+    await Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Ocurrió un error al modificar al trabajador. Por favor, inténtalo de nuevo.",
+      confirmButtonColor: "#2D7541",
+    });
+  }
+  setShowEdit(false);
+};
+
+
+
+
+
+
   
   const handleViewMoreShow = (data) => {
     setViewMoreData(data);
@@ -268,6 +353,10 @@ const handleEditShow = async (id) => {
     setShowViewMore(false);
     setViewMoreData(null);
   };
+
+
+
+
 
   return (
     <>
@@ -280,126 +369,148 @@ const handleEditShow = async (id) => {
           </div>
 
 
-          {/* Modal para agregar trabajador */}
-
-          <Modal show={show} onHide={handleClose}>
+       {/* Modal para agregar trabajador */}
+<Modal show={show} onHide={handleClose}>
   <Modal.Header closeButton>
     <Modal.Title>Añadir Trabajador</Modal.Title>
   </Modal.Header>
   <Modal.Body>
     <Container>
       <Row>
-        <label>Nombre:</label>
-        <Form.Control
-          type="text"
-          placeholder=""
-          value={formData.name}
-          onChange={(e) =>
-            setFormData({ ...formData, name: e.target.value })
-          }
-        />
+        <Col>
+          <label>Nombre:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={formData.name}
+            onChange={(e) =>
+              setFormData({ ...formData, name: e.target.value })
+            }
+          />
+        </Col>
+        <Col>
+          <label>Apellidos:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={formData.lastname}
+            onChange={(e) =>
+              setFormData({ ...formData, lastname: e.target.value })
+            }
+          />
+        </Col>
       </Row>
       <Row>
-        <label>Apellidos:</label>
-        <Form.Control
-          type="text"
-          placeholder=""
-          value={formData.lastname}
-          onChange={(e) =>
-            setFormData({ ...formData, lastname: e.target.value })
-          }
-        />
+        <Col>
+          <label>Usuario:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={formData.userWorker}
+            onChange={(e) =>
+              setFormData({ ...formData, userWorker: e.target.value })
+            }
+          />
+        </Col>
+        <Col>
+          <label>Correo Electrónico:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={formData.email}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
+          />
+        </Col>
       </Row>
       <Row>
-        <label>Usuario:</label>
-        <Form.Control
-          type="text"
-          placeholder=""
-          value={formData.userWorker}
-          onChange={(e) =>
-            setFormData({ ...formData, userWorker: e.target.value })
-          }
-        />
+        <Col>
+          <label>Contraseña:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={formData.password}
+            onChange={(e) =>
+              setFormData({ ...formData, password: e.target.value })
+            }
+          />
+        </Col>
+        <Col>
+          <label>Telefono:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={formData.telefono}
+            onChange={(e) =>
+              setFormData({ ...formData, telefono: e.target.value })
+            }
+          />
+        </Col>
       </Row>
       <Row>
-        <label>Correo Electrónico:</label>
-        <Form.Control
-          type="text"
-          placeholder=""
-          value={formData.email}
-          onChange={(e) =>
-            setFormData({ ...formData, email: e.target.value })
-          }
-        />
+        <Col>
+          <label>Direccion:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={formData.direccion}
+            onChange={(e) =>
+              setFormData({ ...formData, direccion: e.target.value })
+            }
+          />
+        </Col>
+        <Col>
+          <label>División:</label>
+          <Form.Control
+            as="select"
+            value={formData.division.id}
+            onChange={(e) => {
+              const selectedDivisionId = e.target.value;
+              const selectedDivisionName = divisiones.find(
+                (division) => division.id === parseInt(selectedDivisionId)
+              ).name;
+              setFormData({
+                ...formData,
+                division: { id: selectedDivisionId, name: selectedDivisionName },
+              });
+
+              // Actualizar el saldo de la división seleccionada
+              setSelectedDivisionSaldo(divisionMap[selectedDivisionId]);
+            }}
+          >
+            <option value="">Selecciona una división</option>
+            {divisiones.map((division) => (
+              <option key={division.id} value={division.id}>
+                {division.name}
+              </option>
+            ))}
+          </Form.Control>
+        </Col>
       </Row>
+
+
       <Row>
-        <label>Contraseña:</label>
-        <Form.Control
-          type="text"
-          placeholder=""
-          value={formData.password}
-          onChange={(e) =>
-            setFormData({ ...formData, password: e.target.value })
-          }
-        />
+
+      <Col>
+          <label>Saldo disponible de la división:</label>
+          <p>{selectedDivisionSaldo}</p>
+        </Col>
+        <Col>
+          <label>Saldo a asignar:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={formData.saldo}
+            onChange={(e) =>
+              setFormData({ ...formData, saldo: e.target.value })
+            }
+          />
+        </Col>
+     
       </Row>
-      <Row>
-        <label>Saldo:</label>
-        <Form.Control
-          type="text"
-          placeholder=""
-          value={formData.saldo}
-          onChange={(e) =>
-            setFormData({ ...formData, saldo: e.target.value })
-          }
-        />
-      </Row>
-      <Row>
-        <label>Telefono:</label>
-        <Form.Control
-          type="text"
-          placeholder=""
-          value={formData.telefono}
-          onChange={(e) =>
-            setFormData({ ...formData, telefono: e.target.value })
-          }
-        />
-      </Row>
-      <Row>
-        <label>Direccion:</label>
-        <Form.Control
-          type="text"
-          placeholder=""
-          value={formData.direccion}
-          onChange={(e) =>
-            setFormData({ ...formData, direccion: e.target.value })
-          }
-        />
-      </Row>
-      <Row>
-        <label>División:</label>
-        <Form.Control
-          as="select"
-          value={formData.division.id}
-          onChange={(e) => {
-            const selectedDivisionId = e.target.value;
-            const selectedDivisionName = divisiones.find(
-              (division) => division.id === parseInt(selectedDivisionId)
-            ).name;
-            setFormData({
-              ...formData,
-              division: { id: selectedDivisionId, name: selectedDivisionName },
-            });
-          }}
-        >
-          <option value="">Selecciona una división</option>
-          {divisiones.map((division) => (
-            <option key={division.id} value={division.id}>
-              {division.name}
-            </option>
-          ))}
-        </Form.Control>
-      </Row>
+
+      
     </Container>
   </Modal.Body>
   <Modal.Footer>
@@ -409,150 +520,182 @@ const handleEditShow = async (id) => {
   </Modal.Footer>
 </Modal>
 
-   
 
-   {/* Modal para editar trabajadores */}
 
-   <Modal show={showEdit} onHide={handleEditClose}>
+{/* Modal para modificar trabajador */}
+
+
+<Modal show={showEdit} onHide={handleEditClose}>
   <Modal.Header closeButton>
-    <Modal.Title>Modificar administrador</Modal.Title>
+    <Modal.Title>Modificar Trabajador</Modal.Title>
   </Modal.Header>
   <Modal.Body>
     <Container>
       <Row>
-        <label>Nombre de el administrador:</label>
-        <Form.Control
-          type="text"
-          placeholder=""
-          value={selectedTrabajador?.name || ""}
-          onChange={(e) =>
-            setTrabajadores({
-              ...selectedTrabajador,
-              name: e.target.value,
-            })
-          }
-        />
+        <Col>
+          <label>Nombre de el administrador:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={selectedTrabajador?.name || ""}
+            onChange={(e) =>
+              setSelectedTrabajador({
+                ...selectedTrabajador,
+                name: e.target.value,
+              })
+            }
+          />
+        </Col>
+        <Col>
+          <label>Apellido:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={selectedTrabajador?.lastname || ""}
+            onChange={(e) =>
+              setSelectedTrabajador({
+                ...selectedTrabajador,
+                lastname: e.target.value,
+              })
+            }
+          />
+        </Col>
       </Row>
       <Row>
-        <label>Apellido:</label>
-        <Form.Control
-          type="text"
-          placeholder=""
-          value={selectedTrabajador?.lastname || ""}
-          onChange={(e) =>
-            setTrabajadores({
-              ...selectedTrabajador,
-              lastname: e.target.value,
-            })
-          }
-        />
+        <Col>
+          <label>Correo Electrónico:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={selectedTrabajador?.email || ""}
+            onChange={(e) =>
+              setSelectedTrabajador({
+                ...selectedTrabajador,
+                email: e.target.value,
+              })
+            }
+          />
+        </Col>
+        <Col>
+          <label>Usuario:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={selectedTrabajador?.userWorker || ""}
+            onChange={(e) =>
+              setSelectedTrabajador({
+                ...selectedTrabajador,
+                userWorker: e.target.value,
+              })
+            }
+          />
+        </Col>
       </Row>
       <Row>
-        <label>Correo Electrónico:</label>
-        <Form.Control
-          type="text"
-          placeholder=""
-          value={selectedTrabajador?.email || ""}
-          onChange={(e) =>
-            setTrabajadores({
-              ...selectedTrabajador,
-              email: e.target.value,
-            })
-          }
-        />
-      </Row>
-      <Row>
-        <label>Usuario:</label>
-        <Form.Control
-          type="text"
-          placeholder=""
-          value={selectedTrabajador?.userWorker || ""}
-          onChange={(e) =>
-            setTrabajadores({
-              ...selectedTrabajador,
-              userWorker: e.target.value,
-            })
-          }
-        />
-      </Row>
-      <Row>
-        <label>Saldo:</label>
-        <Form.Control
-          type="text"
-          placeholder=""
-          value={selectedTrabajador?.saldo || ""}
-          onChange={(e) =>
-            setTrabajadores({
-              ...selectedTrabajador,
-              saldo: e.target.value,
-            })
-          }
-        />
-      </Row>
-      <Row>
-        <label>Telefono:</label>
-        <Form.Control
-          type="text"
-          placeholder=""
-          value={selectedTrabajador?.telefono || ""}
-          onChange={(e) =>
-            setTrabajadores({
-              ...selectedTrabajador,
-              telefono: e.target.value,
-            })
-          }
-        />
-      </Row>
-      <Row>
-        <label>Direccion:</label>
-        <Form.Control
-          type="text"
-          placeholder=""
-          value={selectedTrabajador?.direccion || ""}
-          onChange={(e) =>
-            setTrabajadores({
-              ...selectedTrabajador,
-              direccion: e.target.value,
-            })
-          }
-        />
+        <Col>
+          <label>Telefono:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={selectedTrabajador?.telefono || ""}
+            onChange={(e) =>
+              setSelectedTrabajador({
+                ...selectedTrabajador,
+                telefono: e.target.value,
+              })
+            }
+          />
+        </Col>
+        <Col>
+          <label>Direccion:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={selectedTrabajador?.direccion || ""}
+            onChange={(e) =>
+              setSelectedTrabajador({
+                ...selectedTrabajador,
+                direccion: e.target.value,
+              })
+            }
+          />
+        </Col>
       </Row>
 
       <Row>
-  <label>División:</label>
-  <Form.Control
-    as="select"
-    value={selectedTrabajador?.idDivision || ""}
-    onChange={(e) =>
-      setSelectedTrabajador({
-        ...selectedTrabajador,
-        idDivision: e.target.value,
-      })
-    }
-  >
-    {divisiones.map((division) => (
-      <option key={division.id} value={division.id}>
-        {division.name}
-      </option>
-    ))}
-  </Form.Control>
-</Row>
+        <Col>
+          <label>División Actual:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={selectedTrabajador?.division?.name || ""}
+            disabled
+          />
+        </Col>
+        <Col>
+          <label>Seleccionar Nueva División:</label>
+          <Form.Control
+            as="select"
+            value={selectedTrabajador?.idDivision || ""}
+            onChange={(e) => {
+              setSelectedTrabajador({
+                ...selectedTrabajador,
+                idDivision: e.target.value,
+              });
+              // Actualizar el saldo de la división seleccionada
+              setSelectedDivisionSaldo(divisionMap[e.target.value]);
+            }}
+          >
+            <option value="">Selecciona una nueva división</option>
+            {divisiones.map((division) => (
+              <option key={division.id} value={division.id}>
+                {division.name}
+              </option>
+            ))}
+          </Form.Control>
+        </Col>
+      </Row>
 
       <Row>
-        <label>Estatus:</label>
-        <Form.Control
-          as="select"
-          value={selectedTrabajador?.status ? "Activo" : "Inactivo"}
-          onChange={(e) =>
-            setSelectedTrabajador({
-              ...selectedTrabajador,
-              status: e.target.value === "Activo",
-            })
-          }
-        >
-          <option>Activo</option>
-          <option>Inactivo</option>
-        </Form.Control>
+
+      <Col>
+          <label>Saldo disponible de la división:</label>
+          <p>{selectedDivisionSaldo}</p>
+        </Col>
+        <Col>
+          <label>Saldo asignado o nuevo saldo:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={selectedTrabajador?.saldo || ""}
+            onChange={(e) =>
+              setSelectedTrabajador({
+                ...selectedTrabajador,
+                saldo: e.target.value,
+              })
+            }
+          />
+        </Col>
+       
+      </Row>
+
+      <Row>
+        <Col>
+          <label>Estatus:</label>
+          <Form.Control
+            as="select"
+            value={selectedTrabajador?.status ? "Activo" : "Inactivo"}
+            onChange={(e) =>
+              setSelectedTrabajador({
+                ...selectedTrabajador,
+                status: e.target.value === "Activo",
+              })
+            }
+          >
+            <option>Activo</option>
+            <option>Inactivo</option>
+          </Form.Control>
+        </Col>
       </Row>
     </Container>
   </Modal.Body>
@@ -562,6 +705,10 @@ const handleEditShow = async (id) => {
     </Button>
   </Modal.Footer>
 </Modal>
+
+
+
+   
 
 
 
@@ -716,4 +863,7 @@ const handleEditShow = async (id) => {
     </>
   );
 };
+
+
+
 export default ConsultaTrabajadores;

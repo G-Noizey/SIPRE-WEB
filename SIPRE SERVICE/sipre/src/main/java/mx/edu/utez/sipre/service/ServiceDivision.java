@@ -70,5 +70,26 @@ public class ServiceDivision {
         repoDivision.deleteById(id);
         return ResponseEntity.ok().body("División eliminada exitosamente");
     }
+
+
+    // METODO PARA RESTAR SALDO A LA DIVISIÓN (NOIZEY)
+    @Transactional(rollbackFor = {Exception.class})
+    public ResponseEntity<String> updateSaldo(Long id, double newSaldo) {
+        Optional<BeanDivision> divisionOptional = repoDivision.findById(id);
+        if (divisionOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        BeanDivision division = divisionOptional.get();
+        division.setSaldo(newSaldo);
+        repoDivision.save(division);
+
+        return ResponseEntity.ok("Saldo de la división actualizado exitosamente");
+    }
+
+
+
+
+
 }
 

@@ -20,30 +20,72 @@ public class ControllerWorker {
     private final ServiceWorker serviceWorker;
     private final RepoWorker repoWorker;
 
+
+    @CrossOrigin(origins = {"*"})
     @GetMapping("/")
     public ResponseEntity<?> getAllWorkers() {
         return ResponseEntity.ok().body(serviceWorker.getAllWorkers());
     }
 
+    @CrossOrigin(origins = {"*"})
     @GetMapping("/{id}")
     public ResponseEntity<?> getWorkerById(@PathVariable("id") Long id) {
         return ResponseEntity.ok().body(serviceWorker.getWorkerById(id));
     }
 
+    @CrossOrigin(origins = {"*"})
     @PostMapping("/")
     public ResponseEntity<?> save(@RequestBody DtoWorker dtoWorker) {
         return ResponseEntity.ok(serviceWorker.save(dtoWorker));
     }
 
-
+    @CrossOrigin(origins = {"*"})
     @PutMapping("/")
     public ResponseEntity<String> update(@RequestBody DtoWorker dtoWorker) {
         ResponseEntity<String> responseEntity = serviceWorker.update(dtoWorker);
         return ResponseEntity.status(responseEntity.getStatusCode()).body(responseEntity.getBody());
     }
 
+
+    @CrossOrigin(origins = {"*"})
     @DeleteMapping("/{id}")
     public ResponseEntity<String> delete(@PathVariable("id") Long id) {
         return serviceWorker.deleteWorker(id);
     }
+
+
+    @CrossOrigin(origins = {"*"})
+    @PutMapping("/{idTrabajador}/division/{idNuevaDivision}")
+    public ResponseEntity<String> updateDivision(@PathVariable Long idTrabajador, @PathVariable Long idNuevaDivision) {
+        return serviceWorker.updateDivision(idTrabajador, idNuevaDivision);
+    }
+
+    @CrossOrigin(origins = {"*"})
+    @PutMapping("/{id}/division")
+    public ResponseEntity<String> updateWorkerDivision(@PathVariable("id") Long idTrabajador, @RequestParam("idNuevaDivision") Long idNuevaDivision) {
+        ResponseEntity<String> responseEntity = serviceWorker.updateWorkerDivision(idTrabajador, idNuevaDivision);
+        return ResponseEntity.status(responseEntity.getStatusCode()).body(responseEntity.getBody());
+    }
+
+
+
+    //METODO PARA VALIDAR CORREOS SIMILARES (NOIZEY)
+    @GetMapping("/email/{email}")
+    public ResponseEntity<Boolean> checkEmailExists(@PathVariable String email) {
+        boolean exists = repoWorker.existsByEmail(email);
+        return ResponseEntity.ok(exists);
+    }
+
+
+    //METODO PARA VALIDAR USERNAMES SIMILARES (NOIZEY)
+    @GetMapping("/userWorker/{userWorker}")
+    public ResponseEntity<Boolean> checkUserWorkerExists(@PathVariable String userWorker) {
+        boolean exists = repoWorker.existsByUserWorker(userWorker);
+        return ResponseEntity.ok(exists);
+    }
+
+
+
+
+
 }

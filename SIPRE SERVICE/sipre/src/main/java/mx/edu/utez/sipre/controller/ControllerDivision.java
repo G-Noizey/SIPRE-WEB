@@ -46,4 +46,14 @@ public class ControllerDivision{
         return serviceDivision.deleteDivision(id);
     }
 
+
+
+    //ENDPOINT PARA RESTAR SALDO DE LA DIVISIÓN (NOIZEY)
+    // Configuración CORS para el endpoint de actualización de saldo
+    @CrossOrigin(origins = {"*"})
+    @PutMapping("/{id}/saldo")
+    public ResponseEntity<String> updateDivisionSaldo(@PathVariable Long id, @RequestParam double newSaldo) {
+        return serviceDivision.updateSaldo(id, newSaldo);
+    }
+
 }
