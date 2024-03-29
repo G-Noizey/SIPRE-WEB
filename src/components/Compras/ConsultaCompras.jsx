@@ -17,6 +17,13 @@ const ConsultaCompras = () => {
   const [selectedStatus, setSelectedStatus] = useState("");
   const [updatedStatus, setUpdatedStatus] = useState("");
 
+
+  const [reintegroSaldo, setReintegroSaldo] = useState("");
+
+
+  const [tablaHabilitada, setTablaHabilitada] = useState(true);
+
+
   useEffect(() => {
     const fetchDivisiones = async () => {
       try {
@@ -88,49 +95,97 @@ const ConsultaCompras = () => {
               variant="success"
               size="sm"
               onClick={() => handleViewMoreShow(row.original)}
+              disabled={row.original.status === "Completado" || row.original.status === "Rechazado"}
             >
               <AiFillEdit />
             </Button>
           </>
         ),
       },
+      
     ],
     []
   );
 
+
   const handleUpdateBuy = async (buyData) => {
-    try {
-      // Construir el objeto con los datos actualizados
-      const updatedBuy = {
-        ...buyData, // Mantener los datos existentes de la compra
-        status: selectedStatus, // Actualizar el estado con el valor seleccionado
-      };
-
-      // Realizar la solicitud de actualización utilizando Axios
-      await axios.put(`http://localhost:8080/buys/`, updatedBuy);
-
-      // Mostrar una alerta de éxito si la actualización se realiza con éxito
-      await Swal.fire({
-        icon: "success",
-        title: "Compra actualizada",
-        text: "La compra se ha actualizado correctamente.",
-        confirmButtonColor: "#2D7541",
-        didClose: () => {
-          // Recargar la página para reflejar los cambios
-          window.location.reload();
-        },
-      });
-    } catch (error) {
-      // Manejar errores mostrando una alerta de error
-      console.error("Error al actualizar la compra:", error);
-      await Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Ocurrió un error al actualizar la compra.",
-        confirmButtonColor: "#2D7541",
-      });
+    if (!buyData.beanWorker || !buyData.beanWorker.id) {
+        console.error("El ID del trabajador es indefinido o nulo.");
+        return;
     }
-  };
+
+    if (selectedStatus !== 'Completado' && selectedStatus !== 'Rechazado') {
+        // Mostrar una alerta de SweetAlert
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'El estado debe ser "Completado" o "Rechazado" para guardar los cambios.',
+            confirmButtonColor: '#2D7541',
+        });
+        return;
+    }
+
+    try {
+        // Construir el objeto con los datos actualizados de la compra
+        const updatedBuy = {
+            ...buyData,
+            status: selectedStatus,
+        };
+
+        // Realizar la solicitud de actualización de la compra utilizando Axios
+        await axios.put(`http://localhost:8080/buys/`, updatedBuy);
+
+        // Realizar el reintegro de saldo al trabajador
+        await handleReintegroSaldo(buyData.beanWorker.id, parseFloat(reintegroSaldo));
+
+        // Deshabilitar la tabla
+        setTablaHabilitada(false);
+
+        // Mostrar una alerta de éxito si la actualización se realiza con éxito
+        await Swal.fire({
+            icon: 'success',
+            title: 'Compra actualizada',
+            text: 'La compra se ha actualizado correctamente.',
+            confirmButtonColor: '#2D7541',
+            didClose: () => {
+                // Recargar la página para reflejar los cambios
+                window.location.reload();
+            },
+        });
+    } catch (error) {
+        // Manejar errores mostrando una alerta de error
+        console.error("Error al actualizar la compra:", error);
+        await Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al actualizar la compra.',
+            confirmButtonColor: '#2D7541',
+        });
+    }
+};
+
+
+const handleReintegroSaldo = async (workerId, amount) => {
+    try {
+        // Realizar el reintegro al trabajador utilizando Axios
+        await axios.put(`http://localhost:8080/worker/${workerId}/reintegro`, null, {
+            params: {
+                cantidadReintegro: amount,
+            },
+        });
+    } catch (error) {
+        console.error("Error al realizar el reintegro de saldo:", error);
+        throw error; // Propagar el error para que sea manejado por el bloque catch externo
+    }
+};
+
+  
+
+
+
+
+
+
 
   const {
     getTableProps,
@@ -219,7 +274,12 @@ const ImagenClickeable = () => {
   const handleAmpliacionClose = () => setShowAmpliacion(false);
   const handleAmpliacionShow = () => setShowAmpliacion(true);
 
+
+
+
   //VISTA
+
+
   return (
     <>
       <div className="container-fluid p-3 my-3">
@@ -289,17 +349,18 @@ const ImagenClickeable = () => {
                   </select>
                 </Row>
 
-                <Row>
+<Row>
   <label>Reintegrar saldo:</label>
   <input
     type="number"
-  // Para bloquear la edición del input
+    value={reintegroSaldo}
+    onChange={(e) => setReintegroSaldo(e.target.value)}
     style={{
       borderRadius: '5px',
       padding: '5px',
       border: '1px solid #ced4da',
-      backgroundColor: '#f5f5f5', 
-      outline: 'none', 
+      backgroundColor: '#f5f5f5',
+      outline: 'none',
       marginLeft: '10px',
     }}
   />
@@ -386,6 +447,8 @@ const ImagenClickeable = () => {
             </table>
           </div>
 
+
+
           {pageOptions.length > 1 && (
             <div className="col-12 p-3 mt-3 d-flex justify-content-end">
               <Button
@@ -422,4 +485,6 @@ const ImagenClickeable = () => {
       </>
     );
   }
+
+  
 export default ConsultaCompras;

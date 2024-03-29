@@ -59,6 +59,7 @@ const ConsultaTrabajadores = () => {
 
 
 
+  
   useEffect(() => {
     const fetchTrabajadores = async () => {
       try {
@@ -283,6 +284,14 @@ const ConsultaTrabajadores = () => {
 
 const handleEditSave = async () => {
   try {
+    const selectedDivisionId = parseInt(selectedTrabajador.idDivision);
+    const selectedDivisionSaldo = divisionMap[selectedDivisionId];
+
+    // Validar que el saldo asignado no exceda el saldo disponible
+    if (parseFloat(selectedTrabajador.saldo) > selectedDivisionSaldo) {
+      throw new Error("El saldo asignado no puede exceder el saldo disponible en la división.");
+    }
+
     const updatedTrabajador = {
       id: editTrabajadorId,
       name: selectedTrabajador.name,
@@ -301,7 +310,7 @@ const handleEditSave = async () => {
     const trabajadorActual = trabajadores.find(t => t.id === editTrabajadorId);
 
     // Actualizar el trabajador en la base de datos
-    await axios.put(`http://localhost:8080/worker/`, updatedTrabajador);
+    await axios.put(`http://localhost:8080/worker/${editTrabajadorId}`, updatedTrabajador);
 
     // Cambiar la división del trabajador
     await axios.put(`http://localhost:8080/worker/${editTrabajadorId}/division`, null, { params: { idNuevaDivision: selectedTrabajador.idDivision } });
@@ -331,7 +340,7 @@ const handleEditSave = async () => {
     await Swal.fire({
       icon: "error",
       title: "Error",
-      text: "Ocurrió un error al modificar al trabajador. Por favor, inténtalo de nuevo.",
+      text: error.message || "Ocurrió un error al modificar al trabajador. Por favor, inténtalo de nuevo.",
       confirmButtonColor: "#2D7541",
     });
   }
@@ -370,6 +379,7 @@ const handleEditSave = async () => {
 
 
        {/* Modal para agregar trabajador */}
+
 <Modal show={show} onHide={handleClose}>
   <Modal.Header closeButton>
     <Modal.Title>Añadir Trabajador</Modal.Title>
@@ -524,7 +534,6 @@ const handleEditSave = async () => {
 
 {/* Modal para modificar trabajador */}
 
-
 <Modal show={showEdit} onHide={handleEditClose}>
   <Modal.Header closeButton>
     <Modal.Title>Modificar Trabajador</Modal.Title>
@@ -638,12 +647,12 @@ const handleEditSave = async () => {
             as="select"
             value={selectedTrabajador?.idDivision || ""}
             onChange={(e) => {
+              const idNuevaDivision = e.target.value;
               setSelectedTrabajador({
                 ...selectedTrabajador,
-                idDivision: e.target.value,
+                idDivision: idNuevaDivision,
               });
-              // Actualizar el saldo de la división seleccionada
-              setSelectedDivisionSaldo(divisionMap[e.target.value]);
+              setSelectedDivisionSaldo(divisionMap[idNuevaDivision]);
             }}
           >
             <option value="">Selecciona una nueva división</option>
@@ -657,9 +666,8 @@ const handleEditSave = async () => {
       </Row>
 
       <Row>
-
-      <Col>
-          <label>Saldo disponible de la división:</label>
+        <Col>
+          <label>Saldo disponible de la nueva división:</label>
           <p>{selectedDivisionSaldo}</p>
         </Col>
         <Col>
@@ -676,7 +684,6 @@ const handleEditSave = async () => {
             }
           />
         </Col>
-       
       </Row>
 
       <Row>
@@ -705,10 +712,6 @@ const handleEditSave = async () => {
     </Button>
   </Modal.Footer>
 </Modal>
-
-
-
-   
 
 
 

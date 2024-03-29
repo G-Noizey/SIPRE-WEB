@@ -40,7 +40,7 @@ public class ControllerWorker {
     }
 
     @CrossOrigin(origins = {"*"})
-    @PutMapping("/")
+    @PutMapping("/{id}")
     public ResponseEntity<String> update(@RequestBody DtoWorker dtoWorker) {
         ResponseEntity<String> responseEntity = serviceWorker.update(dtoWorker);
         return ResponseEntity.status(responseEntity.getStatusCode()).body(responseEntity.getBody());
@@ -82,6 +82,13 @@ public class ControllerWorker {
     public ResponseEntity<Boolean> checkUserWorkerExists(@PathVariable String userWorker) {
         boolean exists = repoWorker.existsByUserWorker(userWorker);
         return ResponseEntity.ok(exists);
+    }
+
+
+    @CrossOrigin(origins = {"*"})
+    @PutMapping("/{id}/reintegro")
+    public ResponseEntity<String> reintegroSaldo(@PathVariable("id") Long idTrabajador, @RequestParam Double cantidadReintegro) {
+        return serviceWorker.reintegroSaldo(idTrabajador, cantidadReintegro);
     }
 
 
