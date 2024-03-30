@@ -204,7 +204,7 @@ public class ServiceWorker {
         return ResponseEntity.ok().body("División del trabajador actualizada exitosamente a: " + nuevaDivision.getName());
     }
 
-    // METODO DE REINTEGRO DE SALDO (BUYS)
+    // METODO DE REINTEGRO DE SALDO (BUYS NOIZEY)
     @Transactional(rollbackFor = {Exception.class})
     public ResponseEntity<String> reintegroSaldo(Long idTrabajador, Double cantidadReintegro) {
         // Obtener el trabajador existente de la base de datos

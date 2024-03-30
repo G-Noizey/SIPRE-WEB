@@ -24,6 +24,10 @@ const ConsultaCompras = () => {
   const [tablaHabilitada, setTablaHabilitada] = useState(true);
 
 
+  const [imagenUrl, setImagenUrl] = useState("");
+
+
+
   useEffect(() => {
     const fetchDivisiones = async () => {
       try {
@@ -179,13 +183,9 @@ const handleReintegroSaldo = async (workerId, amount) => {
     }
 };
 
+
+
   
-
-
-
-
-
-
 
   const {
     getTableProps,
@@ -220,10 +220,39 @@ const handleReintegroSaldo = async (workerId, amount) => {
     setViewMoreData(null);
   };
 
-  const handleViewMoreShow = (data) => {
+
+
+
+
+  const handleViewMoreShow = async (data) => {
     setViewMoreData(data);
     setShowViewMore(true);
+  
+    try {
+      // Obtener la imagen del servidor
+      const response = await axios.get(`http://localhost:8080/buys/${data.id}/comprobante`, {
+        responseType: "arraybuffer",
+      });
+  
+      // Crear una URL a partir de los bytes de la imagen
+      const blob = new Blob([response.data], { type: "image/jpeg" });
+      const imageUrl = URL.createObjectURL(blob);
+      setImagenUrl(imageUrl);
+    } catch (error) {
+      console.error("Error al obtener la imagen:", error);
+    }
   };
+  
+
+
+
+
+
+
+
+
+
+
 
   const getCellStyle = (status) => {
     switch (status) {
@@ -256,17 +285,19 @@ const handleReintegroSaldo = async (workerId, amount) => {
     }
   };
 
-  // Componente funcional que contiene la imagen ampliada
-const AmpliacionImagen = ({ show, handleClose }) => {
-  return (
-    <Modal show={show} onHide={handleClose} size="l"> {/* Tamaño 'xl' para un modal extra grande */}
-      <Modal.Body>
-        <img src="../../../public/assets/images/comprobante.jpg" alt="Imagen Ampliada" style={{ width: '100%', height: 'auto' }} />
-      </Modal.Body>
-    </Modal>
-  );
-};
 
+  
+
+  const AmpliacionImagen = ({ show, handleClose }) => {
+    return (
+      <Modal show={show} onHide={handleClose} size="xl">
+        <Modal.Body>
+          <img src={imagenUrl} alt="Imagen Ampliada" style={{ width: "100%", height: "auto" }} />
+        </Modal.Body>
+      </Modal>
+    );
+  };
+  
 // Componente que renderiza la imagen principal y maneja su clic para mostrarla ampliada
 const ImagenClickeable = () => {
   const [showAmpliacion, setShowAmpliacion] = useState(false);
@@ -300,6 +331,8 @@ const ImagenClickeable = () => {
                 </Row>
                 
                 <Row>
+
+
         <label>Comprobante:</label>
         {/* Espacio para la imagen del comprobante clickeable */}
         <div
@@ -317,13 +350,17 @@ const ImagenClickeable = () => {
           onClick={handleAmpliacionShow} // Al hacer clic en la imagen, muestra la imagen ampliada
         >
           {/* Imagen sin consumo */}
-          <img
-            src="../../../public/assets/images/comprobante.jpg"
-            alt="Imagen General"
-            style={{ maxWidth: '100%', maxHeight: '100%' }}
-          />
+          <img src={imagenUrl} alt="Imagen Ampliada" style={{ maxWidth: "100%", maxHeight: "100%" }} />
         </div>
+
+
       </Row>
+
+
+
+
+
+
       {/* Componente de la imagen ampliada */}
       <AmpliacionImagen show={showAmpliacion} handleClose={handleAmpliacionClose} />
    

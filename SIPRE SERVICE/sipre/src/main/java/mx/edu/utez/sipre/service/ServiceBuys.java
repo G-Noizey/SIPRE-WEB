@@ -121,5 +121,34 @@ public class ServiceBuys {
 
 
 
+    public ResponseEntity<byte[]> getComprobante(Long id) {
+        try {
+            // Obtener la compra basada en el ID proporcionado
+            Optional<BeanBuys> optionalBuys = repoBuys.findById(id);
+            if (optionalBuys.isPresent()) {
+                // Obtener los bytes del comprobante de la compra
+                BeanBuys compra = optionalBuys.get();
+                byte[] comprobante = compra.getComprobante();
+
+                // Devolver los bytes del comprobante como respuesta
+                return ResponseEntity.ok().body(comprobante);
+            } else {
+                // La compra no fue encontrada, devolver un error 404
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+        } catch (Exception e) {
+            // Manejar cualquier excepción y devolver un error 500
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
+
+
+
+
+
+
+
 
 }
