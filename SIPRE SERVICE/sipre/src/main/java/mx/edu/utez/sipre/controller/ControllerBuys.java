@@ -83,6 +83,10 @@ public class ControllerBuys {
     }
 
 
+        @GetMapping("/generatePDF/{divisionId}")
+    public ResponseEntity<byte[]> generatePDF(@PathVariable Long divisionId) {
+        return serviceBuys.generatePDF(divisionId);
+    }
 
 
     @PostMapping("/")

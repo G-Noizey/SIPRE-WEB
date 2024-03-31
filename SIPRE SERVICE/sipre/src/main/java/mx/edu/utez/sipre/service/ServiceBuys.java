@@ -1,25 +1,43 @@
 package mx.edu.utez.sipre.service;
 
+import com.itextpdf.io.image.ImageDataFactory;
+import com.itextpdf.kernel.colors.DeviceRgb;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.geom.PageSize;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+
+
+import com.itextpdf.layout.borders.Border;
+import com.itextpdf.layout.borders.SolidBorder;
+import com.itextpdf.layout.element.*;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
+import com.itextpdf.layout.properties.VerticalAlignment;
 import lombok.RequiredArgsConstructor;
 import mx.edu.utez.sipre.model.bean.BeanBuys;
 import mx.edu.utez.sipre.model.bean.BeanDivision;
 import mx.edu.utez.sipre.model.bean.BeanWorker;
 import mx.edu.utez.sipre.model.dto.DtoBuys;
-import mx.edu.utez.sipre.model.dto.DtoWorker;
 import mx.edu.utez.sipre.model.repositories.RepoBuys;
 import mx.edu.utez.sipre.model.repositories.RepoDivision;
 import mx.edu.utez.sipre.model.repositories.RepoWorker;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
+
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 @Service
 @Transactional
@@ -144,8 +162,98 @@ public class ServiceBuys {
 
 
 
+    
+
+    //GENERADOR DE PDF (ESTADO DE CUENTA DIVISION)  (NOIZEY)
+    public ResponseEntity<byte[]> generatePDF(@PathVariable Long divisionId) {
+        try {
+            // Obtener el nombre de la división
+            String divisionName = repoDivision.findById(divisionId).get().getName();
+
+            // Obtener las compras completadas de la división especificada
+            List<BeanBuys> completedBuys = repoBuys.findByBeanDivisionIdAndStatus(divisionId, "Completado");
+
+            // Crear el documento PDF con los detalles de las compras completadas
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            PdfWriter writer = new PdfWriter(outputStream);
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf, PageSize.A4);
 
 
+
+// Agregar campo para agregar imagen a la izquierda del título
+            Table imageTable = new Table(new float[]{1, 4});
+            imageTable.setWidth(UnitValue.createPercentValue(100));
+
+            Cell imageCell = new Cell();
+            Image img = new Image(ImageDataFactory.create("classpath:logo.png"));
+            img.setWidth(UnitValue.createPercentValue(10));
+
+            Paragraph paragraph = new Paragraph();
+            paragraph.add(img);
+
+            PdfFont font = PdfFontFactory.createFont();
+            Text text = new Text("Estado de cuenta de la división: " + divisionName)
+                    .setFont(font)
+                    .setFontSize(20)
+                    .setFontColor(new DeviceRgb(45, 117, 65))
+                    .setTextAlignment(TextAlignment.CENTER);
+
+            paragraph.add(text);
+
+            imageCell.add(paragraph);
+            imageCell.setBorder(Border.NO_BORDER); // Eliminar bordes de la celda
+            imageCell.setVerticalAlignment(VerticalAlignment.TOP); // Alinear el texto en la parte superior de la celda
+            imageTable.addCell(imageCell);
+
+            document.add(imageTable);
+
+
+
+
+            // Agregar espacio en blanco
+            document.add(new Paragraph(" "));
+
+            // Agregar tabla con los detalles de las compras
+            Table table = new Table(new float[]{4, 2, 2});
+            table.setWidth(UnitValue.createPercentValue(100));
+
+            // Establecer color de borde de las celdas
+            table.setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1)); // Grosor de borde 1pt
+
+            // Encabezados de la tabla
+            Cell cell = new Cell().add(new Paragraph("Descripción").setBold());
+            cell.setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1)); // Establecer color de borde
+            table.addCell(cell);
+
+            cell = new Cell().add(new Paragraph("Monto").setBold());
+            cell.setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1)); // Establecer color de borde
+            table.addCell(cell);
+
+            cell = new Cell().add(new Paragraph("Fecha de movimiento").setBold());
+            cell.setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1)); // Establecer color de borde
+            table.addCell(cell);
+
+            // Datos de las compras
+            for (BeanBuys buy : completedBuys) {
+                table.addCell(new Cell().add(new Paragraph(buy.getDescripcion())).setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1))); // Establecer color de borde
+                table.addCell(new Cell().add(new Paragraph(String.valueOf(buy.getMonto()))).setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1))); // Establecer color de borde
+                table.addCell(new Cell().add(new Paragraph(String.valueOf(buy.getFecha()))).setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1))); // Establecer color de borde
+            }
+
+            document.add(table);
+
+            document.close();
+
+            // Devolver el PDF como un array de bytes en la respuesta
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(outputStream.toByteArray());
+        } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
 
 

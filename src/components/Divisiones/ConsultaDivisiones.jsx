@@ -2,17 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { Button, Container, Modal, Row, Form } from 'react-bootstrap';
 import { AiFillEdit } from "react-icons/ai";
 import { HiArrowSmRight, HiArrowSmLeft } from "react-icons/hi";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaFileAlt } from "react-icons/fa"; // Importar el icono FaFileAlt
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useTable, usePagination, useGlobalFilter } from 'react-table';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
 
+
+
 const ConsultaDivisiones = () => {
   const [divisiones, setDivisiones] = useState([]);
   const [editDivisionId, setEditDivisionId] = useState(null); // Estado para almacenar el ID de la división en edición
   const [selectedDivision, setSelectedDivision] = useState(null); // Estado para almacenar la división seleccionada para edición
+
+
+
+
+  //--------------------------------------------------------------------------------------------
+  // FUNCION OBTENER DIVISIONES
 
   useEffect(() => {
     const fetchDivisiones = async () => {
@@ -26,6 +34,41 @@ const ConsultaDivisiones = () => {
 
     fetchDivisiones();
   }, []);
+
+  //------------------------------------------------------------------------------------------
+
+
+
+//--------------------------------------------------------------------------------------------
+
+  //FUNCION GENERAR PDF
+
+
+  const generatePDF = async (id) => {
+    try {
+      const response = await axios.get(`http://localhost:8080/buys/generatePDF/${id}`, {
+        responseType: 'blob', // Indicar que la respuesta es un archivo binario
+      });
+
+      // Crear un objeto URL para el blob
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      // Crear un enlace <a> y simular un clic para descargar el archivo
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'compras.pdf');
+      document.body.appendChild(link);
+      link.click();
+
+      // Liberar el objeto URL
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error al generar el PDF:', error);
+    }
+  };
+
+
+//--------------------------------------------------------------------------------------------
 
 
 
@@ -68,17 +111,25 @@ const ConsultaDivisiones = () => {
           
         ),
       },
+
       {
         Header: 'Estado de cuenta',
-        Cell: () => (
-          <Button variant="success" size="sm">
-            Generar estado de cuenta
+        Cell: ({ row }) => (
+          <Button variant="success" size="sm" onClick={() => generatePDF(row.original.id)}>
+            <FaFileAlt /> {/* Icono de PDF */}
           </Button>
         ),
       },
+      
     ],
     []
   );
+
+
+
+
+
+  
 
   const {
     getTableProps,
