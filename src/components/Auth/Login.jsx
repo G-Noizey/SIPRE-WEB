@@ -42,6 +42,7 @@ const Login = () => {
           localStorage.setItem("apellido", responseData.apellido);
           localStorage.setItem("userAdmin", responseData.userAdmin);
           localStorage.setItem("email", responseData.email);
+          localStorage.setItem("id", responseData.id);
 
           // Si la cuenta no está inactiva, muestra el mensaje de inicio de sesión exitoso
           Swal.fire({
