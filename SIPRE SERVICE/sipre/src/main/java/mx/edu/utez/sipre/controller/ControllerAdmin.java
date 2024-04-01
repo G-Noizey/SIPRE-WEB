@@ -50,5 +50,16 @@ public class ControllerAdmin {
         return serviceAdmin.authenticate(admin);
     }
 
+    //Cambios adan
+    @PutMapping("/{id}/update-username")
+    public ResponseEntity<?> updateUsername(@PathVariable("id") Long id, @RequestParam String newUsername) {
+        return serviceAdmin.updateUsername(id, newUsername);
+    }
+
+    @PutMapping("/{id}/update-password")
+    public ResponseEntity<?> updatePassword(@PathVariable("id") Long id, @RequestParam String newPassword) {
+        return serviceAdmin.updatePassword(id, newPassword);
+    }
+
 }
 

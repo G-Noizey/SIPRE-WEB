@@ -72,6 +72,7 @@
         //REEMPLAZAR ESTE METODO
 
         //FUNCIONES IMPLEMENTADAS PARA LA AUTENTICACIÓN LOGIN (NOIZEY)
+        //MÉTODOS DE CUENTA DESACTIVADA Y AGREGACIÓN DE DATOS PARA EL LOCAL STORAGE
         @Transactional(readOnly = true)
         public ResponseEntity<Map<String, String>> authenticate(BeanAdmin admin) {
             Optional<BeanAdmin> adminOptional = repoAdmin.findByUserAdmin(admin.getUserAdmin());
@@ -91,6 +92,7 @@
 
             Map<String, String> responseData = new HashMap<>();
 
+            responseData.put("id", storedAdmin.getId().toString());
             responseData.put("token", generateToken());
             responseData.put("name", storedAdmin.getName());
             responseData.put("role", String.valueOf(storedAdmin.getRole()));
@@ -118,6 +120,36 @@
             return token.toString();
         }
 
+    //cambios adan
+        @Transactional(rollbackFor = {SQLException.class})
+        public ResponseEntity<BeanAdmin> updateUsername(Long id, String newUsername) {
+            Optional<BeanAdmin> existingAdminOptional = repoAdmin.findById(id);
+
+            if (existingAdminOptional.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            BeanAdmin existingAdmin = existingAdminOptional.get();
+            existingAdmin.setUserAdmin(newUsername); // Actualiza el nombre de usuario
+
+            BeanAdmin updatedAdmin = repoAdmin.save(existingAdmin);
+            return ResponseEntity.ok().body(updatedAdmin);
+        }
+
+        @Transactional(rollbackFor = {SQLException.class})
+        public ResponseEntity<BeanAdmin> updatePassword(Long id, String newPassword) {
+            Optional<BeanAdmin> existingAdminOptional = repoAdmin.findById(id);
+
+            if (existingAdminOptional.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            BeanAdmin existingAdmin = existingAdminOptional.get();
+            existingAdmin.setPassword(newPassword); // Actualiza la contraseña
+
+            BeanAdmin updatedAdmin = repoAdmin.save(existingAdmin);
+            return ResponseEntity.ok().body(updatedAdmin);
+        }
 
 
     }
