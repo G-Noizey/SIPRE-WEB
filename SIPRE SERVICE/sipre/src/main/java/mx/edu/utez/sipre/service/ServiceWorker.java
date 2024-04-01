@@ -120,17 +120,37 @@ public class ServiceWorker {
     }
 
     @Transactional(rollbackFor = {Exception.class})
-    public ResponseEntity<String> deleteWorker(Long id) {
-        if (!repoWorker.existsById(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Trabajador con id " + id + " no encontrado");
+    public ResponseEntity<String> updateInfoPersonal(DtoWorker dtoWorker) {
+        // Obtener el trabajador existente de la base de datos
+        Optional<BeanWorker> existingWorkerOptional = repoWorker.findById(dtoWorker.getId());
+        if (existingWorkerOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró ningún trabajador con ID: " + dtoWorker.getId());
         }
-        repoWorker.deleteById(id);
-        return ResponseEntity.ok().body("Trabajador eliminado exitosamente");
 
+        // Obtener la división basada en el ID proporcionado en el DTO
+        BeanDivision division = BeanDivision.builder().id((long) dtoWorker.getIdDivision()).build();
 
+        // Actualizar los campos del trabajador existente con los valores del DTO
+        BeanWorker existingWorker = existingWorkerOptional.get();
+        existingWorker.setName(dtoWorker.getName());
+        existingWorker.setLastname(dtoWorker.getLastname());
+        existingWorker.setEmail(dtoWorker.getEmail());
+        existingWorker.setPassword(dtoWorker.getPassword());
+        existingWorker.setStatus(dtoWorker.getStatus());
+        existingWorker.setUserWorker(dtoWorker.getUserWorker());
+        existingWorker.setSaldo(dtoWorker.getSaldo());
+        existingWorker.setTelefono(dtoWorker.getTelefono());
+        existingWorker.setDireccion(dtoWorker.getDireccion());
 
+        // Guardar el trabajador actualizado en la base de datos
+        repoWorker.save(existingWorker);
 
+        // Devolver una respuesta con el estado OK y un mensaje indicando que el trabajador se actualizó exitosamente
+        return ResponseEntity.ok().body("Trabajador actualizado exitosamente");
     }
+
+
+
 
     // METODO PARA CAMBIAR LA DIVISION DEL TRABAJADOR (NOIZEY)
     @Transactional(rollbackFor = {Exception.class})
@@ -224,6 +244,7 @@ public class ServiceWorker {
         // Devolver una respuesta con el estado OK y un mensaje indicando que se realizó el reintegro exitosamente
         return ResponseEntity.ok().body("Reintegro de saldo realizado exitosamente. Nuevo saldo: " + nuevoSaldo);
     }
+
 
 
 

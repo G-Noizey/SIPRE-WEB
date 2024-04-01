@@ -47,11 +47,6 @@ public class ControllerWorker {
     }
 
 
-    @CrossOrigin(origins = {"*"})
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable("id") Long id) {
-        return serviceWorker.deleteWorker(id);
-    }
 
 
     @CrossOrigin(origins = {"*"})
@@ -67,6 +62,12 @@ public class ControllerWorker {
         return ResponseEntity.status(responseEntity.getStatusCode()).body(responseEntity.getBody());
     }
 
+    @CrossOrigin(origins = {"*"})
+    @PutMapping("/{id}/infoPersonal")
+    public ResponseEntity<String> updateInfoPersonal(@RequestBody DtoWorker dtoWorker) {
+        ResponseEntity<String> responseEntity = serviceWorker.updateInfoPersonal(dtoWorker);
+        return ResponseEntity.status(responseEntity.getStatusCode()).body(responseEntity.getBody());
+    }
 
 
     //METODO PARA VALIDAR CORREOS SIMILARES (NOIZEY)

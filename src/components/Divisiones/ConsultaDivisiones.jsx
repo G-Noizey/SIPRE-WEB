@@ -9,18 +9,10 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 
 
-
-
 const ConsultaDivisiones = () => {
   const [divisiones, setDivisiones] = useState([]);
   const [editDivisionId, setEditDivisionId] = useState(null); // Estado para almacenar el ID de la división en edición
   const [selectedDivision, setSelectedDivision] = useState(null); // Estado para almacenar la división seleccionada para edición
-
-
-
-
-  //--------------------------------------------------------------------------------------------
-  // FUNCION OBTENER DIVISIONES
 
   useEffect(() => {
     const fetchDivisiones = async () => {
@@ -35,15 +27,15 @@ const ConsultaDivisiones = () => {
     fetchDivisiones();
   }, []);
 
-  //------------------------------------------------------------------------------------------
 
 
-
-//--------------------------------------------------------------------------------------------
-
-  //FUNCION GENERAR PDF
-
-
+  const [formData, setFormData] = useState({
+    name: '',
+    siglas: '',
+    saldo: '',
+    status: true, // Establecer el status por defecto como true
+  });
+  
   const generatePDF = async (id) => {
     try {
       const response = await axios.get(`http://localhost:8080/buys/generatePDF/${id}`, {
@@ -67,18 +59,6 @@ const ConsultaDivisiones = () => {
     }
   };
 
-
-//--------------------------------------------------------------------------------------------
-
-
-
-  const [formData, setFormData] = useState({
-    name: '',
-    siglas: '',
-    saldo: '',
-    status: true, // Establecer el status por defecto como true
-  });
-  
 
   const columns = React.useMemo(
     () => [
@@ -111,7 +91,6 @@ const ConsultaDivisiones = () => {
           
         ),
       },
-
       {
         Header: 'Estado de cuenta',
         Cell: ({ row }) => (
@@ -120,16 +99,9 @@ const ConsultaDivisiones = () => {
           </Button>
         ),
       },
-      
     ],
     []
   );
-
-
-
-
-
-  
 
   const {
     getTableProps,
@@ -214,25 +186,58 @@ const ConsultaDivisiones = () => {
   };
 
   
-  
-  
-  
-  
 
   const handleEditSave = async () => {
     try {
-      await axios.put(`http://localhost:8080/division/${editDivisionId}`, selectedDivision);
-      // Mostrar alerta de éxito
-      await Swal.fire({
-        icon: 'success',
-        title: 'División modificada',
-        text: 'La división se modificó correctamente.',
-        confirmButtonColor: '#2D7541',
-        didClose: () => {
-          // Recargar la página después de cerrar la alerta
-          window.location.reload();
+      if (selectedDivision.status === 'Inactivo') {
+        const confirmResult = await Swal.fire({
+          icon: 'warning',
+          title: 'Confirmar inactivación de la división',
+          text: 'Al inactivar esta división, se eliminarán los saldos de los trabajadores que pertenecen a ella y la división se inactivará. ¿Estás seguro de continuar?',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, continuar',
+          cancelButtonText: 'Cancelar',
+          confirmButtonColor: '#2D7541',
+        });
+  
+        if (confirmResult.isConfirmed) {
+          // Procede con la actualización de la división
+          await axios.put(`http://localhost:8080/division/${editDivisionId}/status`, null, {
+            params: {
+              status: selectedDivision.status === 'Activo' // Convierte el estado a booleano
+            }
+          });
+          // Mostrar alerta de éxito
+          await Swal.fire({
+            icon: 'success',
+            title: 'División modificada',
+            text: 'La división se modificó correctamente.',
+            confirmButtonColor: '#2D7541',
+            didClose: () => {
+              // Recargar la página después de cerrar la alerta
+              window.location.reload();
+            }
+          });
         }
-      });
+      } else {
+        // Procede con la actualización de la división
+        await axios.put(`http://localhost:8080/division/${editDivisionId}/status`, null, {
+          params: {
+            status: selectedDivision.status === 'Activo' // Convierte el estado a booleano
+          }
+        });
+        // Mostrar alerta de éxito
+        await Swal.fire({
+          icon: 'success',
+          title: 'División modificada',
+          text: 'La división se modificó correctamente.',
+          confirmButtonColor: '#2D7541',
+          didClose: () => {
+            // Recargar la página después de cerrar la alerta
+            window.location.reload();
+          }
+        });
+      }
     } catch (error) {
       console.error('Error al modificar la división:', error);
       // Mostrar alerta de error
@@ -245,7 +250,8 @@ const ConsultaDivisiones = () => {
     }
     setShowEdit(false);
   };
-
+  
+  
   return (
     <>
       <div className='container-fluid p-3 my-3'>

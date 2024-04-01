@@ -209,8 +209,6 @@ public class ServiceBuys {
             document.add(imageTable);
 
 
-
-
             // Agregar espacio en blanco
             document.add(new Paragraph(" "));
 

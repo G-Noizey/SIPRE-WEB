@@ -20,7 +20,18 @@ const ConsultaTrabajadores = () => {
   const [selectedDivisionSaldo, setSelectedDivisionSaldo] = useState("");
 
   const [saldoDisponible, setSaldoDisponible] = useState(0);
+  const [showSecondModal, setShowSecondModal] = useState(false);
 
+
+  // Función para abrir el segundo modal
+const handleOpenSecondModal = () => {
+  setShowSecondModal(true);
+};
+
+// Función para cerrar el segundo modal
+const handleCloseSecondModal = () => {
+  setShowSecondModal(false);
+};
   
 
 
@@ -29,7 +40,7 @@ const ConsultaTrabajadores = () => {
       const response = await axios.put(`http://localhost:8080/division/${idDivision}/saldo`, null, { params: { newSaldo: nuevoSaldo } });
       return response.data;
     } catch (error) {
-      console.error("Error al actualizar saldo de la división:", error);
+      console.error("Error al actualizar el saldo de la división:", error);
       throw error;
     }
   };
@@ -284,14 +295,6 @@ const ConsultaTrabajadores = () => {
 
 const handleEditSave = async () => {
   try {
-    const selectedDivisionId = parseInt(selectedTrabajador.idDivision);
-    const selectedDivisionSaldo = divisionMap[selectedDivisionId];
-
-    // Validar que el saldo asignado no exceda el saldo disponible
-    if (parseFloat(selectedTrabajador.saldo) > selectedDivisionSaldo) {
-      throw new Error("El saldo asignado no puede exceder el saldo disponible en la división.");
-    }
-
     const updatedTrabajador = {
       id: editTrabajadorId,
       name: selectedTrabajador.name,
@@ -301,28 +304,12 @@ const handleEditSave = async () => {
       saldo: selectedTrabajador.saldo,
       telefono: selectedTrabajador.telefono,
       direccion: selectedTrabajador.direccion,
-      idDivision: parseInt(selectedTrabajador.idDivision),
       status: selectedTrabajador.status,
       password: selectedTrabajador.password,
     };
 
-    // Obtener el trabajador actual
-    const trabajadorActual = trabajadores.find(t => t.id === editTrabajadorId);
-
-    // Actualizar el trabajador en la base de datos
-    await axios.put(`http://localhost:8080/worker/${editTrabajadorId}`, updatedTrabajador);
-
-    // Cambiar la división del trabajador
-    await axios.put(`http://localhost:8080/worker/${editTrabajadorId}/division`, null, { params: { idNuevaDivision: selectedTrabajador.idDivision } });
-
-    // Devolver el saldo a la división anterior
-    const saldoDevuelto = parseFloat(trabajadorActual.saldo);
-    const nuevoSaldoDivisionActual = divisionMap[trabajadorActual.division.id] + saldoDevuelto;
-    await axios.put(`http://localhost:8080/division/${trabajadorActual.division.id}/saldo`, null, { params: { newSaldo: nuevoSaldoDivisionActual } });
-
-    // Restar el saldo de la nueva división
-    const nuevoSaldoDivisionNueva = divisionMap[selectedTrabajador.idDivision] - parseFloat(selectedTrabajador.saldo);
-    await axios.put(`http://localhost:8080/division/${selectedTrabajador.idDivision}/saldo`, null, { params: { newSaldo: nuevoSaldoDivisionNueva } });
+    // Actualizar el trabajador en la base de datos utilizando el nuevo endpoint
+    await axios.put(`http://localhost:8080/worker/${editTrabajadorId}/infoPersonal`, updatedTrabajador);
 
     // Mostrar mensaje de éxito
     await Swal.fire({
@@ -347,6 +334,71 @@ const handleEditSave = async () => {
   setShowEdit(false);
 };
 
+const handleUpdateData = async () => {
+  try {
+    // Obtener el trabajador actual
+    const trabajadorActual = trabajadores.find(t => t.id === editTrabajadorId);
+
+    // Validar que el saldo asignado no exceda el saldo disponible
+    if (parseFloat(nuevaDivision.saldo) > selectedDivisionSaldo) {
+      throw new Error("El saldo asignado no puede exceder el saldo disponible en la división.");
+    }
+
+    // Crear objeto con los datos actualizados del trabajador
+    const updatedTrabajador = {
+      ...selectedTrabajador,
+      idDivision: parseInt(nuevaDivision.idDivision),
+      saldo: nuevaDivision.saldo,
+    };
+
+    // Actualizar el trabajador en la base de datos
+    await axios.put(`http://localhost:8080/worker/${editTrabajadorId}`, updatedTrabajador);
+
+    // Cambiar la división del trabajador
+    await axios.put(`http://localhost:8080/worker/${editTrabajadorId}/division`, null, { params: { idNuevaDivision: updatedTrabajador.idDivision } });
+
+    // Devolver el saldo a la división anterior
+    const saldoDevuelto = parseFloat(trabajadorActual.saldo);
+    const nuevoSaldoDivisionActual = divisionMap[trabajadorActual.division.id] + saldoDevuelto;
+    await axios.put(`http://localhost:8080/division/${trabajadorActual.division.id}/saldo`, null, { params: { newSaldo: nuevoSaldoDivisionActual } });
+
+    // Restar el saldo de la nueva división
+    const nuevoSaldoDivisionNueva = divisionMap[updatedTrabajador.idDivision] - parseFloat(updatedTrabajador.saldo);
+    await axios.put(`http://localhost:8080/division/${updatedTrabajador.idDivision}/saldo`, null, { params: { newSaldo: nuevoSaldoDivisionNueva } });
+
+    // Mostrar mensaje de éxito
+    await Swal.fire({
+      icon: "success",
+      title: "Trabajador actualizado",
+      text: "El trabajador se actualizó correctamente.",
+      confirmButtonColor: "#2D7541",
+      didClose: () => {
+        // Aquí puedes agregar lógica adicional después de la actualización exitosa
+        // Por ejemplo, recargar la página o realizar alguna otra acción necesaria
+      window.location.reload();
+      },
+    });
+
+    // Cerrar el segundo modal después de la actualización
+    handleCloseSecondModal();
+  } catch (error) {
+    console.error("Error al actualizar el trabajador:", error);
+    // Mostrar alerta de error
+    await Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: error.message || "Ocurrió un error al actualizar al trabajador. Por favor, inténtalo de nuevo.",
+      confirmButtonColor: "#2D7541",
+    });
+  }
+};
+
+
+
+const [nuevaDivision, setNuevaDivision] = useState({
+  idDivision: '',
+  saldo: '',
+});
 
 
 
@@ -380,7 +432,7 @@ const handleEditSave = async () => {
 
        {/* Modal para agregar trabajador */}
 
-<Modal show={show} onHide={handleClose}>
+       <Modal show={show} onHide={handleClose}>
   <Modal.Header closeButton>
     <Modal.Title>Añadir Trabajador</Modal.Title>
   </Modal.Header>
@@ -499,13 +551,19 @@ const handleEditSave = async () => {
         </Col>
       </Row>
 
-
-      <Row>
-
-      <Col>
-          <label>Saldo disponible de la división:</label>
-          <p>{selectedDivisionSaldo}</p>
+      
+      <Row style={{ marginBottom: '20px', borderBottom: '1px solid #ccc' }}>
+        <Col style={{ marginTop: '20px'}}>
+          <b>Asignación de saldo:</b>
         </Col>
+      </Row>
+      <Row>
+        <Col>
+          <label>Saldo disponible de la división:</label>
+          <p>${selectedDivisionSaldo}</p>
+        </Col>
+      </Row>
+      <Row>
         <Col>
           <label>Saldo a asignar:</label>
           <Form.Control
@@ -517,10 +575,7 @@ const handleEditSave = async () => {
             }
           />
         </Col>
-     
       </Row>
-
-      
     </Container>
   </Modal.Body>
   <Modal.Footer>
@@ -529,6 +584,7 @@ const handleEditSave = async () => {
     </Button>
   </Modal.Footer>
 </Modal>
+
 
 
 
@@ -542,7 +598,7 @@ const handleEditSave = async () => {
     <Container>
       <Row>
         <Col>
-          <label>Nombre de el administrador:</label>
+          <label>Nombre:</label>
           <Form.Control
             type="text"
             placeholder=""
@@ -630,62 +686,6 @@ const handleEditSave = async () => {
           />
         </Col>
       </Row>
-
-      <Row>
-        <Col>
-          <label>División Actual:</label>
-          <Form.Control
-            type="text"
-            placeholder=""
-            value={selectedTrabajador?.division?.name || ""}
-            disabled
-          />
-        </Col>
-        <Col>
-          <label>Seleccionar Nueva División:</label>
-          <Form.Control
-            as="select"
-            value={selectedTrabajador?.idDivision || ""}
-            onChange={(e) => {
-              const idNuevaDivision = e.target.value;
-              setSelectedTrabajador({
-                ...selectedTrabajador,
-                idDivision: idNuevaDivision,
-              });
-              setSelectedDivisionSaldo(divisionMap[idNuevaDivision]);
-            }}
-          >
-            <option value="">Selecciona una nueva división</option>
-            {divisiones.map((division) => (
-              <option key={division.id} value={division.id}>
-                {division.name}
-              </option>
-            ))}
-          </Form.Control>
-        </Col>
-      </Row>
-
-      <Row>
-        <Col>
-          <label>Saldo disponible de la nueva división:</label>
-          <p>{selectedDivisionSaldo}</p>
-        </Col>
-        <Col>
-          <label>Saldo asignado o nuevo saldo:</label>
-          <Form.Control
-            type="text"
-            placeholder=""
-            value={selectedTrabajador?.saldo || ""}
-            onChange={(e) =>
-              setSelectedTrabajador({
-                ...selectedTrabajador,
-                saldo: e.target.value,
-              })
-            }
-          />
-        </Col>
-      </Row>
-
       <Row>
         <Col>
           <label>Estatus:</label>
@@ -704,6 +704,11 @@ const handleEditSave = async () => {
           </Form.Control>
         </Col>
       </Row>
+
+      <Button variant="success" onClick={handleOpenSecondModal} style={{ marginTop: '20px' }}>
+  Cambiar de División al Trabajador
+</Button>
+
     </Container>
   </Modal.Body>
   <Modal.Footer>
@@ -713,51 +718,135 @@ const handleEditSave = async () => {
   </Modal.Footer>
 </Modal>
 
+ {/* Segundo modal */}
+{/* Segundo modal */}
+<Modal show={showSecondModal} onHide={handleCloseSecondModal}
+>
+      <Modal.Header closeButton>
+        <Modal.Title>Cambiar de División</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        {/* Contenido del segundo modal */}
+        <Row style={{ marginTop: '50px' }}> 
+          <Col>
+            <label>División actual:</label>
+            <Form.Control
+              type="text"
+              placeholder=""
+              value={selectedTrabajador?.division?.name || ""}
+              disabled
+            />
+          </Col>
+          <Col>
+            <label>Seleccionar nueva división:</label>
+            <Form.Control
+              as="select"
+              value={nuevaDivision.idDivision}
+              onChange={(e) => {
+                const idNuevaDivision = e.target.value;
+                setNuevaDivision({
+                  ...nuevaDivision,
+                  idDivision: idNuevaDivision,
+                });
+                setSelectedDivisionSaldo(divisionMap[idNuevaDivision]);
+              }}
+            >
+              <option value="">Escoge una nueva división</option>
+              {divisiones.map((division) => (
+                <option key={division.id} value={division.id}>
+                  {division.name}
+                </option>
+              ))}
+            </Form.Control>
+          </Col>
+        </Row>
 
+        <Row style={{ marginTop: '50px' }}>
+          <Col>
+            <label>Saldo disponible de la nueva división:</label>
+            <p>${selectedDivisionSaldo}</p>
+          </Col>
+          <Col>
+            <label>Asignar nuevo saldo:</label>
+            <Form.Control
+              type="text"
+              placeholder=""
+              value={nuevaDivision.saldo}
+              onChange={(e) =>
+                setNuevaDivision({
+                  ...nuevaDivision,
+                  saldo: e.target.value,
+                })
+              }
+            />
+          </Col>
+          
+        </Row>
+        <Row style={{ marginTop: '100px' }}></Row>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="success" onClick={handleUpdateData}>
+          Guardar cambios
+        </Button>
+        <Button variant="secondary" onClick={handleCloseSecondModal}>
+          Cerrar
+        </Button>
+      </Modal.Footer>
+    </Modal>
 
 {/* Modal para ver mas informacion del trabajador */}
-
-   <Modal show={showViewMore} onHide={handleViewMoreClose}>
+<Modal show={showViewMore} onHide={handleViewMoreClose}>
   <Modal.Header closeButton>
     <Modal.Title>Datos completos del trabajador</Modal.Title>
   </Modal.Header>
   <Modal.Body>
     <Container>
       <Row>
-        <label>Nombre:</label>
-        <p>{viewMoreData?.name}</p>
+        <Col>
+          <label>Nombre:</label>
+          <p>{viewMoreData?.name}</p>
+        </Col>
+        <Col>
+          <label>Apellido:</label>
+          <p>{viewMoreData?.lastname}</p>
+        </Col>
       </Row>
       <Row>
-        <label>Apellido:</label>
-        <p>{viewMoreData?.lastname}</p>
+        <Col>
+          <label>Email:</label>
+          <p>{viewMoreData?.email}</p>
+        </Col>
+        <Col>
+          <label>Usuario:</label>
+          <p>{viewMoreData?.userWorker}</p>
+        </Col>
       </Row>
       <Row>
-        <label>Email:</label>
-        <p>{viewMoreData?.email}</p>
+      <Col>
+          <label>Dirección:</label>
+          <p>{viewMoreData?.direccion}</p>
+        </Col>
+        <Col>
+          <label>Teléfono:</label>
+          <p>{viewMoreData?.telefono}</p>
+        </Col>
       </Row>
       <Row>
-        <label>Usuario:</label>
-        <p>{viewMoreData?.userWorker}</p>
+        
+        <Col>
+          <label>Saldo trabajador:</label>
+          <p>${viewMoreData?.saldo}</p>
+        </Col>
+        <Col>
+          <label>División:</label>
+          <p>{viewMoreData?.division?.name}</p>
+        </Col>
       </Row>
       <Row>
-        <label>Saldo:</label>
-        <p>{viewMoreData?.saldo}</p>
-      </Row>
-      <Row>
-        <label>Teléfono:</label>
-        <p>{viewMoreData?.telefono}</p>
-      </Row>
-      <Row>
-        <label>Dirección:</label>
-        <p>{viewMoreData?.direccion}</p>
-      </Row>
-      <Row>
-        <label>División:</label>
-        <p>{viewMoreData?.division?.name}</p>
-      </Row>
-      <Row>
-        <label>Estatus:</label>
-        <p>{viewMoreData?.status ? 'Activo' : 'Inactivo'}</p>
+        <Col>
+          <label>Estatus:</label>
+          <p>{viewMoreData?.status ? 'Activo' : 'Inactivo'}</p>
+        </Col>
       </Row>
     </Container>
   </Modal.Body>
@@ -767,6 +856,7 @@ const handleEditSave = async () => {
     </Button>
   </Modal.Footer>
 </Modal>
+
 
            
 

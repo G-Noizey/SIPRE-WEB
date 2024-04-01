@@ -1,9 +1,11 @@
 package mx.edu.utez.sipre.model.repositories;
 
+import mx.edu.utez.sipre.model.bean.BeanDivision;
 import mx.edu.utez.sipre.model.bean.BeanWorker;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -15,4 +17,6 @@ public interface RepoWorker extends JpaRepository<BeanWorker, Long> {
     Optional<BeanWorker> findByUserWorker(String userWorker);
 
     Optional<BeanWorker> findByEmail(String email);
+
+    List<BeanWorker> findByDivision(BeanDivision division);
 }

@@ -69,6 +69,8 @@
         }
 
 
+        //REEMPLAZAR ESTE METODO
+
         //FUNCIONES IMPLEMENTADAS PARA LA AUTENTICACIÓN LOGIN (NOIZEY)
         @Transactional(readOnly = true)
         public ResponseEntity<Map<String, String>> authenticate(BeanAdmin admin) {
@@ -94,6 +96,7 @@
             responseData.put("role", String.valueOf(storedAdmin.getRole()));
             responseData.put("email", storedAdmin.getEmail());
             responseData.put("apellido", storedAdmin.getApellido());
+            responseData.put("userAdmin", storedAdmin.getUserAdmin());
 
             return ResponseEntity.ok(responseData);
         }
