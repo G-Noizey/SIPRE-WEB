@@ -189,68 +189,30 @@ const ConsultaDivisiones = () => {
 
   const handleEditSave = async () => {
     try {
-      if (selectedDivision.status === 'Inactivo') {
-        const confirmResult = await Swal.fire({
-          icon: 'warning',
-          title: 'Confirmar inactivación de la división',
-          text: 'Al inactivar esta división, se eliminarán los saldos de los trabajadores que pertenecen a ella y la división se inactivará. ¿Estás seguro de continuar?',
-          showCancelButton: true,
-          confirmButtonText: 'Sí, continuar',
-          cancelButtonText: 'Cancelar',
-          confirmButtonColor: '#2D7541',
-        });
-  
-        if (confirmResult.isConfirmed) {
-          // Procede con la actualización de la división
-          await axios.put(`http://localhost:8080/division/${editDivisionId}/status`, null, {
-            params: {
-              status: selectedDivision.status === 'Activo' // Convierte el estado a booleano
-            }
-          });
-          // Mostrar alerta de éxito
-          await Swal.fire({
-            icon: 'success',
-            title: 'División modificada',
-            text: 'La división se modificó correctamente.',
-            confirmButtonColor: '#2D7541',
-            didClose: () => {
-              // Recargar la página después de cerrar la alerta
-              window.location.reload();
-            }
-          });
-        }
-      } else {
-        // Procede con la actualización de la división
-        await axios.put(`http://localhost:8080/division/${editDivisionId}/status`, null, {
-          params: {
-            status: selectedDivision.status === 'Activo' // Convierte el estado a booleano
-          }
-        });
+        const response = await axios.put(`http://localhost:8080/division/${editDivisionId}`, selectedDivision);
         // Mostrar alerta de éxito
         await Swal.fire({
-          icon: 'success',
-          title: 'División modificada',
-          text: 'La división se modificó correctamente.',
-          confirmButtonColor: '#2D7541',
-          didClose: () => {
-            // Recargar la página después de cerrar la alerta
-            window.location.reload();
-          }
+            icon: 'success',
+            title: 'División modificada',
+            text: response.data,
+            confirmButtonColor: '#2D7541',
+            didClose: () => {
+                // Recargar la página después de cerrar la alerta
+                window.location.reload();
+            }
         });
-      }
     } catch (error) {
-      console.error('Error al modificar la división:', error);
-      // Mostrar alerta de error
-      await Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Ocurrió un error al modificar la división. Por favor, inténtalo de nuevo.',
-        confirmButtonColor: '#2D7541',
-      });
+        console.error('Error al modificar la división:', error);
+        // Mostrar alerta de error
+        await Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al modificar la división. Por favor, inténtalo de nuevo.',
+            confirmButtonColor: '#2D7541',
+        });
     }
     setShowEdit(false);
-  };
-  
+};
   
   return (
     <>
@@ -302,58 +264,57 @@ const ConsultaDivisiones = () => {
             </Modal.Footer>
           </Modal>
 
-
-           {/* Modal de edición */}
-      <Modal show={showEdit} onHide={handleEditClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Modificar división</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Container>
+{/* Modal de edición */}
+<Modal show={showEdit} onHide={handleEditClose}>
+    <Modal.Header closeButton>
+        <Modal.Title>Modificar división</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+        <Container>
             <Row>
-              <label>Nombre de la división:</label>
-              <Form.Control
-                type="text"
-                placeholder=""
-                value={selectedDivision?.name || ''}
-                onChange={(e) => setSelectedDivision({ ...selectedDivision, name: e.target.value })}
-              />
+                <label>Nombre de la división:</label>
+                <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={selectedDivision?.name || ''}
+                    onChange={(e) => setSelectedDivision({ ...selectedDivision, name: e.target.value })}
+                />
             </Row>
             <Row>
-              <label>Siglas:</label>
-              <Form.Control
-                type="text"
-                placeholder=""
-                value={selectedDivision?.siglas || ''}
-                onChange={(e) => setSelectedDivision({ ...selectedDivision, siglas: e.target.value })}
-              />
+                <label>Siglas:</label>
+                <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={selectedDivision?.siglas || ''}
+                    onChange={(e) => setSelectedDivision({ ...selectedDivision, siglas: e.target.value })}
+                />
             </Row>
             <Row>
-              <label>Monto:</label>
-              <Form.Control
-                type="text"
-                placeholder=""
-                value={selectedDivision?.saldo || ''}
-                onChange={(e) => setSelectedDivision({ ...selectedDivision, saldo: e.target.value })}
-              />
+                <label>Monto:</label>
+                <Form.Control
+                    type="text"
+                    placeholder=""
+                    value={selectedDivision?.saldo || ''}
+                    onChange={(e) => setSelectedDivision({ ...selectedDivision, saldo: e.target.value })}
+                />
             </Row>
             <Row>
-              <label>Estatus:</label>
-              <Form.Control
-                as="select"
-                value={selectedDivision?.status ? 'Activo' : 'Inactivo'}
-                onChange={(e) => setSelectedDivision({ ...selectedDivision, status: e.target.value === 'Activo' })}
-              >
-                <option>Activo</option>
-                <option>Inactivo</option>
-              </Form.Control>
+                <label>Estatus:</label>
+                <Form.Control
+                    as="select"
+                    value={selectedDivision?.status ? 'Activo' : 'Inactivo'}
+                    onChange={(e) => setSelectedDivision({ ...selectedDivision, status: e.target.value === 'Activo' })}
+                >
+                    <option>Activo</option>
+                    <option>Inactivo</option>
+                </Form.Control>
             </Row>
-          </Container>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="success" onClick={handleEditSave}>Guardar cambios</Button>
-        </Modal.Footer>
-      </Modal>
+        </Container>
+    </Modal.Body>
+    <Modal.Footer>
+        <Button variant="success" onClick={handleEditSave}>Guardar cambios</Button>
+    </Modal.Footer>
+</Modal>
 
           <div className='col-6 d-flex justify-content-end'>
             <input

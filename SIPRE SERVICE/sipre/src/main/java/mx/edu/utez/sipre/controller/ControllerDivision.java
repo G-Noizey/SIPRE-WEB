@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/division")
@@ -41,12 +42,7 @@ public class ControllerDivision{
         return ResponseEntity.ok(serviceDivision.save(division));
     }
 
-    @CrossOrigin(origins = {"*"})
-    @PutMapping("/{id}")
 
-    public ResponseEntity<?> update(@RequestBody BeanDivision division){
-        return ResponseEntity.ok(serviceDivision.update(division));
-    }
     @DeleteMapping("/{id}")
 
     public ResponseEntity<String> delete(@PathVariable("id")Long id){
@@ -66,22 +62,18 @@ public class ControllerDivision{
 
     //ENDPOINT PARA ACTUALIZAR EL ESTADO DE LA DIVISIÓN GENOCIDIO
 
-    @CrossOrigin(origins = {"*"})
     @PutMapping("/{id}/status")
     public ResponseEntity<String> updateDivisionStatus(@PathVariable("id") Long divisionId, @RequestParam("status") boolean newStatus) {
         try {
-            // Verificar si el ID de la división es válido
-            if (!divisionRepository.existsById(divisionId)) {
+            Optional<BeanDivision> divisionOptional = divisionRepository.findById(divisionId);
+            if (!divisionOptional.isPresent()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró ninguna división con ID: " + divisionId);
             }
 
-            // Obtener la división existente de la base de datos
-            BeanDivision division = divisionRepository.findById(divisionId).orElse(null);
-            if (division == null) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al obtener la división con ID: " + divisionId);
-            }
+            BeanDivision division = divisionOptional.get();
+            boolean currentStatus = division.getStatus();
 
-            if (division.getStatus() == newStatus) {
+            if (currentStatus == newStatus) {
                 return ResponseEntity.badRequest().body("El estado de la división no ha cambiado.");
             }
 
@@ -110,4 +102,38 @@ public class ControllerDivision{
         }
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateDivision(@PathVariable Long id, @RequestBody BeanDivision updatedDivision) {
+        try {
+            Optional<BeanDivision> divisionOptional = divisionRepository.findById(id);
+            if (!divisionOptional.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró ninguna división con ID: " + id);
+            }
+
+            BeanDivision division = divisionOptional.get();
+            division.setName(updatedDivision.getName());
+            division.setSiglas(updatedDivision.getSiglas());
+            division.setSaldo(updatedDivision.getSaldo());
+            division.setStatus(updatedDivision.getStatus());
+
+            if (!updatedDivision.getStatus()) {
+                // Si el nuevo estado es "Inactivo", establecer los saldos de los trabajadores a cero
+                List<BeanWorker> workers = workerRepository.findByDivision(division);
+                for (BeanWorker worker : workers) {
+                    worker.setSaldo(0); // Eliminar el saldo del trabajador
+                }
+                // Actualizar el saldo de la división (suma de los saldos de los trabajadores)
+                double totalSaldo = workers.stream().mapToDouble(BeanWorker::getSaldo).sum();
+                division.setSaldo(totalSaldo);
+            }
+
+            divisionRepository.save(division);
+
+            return ResponseEntity.ok("División actualizada exitosamente.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar la división: " + e.getMessage());
+        }
+    }
 }
+
+
