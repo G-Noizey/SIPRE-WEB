@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,7 @@ public class ServiceDivision {
         return ResponseEntity.ok().body(divisionOptional.get());
     }
 
+    //ACTUALICE SAVE PARA QUE ACTUALICE EL SALDOTOTAL DE LA DIVISIÓN ADAN
     @Transactional(rollbackFor = {Exception.class})
     public ResponseEntity<String> save(BeanDivision division) {
         if (repoDivision.findByName(division.getName()).isPresent()) {
@@ -48,19 +50,44 @@ public class ServiceDivision {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ya existe una división con estas siglas");
         }
 
+        // Actualizar saldototal con el valor de saldo
+        division.setSaldototal(division.getSaldo());
+
         repoDivision.save(division);
         return ResponseEntity.status(HttpStatus.CREATED).body("División creada exitosamente");
     }
 
-    @Transactional(rollbackFor = {Exception.class})
-    public ResponseEntity<BeanDivision> update(BeanDivision division) {
-        Optional<BeanDivision> existingDivisionOptional = repoDivision.findById(division.getId());
-        if (existingDivisionOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        BeanDivision updatedDivision = repoDivision.save(division);
-        return ResponseEntity.ok().body(updatedDivision);
+//ACTUALICE UPDATES PARA QUE ACTUALICE EL SALDO Y SALDOTOTAL DE LA DIVISIÓN ADAN
+
+
+@Transactional(rollbackFor = {Exception.class})
+public ResponseEntity<BeanDivision> update(BeanDivision division) {
+    Optional<BeanDivision> existingDivisionOptional = repoDivision.findById(division.getId());
+    if (existingDivisionOptional.isEmpty()) {
+        return ResponseEntity.notFound().build();
     }
+
+    BeanDivision existingDivision = existingDivisionOptional.get();
+
+    // Actualizar los campos de la división
+    existingDivision.setName(division.getName());
+    existingDivision.setSiglas(division.getSiglas());
+    existingDivision.setStatus(division.getStatus());
+
+    // Recalcular el saldo total
+    double saldoTotal = division.getSaldo();
+
+    existingDivision.setSaldo(division.getSaldo()); // Actualizar el saldo
+    existingDivision.setSaldototal(saldoTotal); // Actualizar el saldo total
+
+    BeanDivision updatedDivision = repoDivision.save(existingDivision);
+
+    return ResponseEntity.ok().body(updatedDivision);
+}
+
+
+
+
 
     @Transactional(rollbackFor = {Exception.class})
     public ResponseEntity<String> deleteDivision(Long id) {
@@ -86,8 +113,6 @@ public class ServiceDivision {
 
         return ResponseEntity.ok("Saldo de la división actualizado exitosamente");
     }
-
-
 
 
 

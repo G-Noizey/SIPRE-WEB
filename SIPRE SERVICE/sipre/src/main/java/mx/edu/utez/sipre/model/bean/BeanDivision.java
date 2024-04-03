@@ -25,7 +25,8 @@ public class BeanDivision {
     private String siglas;
     @Column(name = "saldo", length = 9, nullable = false)
     private Double saldo;
-
+    @Column(name = "saldototal", length = 9)
+    private Double saldototal;
     @OneToMany(mappedBy = "division")
     @JsonIgnore
     private List<BeanWorker> workers;

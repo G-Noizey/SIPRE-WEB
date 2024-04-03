@@ -138,7 +138,12 @@ const ConsultaDivisiones = () => {
 
   const handleAdd = async () => {
     try {
-      await axios.post('http://localhost:8080/division/', formData);
+      // Enviar el formulario con los datos de formData
+      const response = await axios.post('http://localhost:8080/division/', formData);
+  
+      // Actualizar saldototal con el valor de saldo
+      formData.saldototal = formData.saldo;
+  
       // Mostrar alerta de éxito
       await Swal.fire({
         icon: 'success',
@@ -163,6 +168,8 @@ const ConsultaDivisiones = () => {
     setShow(false);
   };
 
+
+  
   const handleEditClose = () => {
     setShowEdit(false);
     setEditDivisionId(null); // Limpiar el ID de la división en edición
@@ -187,32 +194,39 @@ const ConsultaDivisiones = () => {
 
   
 
-  const handleEditSave = async () => {
-    try {
-        const response = await axios.put(`http://localhost:8080/division/${editDivisionId}`, selectedDivision);
-        // Mostrar alerta de éxito
-        await Swal.fire({
-            icon: 'success',
-            title: 'División modificada',
-            text: response.data,
-            confirmButtonColor: '#2D7541',
-            didClose: () => {
-                // Recargar la página después de cerrar la alerta
-                window.location.reload();
-            }
-        });
-    } catch (error) {
-        console.error('Error al modificar la división:', error);
-        // Mostrar alerta de error
-        await Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Ocurrió un error al modificar la división. Por favor, inténtalo de nuevo.',
-            confirmButtonColor: '#2D7541',
-        });
-    }
-    setShowEdit(false);
+  
+ // Dentro de handleEditSave en ConsultaDivisiones.js
+
+ const handleEditSave = async () => {
+  try {
+      // Enviar el formulario con los datos de selectedDivision
+      const response = await axios.put(`http://localhost:8080/division/${editDivisionId}`, selectedDivision);
+
+      // Mostrar alerta de éxito
+      await Swal.fire({
+          icon: 'success',
+          title: 'División modificada',
+          text: response.data,
+          confirmButtonColor: '#2D7541',
+          didClose: () => {
+              // Recargar la página después de cerrar la alerta
+              window.location.reload();
+          }
+      });
+  } catch (error) {
+      console.error('Error al modificar la división:', error);
+      // Mostrar alerta de error
+      await Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Ocurrió un error al modificar la división. Por favor, inténtalo de nuevo.',
+          confirmButtonColor: '#2D7541',
+      });
+  }
+  setShowEdit(false);
 };
+
+
   
   return (
     <>
@@ -290,9 +304,9 @@ const ConsultaDivisiones = () => {
                 />
             </Row>
             <Row>
-                <label>Monto:</label>
+                
                 <Form.Control
-                    type="text"
+                    type="hidden"
                     placeholder=""
                     value={selectedDivision?.saldo || ''}
                     onChange={(e) => setSelectedDivision({ ...selectedDivision, saldo: e.target.value })}

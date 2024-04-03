@@ -67,10 +67,16 @@ const Dashboard = () => {
   const storedApellido = localStorage.getItem("apellido");
 
   return (
+
+
     <div className="container-fluid">
       <div className="row">
+
+
         {/* Sidebar */}
+        
         <div
+
           className="col-lg-2 sidebar"
           style={{
             backgroundColor: "white",
@@ -80,6 +86,8 @@ const Dashboard = () => {
             boxShadow: "2px 0px 4px rgba(0,0,0,0.1)",
           }}
         >
+
+
           <div className="  container-fluid ">
             <div className="row  ">
               <div className="col-2">

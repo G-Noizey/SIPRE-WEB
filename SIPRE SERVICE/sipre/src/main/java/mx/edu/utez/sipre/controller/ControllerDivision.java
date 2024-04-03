@@ -21,6 +21,15 @@ public class ControllerDivision{
     private final ServiceDivision serviceDivision;
     private final RepoDivision divisionRepository;
     private final RepoWorker workerRepository;
+    private final RepoDivision repoDivision;
+
+    @GetMapping("/saldos")
+    public ResponseEntity<List<BeanDivision>> obtenerSaldosDivisiones() {
+        List<BeanDivision> divisiones = repoDivision.findAll(); // Obtén todas las divisiones desde el repositorio
+        // Puedes ajustar el formato de los datos según sea necesario
+        return ResponseEntity.ok().body(divisiones);
+    }
+
     @CrossOrigin(origins = {"*"})
     @GetMapping("/")
 
@@ -41,6 +50,7 @@ public class ControllerDivision{
     public ResponseEntity<?> save(@RequestBody BeanDivision division){
         return ResponseEntity.ok(serviceDivision.save(division));
     }
+
 
 
     @DeleteMapping("/{id}")
@@ -85,12 +95,15 @@ public class ControllerDivision{
                 // Eliminar los saldos de los trabajadores que pertenecen a esta división
                 List<BeanWorker> workers = workerRepository.findByDivision(division);
                 for (BeanWorker worker : workers) {
-                    worker.setSaldo(0); // Eliminar el saldo del trabajador
+                    worker.setSaldo(0); // Establecer el saldo del trabajador a cero
                 }
 
                 // Actualizar el saldo de la división (suma de los saldos de los trabajadores)
                 double totalSaldo = workers.stream().mapToDouble(BeanWorker::getSaldo).sum();
                 division.setSaldo(totalSaldo);
+
+                // Actualizar el saldo total de la división a cero
+                division.setSaldototal(0.0);
             }
 
             // Guardar los cambios en la base de datos
@@ -101,6 +114,7 @@ public class ControllerDivision{
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar el estado de la división: " + e.getMessage());
         }
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateDivision(@PathVariable Long id, @RequestBody BeanDivision updatedDivision) {
@@ -116,6 +130,9 @@ public class ControllerDivision{
             division.setSaldo(updatedDivision.getSaldo());
             division.setStatus(updatedDivision.getStatus());
 
+            // Actualizar el saldo total
+            division.setSaldototal(updatedDivision.getSaldo());
+
             if (!updatedDivision.getStatus()) {
                 // Si el nuevo estado es "Inactivo", establecer los saldos de los trabajadores a cero
                 List<BeanWorker> workers = workerRepository.findByDivision(division);
@@ -127,13 +144,22 @@ public class ControllerDivision{
                 division.setSaldo(totalSaldo);
             }
 
-            divisionRepository.save(division);
+            // Guardar los cambios en la base de datos
+            BeanDivision savedDivision = divisionRepository.save(division);
+
+            // Validar si el saldo es igual al saldototal y volver a guardar si es necesario
+            if (savedDivision.getSaldo() != savedDivision.getSaldototal()) {
+                savedDivision.setSaldototal(savedDivision.getSaldo());
+                divisionRepository.save(savedDivision);
+            }
 
             return ResponseEntity.ok("División actualizada exitosamente.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar la división: " + e.getMessage());
         }
     }
+
+
 }
 
 
