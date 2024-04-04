@@ -10,6 +10,8 @@ import RecuperarContra from '../components/Auth/RecuperarContra';
 import InfoAdmin from '../components/Admin/InfoAdmin';
 import ReporteCharts from '../components/Charts/ReporteCharts';
 import ConsultaTransacciones from '../components/Transacciones/ConsultaTransacciones';
+import CambiarContra from '../components/Auth/CambiarContra';
+import CambiarContraWorker from '../components/Auth/CambiarContraWorker';
 
 
 const PrivateRoute = ({ element }) => {
@@ -23,6 +25,8 @@ function AppRouter() {
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/recuperar" element={<RecuperarContra />} />
+        <Route path='/cambiar-contra' element={<CambiarContra/>} />
+        <Route path='/cambiar-contra-trabajador' element={<CambiarContraWorker/>}/>
         <Route path="/dashboard" element={<PrivateRoute element={<Dashboard />} />}>
           <Route path="divisiones" element={<PrivateRoute element={<ConsultaDivisiones />} />} />
           <Route path="trabajadores" element={<PrivateRoute element={<ConsultaTrabajadores />} />} />

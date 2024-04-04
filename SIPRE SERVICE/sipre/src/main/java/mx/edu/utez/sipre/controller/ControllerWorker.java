@@ -97,8 +97,10 @@ public class ControllerWorker {
         return serviceWorker.reintegroSaldo(idTrabajador, cantidadReintegro);
     }
 
-
-
-
+    @CrossOrigin(origins = {"*"})
+    @PutMapping("/update-password")
+    public ResponseEntity<?> updateByEmail(@RequestParam String email, @RequestParam String newPassword) {
+        return serviceWorker.updateByEmail(email, newPassword);
+    }
 
 }

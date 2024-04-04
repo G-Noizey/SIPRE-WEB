@@ -151,6 +151,18 @@
             return ResponseEntity.ok().body(updatedAdmin);
         }
 
+        @Transactional(rollbackFor = {SQLException.class})
+        public ResponseEntity<BeanAdmin> updateByEmail(String email, String newPassword) {
+            Optional<BeanAdmin> existingAdminOptional = repoAdmin.findByEmail(email);
+
+            if (existingAdminOptional.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+            BeanAdmin existingAdmin = existingAdminOptional.get();
+            existingAdmin.setPassword(newPassword);
+            BeanAdmin updatedAdmin = repoAdmin.save(existingAdmin);
+            return ResponseEntity.ok().body(updatedAdmin);
+        }
 
     }
 

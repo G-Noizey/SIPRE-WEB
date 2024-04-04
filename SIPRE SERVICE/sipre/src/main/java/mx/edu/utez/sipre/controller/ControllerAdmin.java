@@ -61,5 +61,11 @@ public class ControllerAdmin {
         return serviceAdmin.updatePassword(id, newPassword);
     }
 
+    @CrossOrigin(origins = {"*"})
+    @PutMapping("/update-password")
+    public ResponseEntity<?> updateByEmail(@RequestParam String email, @RequestParam String newPassword) {
+        return serviceAdmin.updateByEmail(email, newPassword);
+    }
+
 }
 

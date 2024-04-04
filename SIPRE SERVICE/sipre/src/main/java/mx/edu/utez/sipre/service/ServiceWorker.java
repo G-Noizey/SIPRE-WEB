@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -265,9 +266,16 @@ public class ServiceWorker {
         return ResponseEntity.ok().body("Reintegro de saldo realizado exitosamente. Nuevo saldo: " + nuevoSaldo);
     }
 
+    @Transactional(rollbackFor = {SQLException.class})
+    public ResponseEntity<BeanWorker> updateByEmail(String email, String newPassword) {
+        Optional<BeanWorker> existingWorkerOptional = repoWorker.findByEmail(email);
 
-
-
-
-
+        if (existingWorkerOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        BeanWorker existingWorker = existingWorkerOptional.get();
+        existingWorker.setPassword(newPassword);
+        BeanWorker updateWorker = repoWorker.save(existingWorker);
+        return ResponseEntity.ok().body(updateWorker);
+    }
 }

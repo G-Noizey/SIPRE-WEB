@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Recuperación de Contraseña</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      margin: 20px auto;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .header {
+      background-color: #2D7541;
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .content {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      color: #fff;
+      background-color: #007bff;
+      border-radius: 5px;
+      text-decoration: none
+    }
+
+    .footer {
+      text-align: center;
+      padding: 20px;
+      background-color: #f8f8f8;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>Cambio de Contraseña</h1>
+  </div>
+  <div class="content">
+    <p>Para restablecer tu contraseña, por favor sigue este enlace:</p>
+    <a th:href="@{${resetLink}}" class="button">Cambiar Contraseña</a>
+  </div>
+  <div class="footer">
+    <p>Si no has solicitado este cambio, por favor ignora este mensaje.</p>
+  </div>
+</div>
+</body>
+</html>
