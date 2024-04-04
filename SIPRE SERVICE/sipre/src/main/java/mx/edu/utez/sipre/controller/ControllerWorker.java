@@ -22,6 +22,11 @@ public class ControllerWorker {
 
 
     @CrossOrigin(origins = {"*"})
+    @GetMapping("/saldosPorDivision/{idDivision}")
+    public ResponseEntity<?> getSaldosTrabajadoresPorDivision(@PathVariable("idDivision") Long idDivision) {
+        return serviceWorker.getSaldosTrabajadoresPorDivision(idDivision);
+    }
+    @CrossOrigin(origins = {"*"})
     @GetMapping("/")
     public ResponseEntity<?> getAllWorkers() {
         return ResponseEntity.ok().body(serviceWorker.getAllWorkers());

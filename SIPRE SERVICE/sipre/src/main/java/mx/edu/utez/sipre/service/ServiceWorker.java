@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -20,6 +21,25 @@ import java.util.Optional;
 public class ServiceWorker {
     private final RepoWorker repoWorker;
     private final RepoDivision repoDivision;
+
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<DtoWorker>> getSaldosTrabajadoresPorDivision(Long idDivision) {
+        try {
+            List<BeanWorker> workers = repoWorker.findByDivisionId(idDivision);
+            List<DtoWorker> workerDtos = workers.stream()
+                    .map(worker -> DtoWorker.builder()
+                            .id(worker.getId())
+                            .name(worker.getName())
+                            .saldo(worker.getSaldo())
+                            .build())
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok().body(workerDtos);
+        } catch (Exception e) {
+            System.err.println("Error al obtener los saldos de los trabajadores por división:");
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
     @Transactional(readOnly = true)
     public ResponseEntity<List<BeanWorker>> getAllWorkers() {

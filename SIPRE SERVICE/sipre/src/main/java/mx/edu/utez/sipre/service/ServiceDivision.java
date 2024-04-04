@@ -24,6 +24,8 @@ import java.util.Optional;
 public class ServiceDivision {
     private final RepoDivision repoDivision;
 
+
+
     @Transactional(readOnly = true)
     public ResponseEntity<List<BeanDivision>> getAllDivisions() {
         List<BeanDivision> divisions = repoDivision.findAll();

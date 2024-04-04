@@ -1,8 +1,6 @@
-//CAMBIOS ADAN
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
-
 
 const BotonConContenido = ({ contenidoInicial, contenidoHover, contenidoBoton, onClick }) => {
   const [hover, setHover] = useState(false);
@@ -51,7 +49,7 @@ const ContenidoBoton1 = ({ onClick }) => {
             data.addRow([division.name, division.saldototal]);
           });
           const options = {
-            title: 'Saldos por División',
+            title: 'Saldos Totales por División',
             width: 900,
             height: 420
           };
@@ -66,9 +64,6 @@ const ContenidoBoton1 = ({ onClick }) => {
     fetchData();
   }, []);
   
-
-
-
   return (
     <div style={{ textAlign: 'center' }}>
       <h1 style={{ color: '#2D7541', marginBottom: '20px', marginRight:'70px' }}>Saldos por Divisiones</h1>
@@ -80,15 +75,89 @@ const ContenidoBoton1 = ({ onClick }) => {
   );
 };
 
-
 //ADAN DICE: en este componente se muestra el contenido del boton 2 (la pantalla que se abre)
 const ContenidoBoton2 = ({ onClick }) => {
+  const [divisiones, setDivisiones] = useState([]);
+  const [selectedDivision, setSelectedDivision] = useState('');
+  const [saldosTrabajadores, setSaldosTrabajadores] = useState([]);
+
+  useEffect(() => {
+    const fetchDivisiones = async () => {
+      try {
+        const response = await axios.get('http://localhost:8080/division/');
+        setDivisiones(response.data.body);
+      } catch (error) {
+        console.error('Error al obtener las divisiones:', error);
+      }
+    };
+
+    fetchDivisiones();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (selectedDivision) {
+          const response = await axios.get(`http://localhost:8080/worker/saldosPorDivision/${selectedDivision}`);
+          const trabajadores = response.data;
+          
+          const data = new google.visualization.DataTable();
+          data.addColumn('string', 'Trabajador');
+          data.addColumn('number', 'Saldo');
+          
+          trabajadores.forEach((trabajador, index) => {
+            data.addRow([`${trabajador.name}`, trabajador.saldo]);
+          });
+
+          const options = {
+            title: 'Saldos por Trabajador',
+            width: 900,
+            height: 420
+          };
+          const chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+          chart.draw(data, options);
+        }
+      } catch (error) {
+        console.error('Error al obtener los saldos de los trabajadores por división:', error);
+      }
+    };
+
+    fetchData();
+  }, [selectedDivision]);
+
+  const handleDivisionChange = async (event) => {
+    const selectedDivisionId = event.target.value;
+    setSelectedDivision(selectedDivisionId);
+  };
+
   return (
     <div style={{ textAlign: 'center' }}>
-       <h1 style={{ color: '#2D7541', marginBottom: '20px', marginRight:'20px' }}>Saldos por  Trabajador</h1>
+      <h1 style={{ color: '#2D7541', marginBottom: '20px', marginRight: '20px' }}>Saldos por Trabajador</h1>
       <div style={{ border: '2px solid #2D7541', borderRadius: '10px', padding: '20px', marginBottom: '20px' }}>
-       
-        <div id="chart_div" style={{ width: '100%', height: '400px', display: 'flex', justifyContent: 'center', marginLeft:'50px' }}></div>
+        {/* Selector de divisiones */}
+        <select
+  value={selectedDivision}
+  onChange={handleDivisionChange}
+  style={{
+    marginBottom: '20px',
+    border: 'none', // Eliminar el contorno
+    boxShadow: '0px 0px 5px rgba(0, 0, 0, 0.5)', // Agregar una sombra
+    backgroundColor: 'white', // Añadir un fondo blanco para que la sombra sea visible
+    padding: '8px', // Añadir un poco de relleno para separar el texto del borde
+    borderRadius: '8px' // Agregar bordes redondeados
+  }}
+>
+  <option value="">Selecciona una división</option>
+  {divisiones.map((division) => (
+    <option key={division.id} value={division.id}>{division.name}</option>
+  ))}
+</select>
+
+        {/* Mostrar la gráfica de los saldos de los trabajadores de la división seleccionada */}
+        <div>
+
+          <div id="chart_div" style={{ width: '100%', height: '400px', display: 'flex', justifyContent: 'center', marginLeft: '78px' }}></div>
+        </div>
       </div>
       <button onClick={onClick} className="btn btn-success float-right">Volver</button>
     </div>
@@ -117,21 +186,6 @@ const App = () => {
               contenidoHover="Observa el saldo total de cada trabajador de acuerdo al saldo de su división"
               onClick={() => handleButtonClick('trabajador')}
             />
-            <BotonConContenido
-              contenidoInicial="Gastos por división"
-              contenidoHover="Observa el saldo gastado del último mes de cada división"
-              onClick={() => handleButtonClick('gastos_division')}
-            />
-            <BotonConContenido
-              contenidoInicial="Gastos por trabajador"
-              contenidoHover="Observa el saldo gastado del último mes de cada trabajador"
-              onClick={() => handleButtonClick('gastos_trabajador')}
-            />
-            <BotonConContenido
-              contenidoInicial="Reintegros de saldos"
-              contenidoHover="Observa cual es el dinero que se le reintegró a cada trabajador"
-              onClick={() => handleButtonClick('reintegros')}
-            />
           </div>
         </div>
       )}
@@ -147,4 +201,3 @@ const App = () => {
 };
 
 export default App;
-
