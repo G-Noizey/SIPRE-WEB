@@ -16,13 +16,18 @@ public class BeanTransferencia {
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
-    @Column(name="descripcion", length = 200, nullable = false)
+    @Column(name = "descripcion", length = 200, nullable = false)
     private String descripcion;
-    @Column(name="fecha", nullable = false)
+    @Column(name = "fecha", nullable = false)
     private LocalDate fecha;
-    @Column(name="monto", length = 100, nullable = false)
+    // @Column(name="nuTransferencia", length = 16, nullable = false)
+    //private Long nuTransferencia;
+    @Column(name = "monto", length = 100, nullable = false)
     private double monto;
-    @Column(name="status", length = 20, nullable = false)
+    @Lob
+    @Column(name = "comprobante", columnDefinition = "LONGBLOB", nullable = false)
+    private byte[] comprobante;
+    @Column(name = "status", length = 20, nullable = false)
     private String status;
     @ManyToOne
     @JoinColumn(name = "idWorker", nullable = false)

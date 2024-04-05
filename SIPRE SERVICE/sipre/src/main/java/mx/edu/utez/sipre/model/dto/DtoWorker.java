@@ -18,5 +18,6 @@ public class DtoWorker {
     private double saldo;
     private int telefono;
     private String direccion;
+    private String nuCuenta;
     private long idDivision;
 }

@@ -13,6 +13,7 @@ public class DtoTransfer {
     private Long id;
     private String descripcion;
     private LocalDate fecha;
+    // private Long nuTransferencia;
     private String status;
     private double monto;
     private Long idWorker;

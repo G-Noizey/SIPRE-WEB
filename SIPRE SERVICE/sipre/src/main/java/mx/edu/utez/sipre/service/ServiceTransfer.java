@@ -39,37 +39,37 @@ public class ServiceTransfer {
 
     @Transactional(rollbackFor = {Exception.class})
     public ResponseEntity<String> save(DtoTransfer dtoTransfer) {
-    try {
-        // Obtener la división basada en el ID proporcionado en el DTO
-        Optional<BeanDivision> optionalDivision = repoDivision.findById(dtoTransfer.getIdDivision());
-        if (!optionalDivision.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró la división con el ID proporcionado: " + dtoTransfer.getIdDivision());
-        }
-        BeanDivision transferDivision = optionalDivision.get();
+        try {
+            // Obtener la división basada en el ID proporcionado en el DTO
+            Optional<BeanDivision> optionalDivision = repoDivision.findById(dtoTransfer.getIdDivision());
+            if (!optionalDivision.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró la división con el ID proporcionado: " + dtoTransfer.getIdDivision());
+            }
+            BeanDivision transferDivision = optionalDivision.get();
 
-        // Obtener el trabajador basado en el ID proporcionado en el DTO
-        Optional<BeanWorker> optionalWorker = repoWorker.findById(dtoTransfer.getIdWorker());
-        if (!optionalWorker.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró el trabajador con el ID proporcionado: " + dtoTransfer.getIdWorker());
-        }
-        BeanWorker worker = optionalWorker.get();
+            // Obtener el trabajador basado en el ID proporcionado en el DTO
+            Optional<BeanWorker> optionalWorker = repoWorker.findById(dtoTransfer.getIdWorker());
+            if (!optionalWorker.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró el trabajador con el ID proporcionado: " + dtoTransfer.getIdWorker());
+            }
+            BeanWorker worker = optionalWorker.get();
 
-        // Crear la transferencia sin especificar el ID
-        BeanTransferencia transfer = BeanTransferencia.builder()
-                .beanWorkerTrans(worker)
-                .beanDivisionTrans(transferDivision)
-                .monto(dtoTransfer.getMonto())
-                .fecha(dtoTransfer.getFecha())
-                .status(dtoTransfer.getStatus())
-                .descripcion(dtoTransfer.getDescripcion())
-                .build();
-        // Guardar la transferencia
-        repoTransfer.save(transfer);
-        return ResponseEntity.ok().body("Transferencia guardada correctamente");
-    } catch (Exception e) {
-        TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocurrió un error al guardar la transferencia: " + e.getMessage());
-    }
+            // Crear la transferencia sin especificar el ID
+            BeanTransferencia transfer = BeanTransferencia.builder()
+                    .beanWorkerTrans(worker)
+                    .beanDivisionTrans(transferDivision)
+                    .monto(dtoTransfer.getMonto())
+                    .fecha(dtoTransfer.getFecha())
+                    .status(dtoTransfer.getStatus())
+                    .descripcion(dtoTransfer.getDescripcion())
+                    .build();
+            // Guardar la transferencia
+            repoTransfer.save(transfer);
+            return ResponseEntity.ok().body("Transferencia guardada correctamente");
+        } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocurrió un error al guardar la transferencia: " + e.getMessage());
+        }
     }
 
     @Transactional(rollbackFor = {Exception.class})
@@ -77,13 +77,13 @@ public class ServiceTransfer {
         try {
             //Verificar si el DTO contiene un ID válido
             Long transferId = dtoTransfer.getId();
-            if(transferId == null){
+            if (transferId == null) {
                 return ResponseEntity.badRequest().body("El DTO no contiene un ID válido para la transferencia");
             }
 
             //Verificar si la transferencia existe en la base de datos
             Optional<BeanTransferencia> existingTransferOptional = repoTransfer.findById(transferId);
-            if(existingTransferOptional.isEmpty()){
+            if (existingTransferOptional.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró la transferencia con el ID proporcionado: " + transferId);
             }
 
@@ -105,6 +105,28 @@ public class ServiceTransfer {
             //Manejar cualquier exce
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ocurrió un error al actualizar la transferencia: " + e.getMessage());
-        }}
+        }
+    }
+
+    public ResponseEntity<byte[]> getComprobante(Long id) {
+        try {
+            // Obtener la compra basada en el ID proporcionado
+            Optional<BeanTransferencia> optionalTransfer = repoTransfer.findById(id);
+            if (optionalTransfer.isPresent()) {
+                // Obtener los bytes del comprobante de la compra
+                BeanTransferencia compra = optionalTransfer.get();
+                byte[] comprobante = compra.getComprobante();
+
+                // Devolver los bytes del comprobante como respuesta
+                return ResponseEntity.ok().body(comprobante);
+            } else {
+                // La compra no fue encontrada, devolver un error 404
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+        } catch (Exception e) {
+            // Manejar cualquier excepción y devolver un error 500
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
 }

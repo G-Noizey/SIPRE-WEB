@@ -22,4 +22,6 @@ public interface RepoWorker extends JpaRepository<BeanWorker, Long> {
     List<BeanWorker> findByDivisionId(Long idDivision);
 
     List<BeanWorker> findByDivision(BeanDivision division);
+
+    boolean existsByNuCuenta(String nuCuenta);
 }

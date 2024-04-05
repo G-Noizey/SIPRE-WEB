@@ -12,8 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,6 +55,11 @@ public class ServiceWorker {
 
     @Transactional(rollbackFor = {Exception.class})
     public ResponseEntity<String> save(DtoWorker dtoWorker) {
+
+        if (dtoWorker.getNuCuenta() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El campo nuCuenta no puede ser nulo");
+        }
+
         // Verificar si ya existe un trabajador con el mismo correo electrónico
         if(repoWorker.findByEmail(dtoWorker.getEmail()).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Ya existe un trabajador con el mismo correo electrónico: " + dtoWorker.getEmail());
@@ -80,6 +84,7 @@ public class ServiceWorker {
                 .saldo(dtoWorker.getSaldo())
                 .telefono(dtoWorker.getTelefono())
                 .direccion(dtoWorker.getDireccion())
+                .nuCuenta(dtoWorker.getNuCuenta()) // Asignar nuCuenta solo si no es nulo
                 .division(division)
                 .build();
 
@@ -117,6 +122,11 @@ public class ServiceWorker {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró ningún trabajador con ID: " + dtoWorker.getId());
         }
 
+        // Verificar si nuCuenta es nulo
+        if (dtoWorker.getNuCuenta() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El campo nuCuenta no puede ser nulo");
+        }
+
         // Obtener la división basada en el ID proporcionado en el DTO
         BeanDivision division = BeanDivision.builder().id((long) dtoWorker.getIdDivision()).build();
 
@@ -131,6 +141,7 @@ public class ServiceWorker {
         existingWorker.setSaldo(dtoWorker.getSaldo());
         existingWorker.setTelefono(dtoWorker.getTelefono());
         existingWorker.setDireccion(dtoWorker.getDireccion());
+        existingWorker.setNuCuenta(dtoWorker.getNuCuenta()); // Actualizar nuCuenta
         existingWorker.setDivision(division);
 
         // Guardar el trabajador actualizado en la base de datos
@@ -266,6 +277,40 @@ public class ServiceWorker {
         return ResponseEntity.ok().body("Reintegro de saldo realizado exitosamente. Nuevo saldo: " + nuevoSaldo);
     }
 
+    public ResponseEntity<Map<String, String>> authenticate(DtoWorker workerRequest) {
+        Optional<BeanWorker> workerOptional = repoWorker.findByUserWorker(workerRequest.getUserWorker());
+        if (workerOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Usuario no encontrado"));
+        }
+
+        BeanWorker storedWorker = workerOptional.get();
+        if (!storedWorker.getPassword().equals(workerRequest.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Contraseña incorrecta"));
+        }
+
+        // Verificar si el trabajador está inactivo
+        if (!storedWorker.getStatus()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "El trabajador está inactivo"));
+        }
+
+        // Añadir nuCuenta al mapa de respuesta
+        Map<String, String> responseData = new HashMap<>();
+        responseData.put("token", generateToken());
+        responseData.put("id", String.valueOf(storedWorker.getId()));
+        responseData.put("name", storedWorker.getName());
+        responseData.put("lastname", storedWorker.getLastname());
+        responseData.put("email", storedWorker.getEmail());
+        responseData.put("status", String.valueOf(storedWorker.getStatus()));
+        responseData.put("userWorker", storedWorker.getUserWorker());
+        responseData.put("saldo", String.valueOf(storedWorker.getSaldo()));
+        responseData.put("telefono", String.valueOf(storedWorker.getTelefono()));
+        responseData.put("direccion", storedWorker.getDireccion());
+        responseData.put("idDivision", String.valueOf(storedWorker.getDivision().getId()));
+        responseData.put("nuCuenta", storedWorker.getNuCuenta()); // Agregar nuCuenta al mapa
+
+        return ResponseEntity.ok(responseData);
+    }
+
     @Transactional(rollbackFor = {SQLException.class})
     public ResponseEntity<BeanWorker> updateByEmail(String email, String newPassword) {
         Optional<BeanWorker> existingWorkerOptional = repoWorker.findByEmail(email);
@@ -277,5 +322,57 @@ public class ServiceWorker {
         existingWorker.setPassword(newPassword);
         BeanWorker updateWorker = repoWorker.save(existingWorker);
         return ResponseEntity.ok().body(updateWorker);
+    }
+
+    @Transactional(rollbackFor = {Exception.class})
+    public ResponseEntity<String> deleteWorker(Long id) {
+        if (!repoWorker.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Trabajador con id " + id + " no encontrado");
+        }
+        repoWorker.deleteById(id);
+        return ResponseEntity.ok().body("Trabajador eliminado exitosamente");
+    }
+
+    @Transactional(rollbackFor = {Exception.class})
+    public ResponseEntity<String> updateUsername(Long id, String newUsername) {
+        Optional<BeanWorker> optionalWorker = repoWorker.findById(id);
+        if (optionalWorker.isPresent()) {
+            BeanWorker worker = optionalWorker.get();
+            worker.setUserWorker(newUsername);
+            repoWorker.save(worker);
+            return ResponseEntity.ok("Nombre de usuario actualizado correctamente");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @Transactional(rollbackFor = {Exception.class})
+    public ResponseEntity<String> updatePassword(Long id, String newPassword) {
+        Optional<BeanWorker> optionalWorker = repoWorker.findById(id);
+        if (optionalWorker.isPresent()) {
+            BeanWorker worker = optionalWorker.get();
+            worker.setPassword(newPassword);
+            repoWorker.save(worker);
+            return ResponseEntity.ok("Contraseña actualizada correctamente");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    private String generateToken() {
+        int length = 64;
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        StringBuilder token = new StringBuilder();
+
+        for (int i = 0; i < length; i++) {
+            int index = (int) (Math.random() * characters.length());
+            token.append(characters.charAt(index));
+        }
+
+        return token.toString();
+    }
+
+    public boolean existsByNuCuenta(String nuCuenta) {
+        return repoWorker.existsByNuCuenta(nuCuenta);
     }
 }

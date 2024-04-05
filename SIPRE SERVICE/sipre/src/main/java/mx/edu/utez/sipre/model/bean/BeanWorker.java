@@ -35,6 +35,8 @@ public class BeanWorker {
     private int telefono;
     @Column(name = "direccion", length = 150, nullable = false)
     private String direccion;
+    @Column(name = "nuCuenta", length = 150, nullable = false)
+    private String nuCuenta;
 
     @ManyToOne
     @JoinColumn(name = "idDivision", nullable = false)
