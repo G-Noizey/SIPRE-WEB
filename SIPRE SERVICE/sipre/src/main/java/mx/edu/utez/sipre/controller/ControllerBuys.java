@@ -115,10 +115,11 @@ public class ControllerBuys {
     }
 
     //Obtener datos de la compra a excepcion de el comprobante
-    @GetMapping("/all")
-    public ResponseEntity<List<Map<String, Object>>> getAllCompras() {
+    @GetMapping("/all/{workerId}")
+    public ResponseEntity<List<Map<String, Object>>> getAllComprasByWorker(@PathVariable Long workerId) {
         List<BeanBuys> compras = repoBuys.findAll();
         List<Map<String, Object>> comprasResponse = compras.stream()
+                .filter(compra -> compra.getBeanWorker().getId().equals(workerId))
                 .map(compra -> {
                     Map<String, Object> compraMap = new HashMap<>();
                     compraMap.put("id", compra.getId());

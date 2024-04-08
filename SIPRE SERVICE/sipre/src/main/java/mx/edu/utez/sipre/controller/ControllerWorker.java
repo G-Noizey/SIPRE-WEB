@@ -150,4 +150,25 @@ public class ControllerWorker {
         return serviceWorker.authenticate(workerRequest);
     }
 
+
+    ////Cambios Jair
+
+    @PutMapping("/worker/{id}/saldo")
+    public ResponseEntity<?> updateWorkerSaldo(@PathVariable Long id, @RequestBody Map<String, Double> saldoData) {
+        try {
+            // Obtener el trabajador por su ID
+            BeanWorker worker = serviceWorker.findById(id);
+
+            // Establecer el nuevo saldo
+            worker.setSaldo(saldoData.get("saldo"));
+
+            // Guardar el trabajador actualizado
+            serviceWorker.save(worker);
+
+            return ResponseEntity.ok().body("Saldo del trabajador actualizado con éxito.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error al actualizar el saldo del trabajador: " + e.getMessage());
+        }
+    }
+
 }

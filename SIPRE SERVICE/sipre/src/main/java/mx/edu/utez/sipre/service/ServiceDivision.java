@@ -117,6 +117,13 @@ public ResponseEntity<BeanDivision> update(BeanDivision division) {
     }
 
 
+    ///Cambios jair
+
+    public BeanDivision findById(Long id) {
+        return repoDivision.findById(id).orElseThrow(() -> new RuntimeException("División no encontrada con ID: " + id));
+    }
+
+
 
 }
 

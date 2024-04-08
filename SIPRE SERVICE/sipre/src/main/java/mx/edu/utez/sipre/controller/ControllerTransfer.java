@@ -106,10 +106,11 @@ public class ControllerTransfer {
         return serviceTransfer.getComprobante(id);
     }
 
-    @GetMapping("/all")
-    public ResponseEntity<List<Map<String, Object>>> getAllTransferencias() {
+    @GetMapping("/all/{workerId}")
+    public ResponseEntity<List<Map<String, Object>>> getAllTransferenciasByWorker(@PathVariable Long workerId) {
         List<BeanTransferencia> transferencias = repoTransfer.findAll();
         List<Map<String, Object>> transferenciasResponse = transferencias.stream()
+                .filter(transferencia -> transferencia.getBeanWorkerTrans().getId().equals(workerId))
                 .map(transferencia -> {
                     Map<String, Object> transferenciaMap = new HashMap<>();
                     transferenciaMap.put("id", transferencia.getId());
@@ -124,6 +125,7 @@ public class ControllerTransfer {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(transferenciasResponse);
     }
+
 
 
 }

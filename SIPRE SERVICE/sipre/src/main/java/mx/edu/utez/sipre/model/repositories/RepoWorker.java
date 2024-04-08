@@ -18,6 +18,7 @@ public interface RepoWorker extends JpaRepository<BeanWorker, Long> {
 
     Optional<BeanWorker> findByEmail(String email);
 
+    Optional<BeanWorker> findById(Long id);
 
     List<BeanWorker> findByDivisionId(Long idDivision);
 

@@ -61,12 +61,12 @@ public class ServiceWorker {
         }
 
         // Verificar si ya existe un trabajador con el mismo correo electrónico
-        if(repoWorker.findByEmail(dtoWorker.getEmail()).isPresent()) {
+        if (repoWorker.findByEmail(dtoWorker.getEmail()).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Ya existe un trabajador con el mismo correo electrónico: " + dtoWorker.getEmail());
         }
 
         // Verificar si ya existe un trabajador con el mismo nombre de usuario
-        if(repoWorker.findByUserWorker(dtoWorker.getUserWorker()).isPresent()) {
+        if (repoWorker.findByUserWorker(dtoWorker.getUserWorker()).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Ya existe un trabajador con el mismo nombre de usuario: " + dtoWorker.getUserWorker());
         }
 
@@ -151,6 +151,11 @@ public class ServiceWorker {
         return ResponseEntity.ok().body("Trabajador actualizado exitosamente");
     }
 
+    public BeanWorker findById(Long id) {
+        return repoWorker.findById(id).orElseThrow(() -> new RuntimeException("Trabajador no encontrado con ID: " + id));
+    }
+
+    //Añadi cambios para lo del saldo (Jair)
     @Transactional(rollbackFor = {Exception.class})
     public ResponseEntity<String> updateInfoPersonal(DtoWorker dtoWorker) {
         // Obtener el trabajador existente de la base de datos
@@ -159,11 +164,18 @@ public class ServiceWorker {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró ningún trabajador con ID: " + dtoWorker.getId());
         }
 
-        // Obtener la división basada en el ID proporcionado en el DTO
-        BeanDivision division = BeanDivision.builder().id((long) dtoWorker.getIdDivision()).build();
+        BeanWorker existingWorker = existingWorkerOptional.get();
+
+        // Si el trabajador se cambia a inactivo y tiene saldo, actualizar el saldo de la división
+        if (!dtoWorker.getStatus() && existingWorker.getSaldo() > 0) {
+            BeanDivision division = repoDivision.findById(existingWorker.getDivision().getId())
+                    .orElseThrow(() -> new RuntimeException("División no encontrada"));
+            division.setSaldo(division.getSaldo() + existingWorker.getSaldo());
+            repoDivision.save(division);
+            dtoWorker.setSaldo(0.0); // Establecer el saldo del trabajador a 0
+        }
 
         // Actualizar los campos del trabajador existente con los valores del DTO
-        BeanWorker existingWorker = existingWorkerOptional.get();
         existingWorker.setName(dtoWorker.getName());
         existingWorker.setLastname(dtoWorker.getLastname());
         existingWorker.setEmail(dtoWorker.getEmail());
@@ -180,8 +192,6 @@ public class ServiceWorker {
         // Devolver una respuesta con el estado OK y un mensaje indicando que el trabajador se actualizó exitosamente
         return ResponseEntity.ok().body("Trabajador actualizado exitosamente");
     }
-
-
 
 
     // METODO PARA CAMBIAR LA DIVISION DEL TRABAJADOR (NOIZEY)
@@ -225,7 +235,6 @@ public class ServiceWorker {
         // Devolver una respuesta con el estado OK y un mensaje indicando que la división del trabajador se actualizó exitosamente
         return ResponseEntity.ok().body("División del trabajador actualizada exitosamente a: " + nuevaDivision.getName());
     }
-
 
 
     //METODO PARA ASIGNAR LA NUEVA DIVISION AL TRABAJADOR (NOIZEY)
@@ -375,4 +384,10 @@ public class ServiceWorker {
     public boolean existsByNuCuenta(String nuCuenta) {
         return repoWorker.existsByNuCuenta(nuCuenta);
     }
+
+    ///Metodo save para los cambios en el saldo (Jair)
+    public void save(BeanWorker worker) {
+        repoWorker.save(worker);
+    }
+
 }

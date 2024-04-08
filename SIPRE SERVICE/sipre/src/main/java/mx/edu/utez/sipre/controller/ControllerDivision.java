@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -159,6 +160,27 @@ public class ControllerDivision{
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar la división: " + e.getMessage());
         }
     }
+
+    ///Cambios Jair
+
+    @PutMapping("/division/{id}/saldo")
+    public ResponseEntity<?> updateDivisionSaldo(@PathVariable Long id, @RequestBody Map<String, Double> saldoData) {
+        try {
+            // Obtener la división por su ID
+            BeanDivision division = serviceDivision.findById(id);
+
+            // Establecer el nuevo saldo
+            division.setSaldo(saldoData.get("saldo"));
+
+            // Guardar la división actualizada
+            serviceDivision.save(division);
+
+            return ResponseEntity.ok().body("Saldo de la división actualizado con éxito.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error al actualizar el saldo de la división: " + e.getMessage());
+        }
+    }
+
 
 
 }

@@ -35,42 +35,74 @@ const BotonConContenido = ({ contenidoInicial, contenidoHover, contenidoBoton, o
 
 //ADAN DICE: en este componente se muestra el contenido del boton 1 (la pantalla que se abre)
 const ContenidoBoton1 = ({ onClick }) => {
+  const [divisionesConSaldosTotal, setDivisionesConSaldosTotal] = useState([]);
+  const [divisionesConSaldosActuales, setDivisionesConSaldosActuales] = useState([]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        google.charts.load('current', { packages: ['corechart'] });
-        google.charts.setOnLoadCallback(async () => {
-          const response = await axios.get('http://localhost:8080/division/saldos');
-          const divisionesConSaldos = response.data;
-          const data = new google.visualization.DataTable();
-          data.addColumn('string', 'División');
-          data.addColumn('number', 'Saldo');
-          divisionesConSaldos.forEach(division => {
-            data.addRow([division.name, division.saldototal]);
-          });
-          const options = {
-            title: 'Saldos Totales por División',
-            width: 900,
-            height: 420
-          };
-          const chart = new google.visualization.PieChart(document.getElementById('chart_div'));
-          chart.draw(data, options);
-        });
+        const responseTotal = await axios.get('http://localhost:8080/division/saldos');
+        setDivisionesConSaldosTotal(responseTotal.data);
+
+        const responseActual = await axios.get('http://localhost:8080/division/saldos');
+        setDivisionesConSaldosActuales(responseActual.data);
       } catch (error) {
         console.error('Error al obtener los saldos de las divisiones:', error);
       }
     };
-  
+
     fetchData();
   }, []);
-  
+
+  useEffect(() => {
+    if (divisionesConSaldosTotal.length > 0 && divisionesConSaldosActuales.length > 0) {
+      google.charts.load('current', { packages: ['corechart'] });
+      google.charts.setOnLoadCallback(() => drawCharts());
+    }
+  }, [divisionesConSaldosTotal, divisionesConSaldosActuales]);
+
+  const drawCharts = () => {
+    const dataTotal = new google.visualization.DataTable();
+    dataTotal.addColumn('string', 'División');
+    dataTotal.addColumn('number', 'Saldo Total');
+    divisionesConSaldosTotal.forEach(division => {
+      dataTotal.addRow([division.name, division.saldototal]);
+    });
+
+    const dataActual = new google.visualization.DataTable();
+    dataActual.addColumn('string', 'División');
+    dataActual.addColumn('number', 'Saldo Actual');
+    divisionesConSaldosActuales.forEach(division => {
+      dataActual.addRow([division.name, division.saldo]);
+    });
+
+    const options = {
+      title: 'Comparativa de Saldos',
+      width: 510,
+      height: 420
+    };
+
+    const chartTotal = new google.visualization.PieChart(document.getElementById('chart_div_total'));
+    chartTotal.draw(dataTotal, options);
+
+    const chartActual = new google.visualization.PieChart(document.getElementById('chart_div_actual'));
+    chartActual.draw(dataActual, options);
+  };
+
   return (
     <div style={{ textAlign: 'center' }}>
-      <h1 style={{ color: '#2D7541', marginBottom: '20px', marginRight:'70px' }}>Saldos por Divisiones</h1>
-      <div style={{ border: '2px solid #2D7541', borderRadius: '10px', padding: '20px', marginBottom: '20px' }}>
-        <div id="chart_div" style={{ width: '100%', height: '400px', display: 'flex', justifyContent: 'center', marginLeft:'78px' }}></div>
+      <h1 style={{ color: '#2D7541', marginBottom: '20px', marginRight: '70px' }}>Comparativa de Saldos</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+        <div style={{ border: '2px solid #2D7541', borderRadius: '10px', padding: '20px', marginBottom: '20px', width: '45%' }}>
+          <h2 style={{ color: '#2D7541', marginBottom: '20px' }}>Saldos Totales por División</h2>
+          <div id="chart_div_total" style={{ width: '100%', height: '400px', display: 'flex', justifyContent: 'center' }}></div>
+        </div>
+        <div style={{ border: '2px solid #2D7541', borderRadius: '10px', padding: '20px', marginBottom: '20px', width: '45%' }}>
+          <h2 style={{ color: '#2D7541', marginBottom: '20px' }}>Saldos Actuales por División</h2>
+          <div id="chart_div_actual" style={{ width: '100%', height: '400px', display: 'flex', justifyContent: 'center' }}></div>
+        </div>
       </div>
-      <button onClick={onClick} className="btn btn-success float-right" style={{ marginRight:'70px'}}>Volver</button>
+      <button onClick={onClick} className="btn btn-success float-right" style={{ marginRight: '70px' }}>Volver</button>
     </div>
   );
 };
@@ -100,11 +132,11 @@ const ContenidoBoton2 = ({ onClick }) => {
         if (selectedDivision) {
           const response = await axios.get(`http://localhost:8080/worker/saldosPorDivision/${selectedDivision}`);
           const trabajadores = response.data;
-          
+
           const data = new google.visualization.DataTable();
           data.addColumn('string', 'Trabajador');
           data.addColumn('number', 'Saldo');
-          
+
           trabajadores.forEach((trabajador, index) => {
             data.addRow([`${trabajador.name}`, trabajador.saldo]);
           });
@@ -136,22 +168,22 @@ const ContenidoBoton2 = ({ onClick }) => {
       <div style={{ border: '2px solid #2D7541', borderRadius: '10px', padding: '20px', marginBottom: '20px' }}>
         {/* Selector de divisiones */}
         <select
-  value={selectedDivision}
-  onChange={handleDivisionChange}
-  style={{
-    marginBottom: '20px',
-    border: 'none', // Eliminar el contorno
-    boxShadow: '0px 0px 5px rgba(0, 0, 0, 0.5)', // Agregar una sombra
-    backgroundColor: 'white', // Añadir un fondo blanco para que la sombra sea visible
-    padding: '8px', // Añadir un poco de relleno para separar el texto del borde
-    borderRadius: '8px' // Agregar bordes redondeados
-  }}
->
-  <option value="">Selecciona una división</option>
-  {divisiones.map((division) => (
-    <option key={division.id} value={division.id}>{division.name}</option>
-  ))}
-</select>
+          value={selectedDivision}
+          onChange={handleDivisionChange}
+          style={{
+            marginBottom: '20px',
+            border: 'none', // Eliminar el contorno
+            boxShadow: '0px 0px 5px rgba(0, 0, 0, 0.5)', // Agregar una sombra
+            backgroundColor: 'white', // Añadir un fondo blanco para que la sombra sea visible
+            padding: '8px', // Añadir un poco de relleno para separar el texto del borde
+            borderRadius: '8px' // Agregar bordes redondeados
+          }}
+        >
+          <option value="">Selecciona una división</option>
+          {divisiones.map((division) => (
+            <option key={division.id} value={division.id}>{division.name}</option>
+          ))}
+        </select>
 
         {/* Mostrar la gráfica de los saldos de los trabajadores de la división seleccionada */}
         <div>
