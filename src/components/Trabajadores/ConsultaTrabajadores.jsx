@@ -98,7 +98,7 @@ const ConsultaTrabajadores = () => {
     telefono: "",
     direccion: "",
     division: { id: "", name: "", saldo: 0 },
-    nuCuenta: "21312312"
+    nuCuenta: ""
   });
 
   useEffect(() => {
@@ -526,6 +526,20 @@ const ConsultaTrabajadores = () => {
                     />
                   </Col>
                 </Row>
+
+                <Row>
+        <Col>
+          <label>Número de cuenta:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={formData.nuCuenta}
+            onChange={(e) =>
+              setFormData({ ...formData, nuCuenta: e.target.value })
+            }
+          />
+        </Col>
+      </Row>
                 <Row>
                   <Col>
                     <label>Direccion:</label>
@@ -702,6 +716,24 @@ const ConsultaTrabajadores = () => {
                     />
                   </Col>
                 </Row>
+
+
+                <Row>
+        <Col>
+          <label>Número de cuenta:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={selectedTrabajador?.nuCuenta || ""}
+            onChange={(e) =>
+              setSelectedTrabajador({
+                ...selectedTrabajador,
+                nuCuenta: e.target.value,
+              })
+            }
+          />
+        </Col>
+      </Row>
                 <Row>
                   <Col>
                     <label>Estatus:</label>
@@ -845,6 +877,13 @@ const ConsultaTrabajadores = () => {
                   <Col>
                     <label>Teléfono:</label>
                     <p>{viewMoreData?.telefono}</p>
+                  </Col>
+                </Row>
+                <Row>
+                 
+                  <Col>
+                    <label>Número de cuenta:</label>
+                    <p>{viewMoreData?.nuCuenta}</p>
                   </Col>
                 </Row>
                 <Row>
