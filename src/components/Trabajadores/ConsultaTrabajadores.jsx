@@ -98,7 +98,8 @@ const ConsultaTrabajadores = () => {
     telefono: "",
     direccion: "",
     division: { id: "", name: "", saldo: 0 },
-    nuCuenta: ""
+    nuCuenta: "",
+    saldototal: 0,
   });
 
   useEffect(() => {
@@ -209,6 +210,9 @@ const ConsultaTrabajadores = () => {
         throw new Error("Ya existe un trabajador con el mismo nombre de usuario.");
       }
 
+      // Calcular el saldo total
+    formData.saldototal = parseFloat(formData.saldo);
+
       const data = {
         name: formData.name,
         lastname: formData.lastname,
@@ -217,6 +221,7 @@ const ConsultaTrabajadores = () => {
         status: formData.status ? 1 : 0,
         userWorker: formData.userWorker,
         saldo: parseFloat(formData.saldo),
+        saldototal: parseFloat(formData.saldototal),
         telefono: parseInt(formData.telefono),
         direccion: formData.direccion,
         idDivision: parseInt(formData.division.id),
@@ -226,6 +231,7 @@ const ConsultaTrabajadores = () => {
       // Realizar la inserción del trabajador
       await axios.post("http://localhost:8080/worker/", data);
 
+      
       // Restar el saldo asignado al trabajador del saldo disponible en la división
       const updatedSaldoDisponible = saldoDisponible - parseFloat(formData.saldo);
       setSaldoDisponible(updatedSaldoDisponible);

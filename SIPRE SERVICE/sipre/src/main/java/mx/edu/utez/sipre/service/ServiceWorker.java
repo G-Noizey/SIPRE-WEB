@@ -31,6 +31,7 @@ public class ServiceWorker {
                             .id(worker.getId())
                             .name(worker.getName())
                             .saldo(worker.getSaldo())
+                            .saldototal(worker.getSaldototal())
                             .build())
                     .collect(Collectors.toList());
             return ResponseEntity.ok().body(workerDtos);
@@ -70,6 +71,8 @@ public class ServiceWorker {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Ya existe un trabajador con el mismo nombre de usuario: " + dtoWorker.getUserWorker());
         }
 
+
+
         // Crear la división basada en el ID proporcionado en el DTO
         BeanDivision division = BeanDivision.builder().id((long) dtoWorker.getIdDivision()).build();
 
@@ -82,11 +85,15 @@ public class ServiceWorker {
                 .status(dtoWorker.getStatus())
                 .userWorker(dtoWorker.getUserWorker())
                 .saldo(dtoWorker.getSaldo())
+                .saldototal(dtoWorker.getSaldototal())
                 .telefono(dtoWorker.getTelefono())
                 .direccion(dtoWorker.getDireccion())
                 .nuCuenta(dtoWorker.getNuCuenta()) // Asignar nuCuenta solo si no es nulo
                 .division(division)
                 .build();
+
+        // Establecer el saldo total basado en el saldo
+        dtoWorker.setSaldototal(dtoWorker.getSaldo());
 
         // Imprimir los datos del trabajador antes de la inserción
         System.out.println("Datos del trabajador a insertar:");
@@ -96,6 +103,9 @@ public class ServiceWorker {
 
         // Guardar el trabajador en la base de datos
         try {
+            repoWorker.save(worker);
+            // Establecer el saldo total basado en el saldo
+            dtoWorker.setSaldototal(dtoWorker.getSaldo());
             repoWorker.save(worker);
 
             // Imprimir mensaje de éxito después de la inserción

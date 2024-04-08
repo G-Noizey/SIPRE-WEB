@@ -112,6 +112,7 @@ const ContenidoBoton2 = ({ onClick }) => {
   const [divisiones, setDivisiones] = useState([]);
   const [selectedDivision, setSelectedDivision] = useState('');
   const [saldosTrabajadores, setSaldosTrabajadores] = useState([]);
+  const [saldosTotales, setSaldosTotales] = useState([]);
 
   useEffect(() => {
     const fetchDivisiones = async () => {
@@ -130,24 +131,11 @@ const ContenidoBoton2 = ({ onClick }) => {
     const fetchData = async () => {
       try {
         if (selectedDivision) {
-          const response = await axios.get(`http://localhost:8080/worker/saldosPorDivision/${selectedDivision}`);
-          const trabajadores = response.data;
+          const responseTotal = await axios.get(`http://localhost:8080/worker/saldosPorDivision/${selectedDivision}`);
+          setSaldosTotales(responseTotal.data);
 
-          const data = new google.visualization.DataTable();
-          data.addColumn('string', 'Trabajador');
-          data.addColumn('number', 'Saldo');
-
-          trabajadores.forEach((trabajador, index) => {
-            data.addRow([`${trabajador.name}`, trabajador.saldo]);
-          });
-
-          const options = {
-            title: 'Saldos por Trabajador',
-            width: 900,
-            height: 420
-          };
-          const chart = new google.visualization.PieChart(document.getElementById('chart_div'));
-          chart.draw(data, options);
+          const responseActual = await axios.get(`http://localhost:8080/worker/saldosPorDivision/${selectedDivision}`);
+          setSaldosTrabajadores(responseActual.data);
         }
       } catch (error) {
         console.error('Error al obtener los saldos de los trabajadores por división:', error);
@@ -161,6 +149,45 @@ const ContenidoBoton2 = ({ onClick }) => {
     const selectedDivisionId = event.target.value;
     setSelectedDivision(selectedDivisionId);
   };
+
+  const drawCharts = () => {
+    const dataTotal = new google.visualization.DataTable();
+    dataTotal.addColumn('string', 'Trabajador');
+    dataTotal.addColumn('number', 'Saldo Total');
+    saldosTotales.forEach((trabajador, index) => {
+      dataTotal.addRow([`${trabajador.name}`, trabajador.saldototal]);
+    });
+
+    const options = {
+      title: 'Saldos Totales por Trabajador',
+      width: 550,
+      height: 420
+    };
+    const chartTotal = new google.visualization.PieChart(document.getElementById('chart_div_total'));
+    chartTotal.draw(dataTotal, options);
+
+    const dataActual = new google.visualization.DataTable();
+    dataActual.addColumn('string', 'Trabajador');
+    dataActual.addColumn('number', 'Saldo Actual');
+    saldosTrabajadores.forEach((trabajador, index) => {
+      dataActual.addRow([`${trabajador.name}`, trabajador.saldo]);
+    });
+
+    const optionsActual = {
+      title: 'Saldos Actuales por Trabajador',
+      width: 550,
+      height: 420
+    };
+    const chartActual = new google.visualization.PieChart(document.getElementById('chart_div_actual'));
+    chartActual.draw(dataActual, optionsActual);
+  };
+
+  useEffect(() => {
+    if (saldosTotales.length > 0 && saldosTrabajadores.length > 0) {
+      google.charts.load('current', { packages: ['corechart'] });
+      google.charts.setOnLoadCallback(() => drawCharts());
+    }
+  }, [saldosTotales, saldosTrabajadores]);
 
   return (
     <div style={{ textAlign: 'center' }}>
@@ -185,16 +212,17 @@ const ContenidoBoton2 = ({ onClick }) => {
           ))}
         </select>
 
-        {/* Mostrar la gráfica de los saldos de los trabajadores de la división seleccionada */}
-        <div>
-
-          <div id="chart_div" style={{ width: '100%', height: '400px', display: 'flex', justifyContent: 'center', marginLeft: '78px' }}></div>
+        {/* Mostrar la gráfica de los saldos totales de los trabajadores de la división seleccionada */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+          <div id="chart_div_total" style={{ width: '45%', height: '400px', marginRight: '10px' }}></div>
+          <div id="chart_div_actual" style={{ width: '45%', height: '400px', marginLeft: '10px' }}></div>
         </div>
       </div>
       <button onClick={onClick} className="btn btn-success float-right">Volver</button>
     </div>
   );
 };
+
 
 const App = () => {
   const [currentPage, setCurrentPage] = useState('main');
