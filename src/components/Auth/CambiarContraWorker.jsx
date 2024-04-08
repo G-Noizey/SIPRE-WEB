@@ -6,6 +6,11 @@ import { useLocation } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from 'yup';
 
+//RUTA DE LA API
+const apiUrl = import.meta.env.VITE_API_URL;
+
+
+
 const CambiarContraWorker = () => {
     const navigate = useNavigate();
     const [password, setPassword] = useState("");
@@ -40,8 +45,8 @@ const CambiarContraWorker = () => {
 
     const handleUpdate = (newPassword) => {
         axios
-            .put("http://localhost:8080/worker/update-password", null, {
-                params: { email: email, newPassword: newPassword },
+        .put(`${apiUrl}/worker/update-password`, null, {
+            params: { email: email, newPassword: newPassword },
             })
             .then((response) => {
                 Swal.fire({

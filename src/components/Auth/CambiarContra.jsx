@@ -6,6 +6,14 @@ import { useLocation } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from 'yup';
 
+
+//RUTA DE LA API
+const apiUrl = import.meta.env.VITE_API_URL;
+
+
+
+
+
 const CambiarContra = () => {
     const navigate = useNavigate();
     const [password, setPassword] = useState("");
@@ -40,8 +48,8 @@ const CambiarContra = () => {
 
     const handleUpdate = (newPassword) => {
         axios
-            .put("http://localhost:8080/admin/update-password", null, {
-                params: { email: email, newPassword: newPassword },
+        .put(`${apiUrl}/admin/update-password`, null, {
+            params: { email: email, newPassword: newPassword },
             })
             .then((response) => {
                 Swal.fire({

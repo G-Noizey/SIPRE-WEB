@@ -6,6 +6,14 @@ import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from 'yup';
 
+
+
+//RUTA DE LA API
+const apiUrl = import.meta.env.VITE_API_URL;
+
+
+
+
 const RecuperarContra = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -30,7 +38,7 @@ const RecuperarContra = () => {
   const handleSendEmail = async (email) => {
     setIsLoading(true);
     try {
-      const response = await axios.post("http://localhost:8080/reset-password/enviar-correo", {
+      const response = await axios.post(`${apiUrl}/reset-password/enviar-correo`, {
         email: email
       }).then((response) => {
         Swal.fire({

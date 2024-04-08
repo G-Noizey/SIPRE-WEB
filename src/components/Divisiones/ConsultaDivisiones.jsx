@@ -9,6 +9,10 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 
 
+//RUTA DE LA API
+const apiUrl = import.meta.env.VITE_API_URL;
+
+
 const ConsultaDivisiones = () => {
   const [divisiones, setDivisiones] = useState([]);
   const [editDivisionId, setEditDivisionId] = useState(null); // Estado para almacenar el ID de la división en edición
@@ -17,7 +21,7 @@ const ConsultaDivisiones = () => {
   useEffect(() => {
     const fetchDivisiones = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/division/');
+        const response = await axios.get(`${apiUrl}/division/`);
         setDivisiones(response.data.body);
       } catch (error) {
         console.error('Error al obtener las divisiones:', error);
@@ -38,7 +42,7 @@ const ConsultaDivisiones = () => {
   
   const generatePDF = async (id) => {
     try {
-      const response = await axios.get(`http://localhost:8080/buys/generatePDF/${id}`, {
+      const response = await axios.get(`${apiUrl}/buys/generatePDF/${id}`, {
         responseType: 'blob', // Indicar que la respuesta es un archivo binario
       });
 
@@ -139,7 +143,7 @@ const ConsultaDivisiones = () => {
   const handleAdd = async () => {
     try {
       // Enviar el formulario con los datos de formData
-      const response = await axios.post('http://localhost:8080/division/', formData);
+      const response = await axios.post(`${apiUrl}/division/`, formData);
   
       // Actualizar saldototal con el valor de saldo
       formData.saldototal = formData.saldo;
@@ -183,7 +187,7 @@ const ConsultaDivisiones = () => {
 
   const handleEditShow = async (id) => {
     try {
-      const response = await axios.get(`http://localhost:8080/division/${id}`);
+      const response = await axios.get(`${apiUrl}/division/${id}`);
       setSelectedDivision(response.data.body);
       setEditDivisionId(id);
       setShowEdit(true);
@@ -200,7 +204,7 @@ const ConsultaDivisiones = () => {
  const handleEditSave = async () => {
   try {
       // Enviar el formulario con los datos de selectedDivision
-      const response = await axios.put(`http://localhost:8080/division/${editDivisionId}`, selectedDivision);
+      const response = await axios.put(`${apiUrl}/division/${editDivisionId}`, selectedDivision);
 
       // Mostrar alerta de éxito
       await Swal.fire({

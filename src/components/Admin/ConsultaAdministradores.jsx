@@ -8,6 +8,12 @@ import { useTable, usePagination, useGlobalFilter } from "react-table";
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
+
+//RUTA DE LA API
+const apiUrl = import.meta.env.VITE_API_URL;
+
+
+
 // HOOKS PARA EL MANEJO DE ESTADOS DE ADMINISTRADORES AL MOMENTO DE EDITAR Y SELECCIONAR
 const ConsultaAdministradores = () => {
   const [administradores, setAdministradores] = useState([]);
@@ -18,7 +24,7 @@ const ConsultaAdministradores = () => {
   useEffect(() => {
     const fetchAdministradores = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/admin/');
+        const response = await axios.get(`${apiUrl}/admin/`);
         setAdministradores(response.data.body);
       } catch (error) {
         console.error('Error al obtener las divisiones:', error);
@@ -123,7 +129,10 @@ const ConsultaAdministradores = () => {
   //CONSUMO DEL API - POST EN ADMINISTRADORES PARA AÑADIR NUEVOS DATOS DENTRO DEL MODAL
   const handleAdd = async () => {
     try {
-      await axios.post('http://localhost:8080/admin/', formData);
+
+      const response = await axios.get(`${apiUrl}/admin/`);
+
+      await axios.post(`${apiUrl}/admin/`, formData);
       // Mostrar alerta de éxito
       await Swal.fire({
         icon: 'success',
@@ -167,7 +176,7 @@ const ConsultaAdministradores = () => {
   //CONSUMO DEL API - GET BY ID EN ADMINISTRADORES PARA LA OBTENCIÓN DE DATOS EN EL MODAL
   const handleEditShow = async (id) => {
     try {
-      const response = await axios.get(`http://localhost:8080/admin/${id}`);
+      const response = await axios.get(`${apiUrl}/admin/${id}`);
       setSelectedAdministrador(response.data.body);
       setEditAdministradorId(id);
       setShowEdit(true);
@@ -179,7 +188,7 @@ const ConsultaAdministradores = () => {
    // CONSUMO DEL API - PUT EN ADMINISTRADORES
   const handleEditSave = async () => {
     try {
-      await axios.put(`http://localhost:8080/admin/${editAdministradorId}`, selectedAdministrador);
+      await axios.put(`${apiUrl}/admin/${editAdministradorId}`, selectedAdministrador);
       // Mostrar alerta de éxito
       await Swal.fire({
         icon: 'success',

@@ -2,6 +2,12 @@ import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 
+
+
+//RUTA DE LA API
+const apiUrl = import.meta.env.VITE_API_URL;
+
+
 const BotonConContenido = ({ contenidoInicial, contenidoHover, contenidoBoton, onClick }) => {
   const [hover, setHover] = useState(false);
 
@@ -41,10 +47,10 @@ const ContenidoBoton1 = ({ onClick }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const responseTotal = await axios.get('http://localhost:8080/division/saldos');
+        const responseTotal = await axios.get(`${apiUrl}/division/saldos`);
         setDivisionesConSaldosTotal(responseTotal.data);
 
-        const responseActual = await axios.get('http://localhost:8080/division/saldos');
+        const responseActual = await axios.get(`${apiUrl}/division/saldos`);
         setDivisionesConSaldosActuales(responseActual.data);
       } catch (error) {
         console.error('Error al obtener los saldos de las divisiones:', error);
@@ -117,7 +123,7 @@ const ContenidoBoton2 = ({ onClick }) => {
   useEffect(() => {
     const fetchDivisiones = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/division/');
+        const response = await axios.get(`${apiUrl}/division/`);
         setDivisiones(response.data.body);
       } catch (error) {
         console.error('Error al obtener las divisiones:', error);
@@ -131,10 +137,10 @@ const ContenidoBoton2 = ({ onClick }) => {
     const fetchData = async () => {
       try {
         if (selectedDivision) {
-          const responseTotal = await axios.get(`http://localhost:8080/worker/saldosPorDivision/${selectedDivision}`);
+          const responseTotal = await axios.get(`${apiUrl}/worker/saldosPorDivision/${selectedDivision}`);
           setSaldosTotales(responseTotal.data);
 
-          const responseActual = await axios.get(`http://localhost:8080/worker/saldosPorDivision/${selectedDivision}`);
+          const responseActual = await axios.get(`${apiUrl}/worker/saldosPorDivision/${selectedDivision}`);
           setSaldosTrabajadores(responseActual.data);
         }
       } catch (error) {

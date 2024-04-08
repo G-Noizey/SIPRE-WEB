@@ -8,6 +8,11 @@ import { useTable, usePagination, useGlobalFilter } from "react-table";
 import axios from "axios";
 import Swal from "sweetalert2";
 
+
+//RUTA DE LA API
+const apiUrl = import.meta.env.VITE_API_URL;
+
+
 const ConsultaTransacciones = () => {
   const [trans, setTrans] = useState([]);
   const [divisiones, setDivisiones] = useState([]);
@@ -20,7 +25,7 @@ const ConsultaTransacciones = () => {
   useEffect(() => {
     const fetchDivisiones = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/division/");
+        const response = await axios.get(`${apiUrl}/division/`);
         setDivisiones(response.data.body);
       } catch (error) {
         console.error("Error al obtener las divisiones:", error);
@@ -33,7 +38,7 @@ const ConsultaTransacciones = () => {
   useEffect(() => {
     const fetchTrabajadores = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/worker/");
+        const response = await axios.get(`${apiUrl}/worker/`);
         setTrabajadores(response.data.body);
       } catch (error) {
         console.error("Error al obtener los trabajadores:", error);
@@ -46,7 +51,7 @@ const ConsultaTransacciones = () => {
   useEffect(() => {
     const fetchTrans = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/transfer/");
+        const response = await axios.get(`${apiUrl}/transfer/`);
         setTrans(response.data.body);
       } catch (error) {
         console.error("Error al obtener las transfererencias:", error);
@@ -107,7 +112,7 @@ const ConsultaTransacciones = () => {
       };
 
       // Realizar la solicitud de actualización utilizando Axios
-      await axios.put(`http://localhost:8080/transfer/`, updatedTrans);
+      await axios.put(`${apiUrl}/transfer/`, updatedTrans);
 
       // Mostrar una alerta de éxito si la actualización se realiza con éxito
       await Swal.fire({

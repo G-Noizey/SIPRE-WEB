@@ -8,6 +8,9 @@ import { FiEye, FiEyeOff } from "react-icons/fi";
 
 
 
+//RUTA DE LA API
+const apiUrl = import.meta.env.VITE_API_URL;
+
 function InfoAdmin() {
   const [adminData, setAdminData] = useState({
     nombre: '',
@@ -84,7 +87,7 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
       });
   
       // Realizar solicitud PUT para actualizar el nombre de usuario
-      await axios.put(`http://localhost:8080/admin/${adminData.id}/update-username`, null, { params: { newUsername: newUsername } });
+      await axios.put(`${apiUrl}/admin/${adminData.id}/update-username`, null, { params: { newUsername: newUsername } });
       
       // Actualizar los datos en el almacenamiento local
       localStorage.setItem('userAdmin', newUsername);
@@ -136,7 +139,7 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   
     try {
       // Realizar solicitud PUT para actualizar la contraseña
-      await axios.put(`http://localhost:8080/admin/${adminData.id}/update-password`, null, { params: { newPassword } });
+      await axios.put(`${apiUrl}/admin/${adminData.id}/update-password`, null, { params: { newPassword } });
   
       // Mostrar alerta de éxito
       Swal.fire({

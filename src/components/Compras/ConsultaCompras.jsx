@@ -8,6 +8,13 @@ import { useTable, usePagination, useGlobalFilter } from "react-table";
 import axios from "axios";
 import Swal from "sweetalert2";
 
+
+
+//RUTA DE LA API
+const apiUrl = import.meta.env.VITE_API_URL;
+
+
+
 const ConsultaCompras = () => {
   const [compras, setCompras] = useState([]);
   const [divisiones, setDivisiones] = useState([]);
@@ -31,7 +38,7 @@ const ConsultaCompras = () => {
   useEffect(() => {
     const fetchDivisiones = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/division/");
+        const response = await axios.get(`${apiUrl}/division/`);
         setDivisiones(response.data.body);
       } catch (error) {
         console.error("Error al obtener las divisiones:", error);
@@ -44,7 +51,7 @@ const ConsultaCompras = () => {
   useEffect(() => {
     const fetchTrabajadores = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/worker/");
+        const response = await axios.get(`${apiUrl}/worker/`);
         setTrabajadores(response.data.body);
       } catch (error) {
         console.error("Error al obtener los trabajadores:", error);
@@ -57,7 +64,7 @@ const ConsultaCompras = () => {
   useEffect(() => {
     const fetchCompras = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/buys/");
+        const response = await axios.get(`${apiUrl}/buys/`);
         setCompras(response.data.body);
       } catch (error) {
         console.error("Error al obtener las compras:", error);
@@ -137,7 +144,7 @@ const ConsultaCompras = () => {
         };
 
         // Realizar la solicitud de actualización de la compra utilizando Axios
-        await axios.put(`http://localhost:8080/buys/`, updatedBuy);
+        await axios.put(`${apiUrl}/buys/`, updatedBuy);
 
         // Realizar el reintegro de saldo al trabajador
         await handleReintegroSaldo(buyData.beanWorker.id, parseFloat(reintegroSaldo));
@@ -172,8 +179,8 @@ const ConsultaCompras = () => {
 const handleReintegroSaldo = async (workerId, amount) => {
     try {
         // Realizar el reintegro al trabajador utilizando Axios
-        await axios.put(`http://localhost:8080/worker/${workerId}/reintegro`, null, {
-            params: {
+        await axios.put(`${apiUrl}/worker/${workerId}/reintegro`, null, {
+          params: {
                 cantidadReintegro: amount,
             },
         });
@@ -230,7 +237,7 @@ const handleReintegroSaldo = async (workerId, amount) => {
   
     try {
       // Obtener la imagen del servidor
-      const response = await axios.get(`http://localhost:8080/buys/${data.id}/comprobante`, {
+      const response = await axios.get(`${apiUrl}/buys/${data.id}/comprobante`, {
         responseType: "arraybuffer",
       });
   

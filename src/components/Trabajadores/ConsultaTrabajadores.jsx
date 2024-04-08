@@ -9,6 +9,13 @@ import { useTable, usePagination, useGlobalFilter } from "react-table";
 import axios from "axios";
 import Swal from "sweetalert2";
 
+
+
+//RUTA DE LA API
+const apiUrl = import.meta.env.VITE_API_URL;
+
+
+
 const ConsultaTrabajadores = () => {
   const [trabajadores, setTrabajadores] = useState([]);
   const [editTrabajadorId, setEditTrabajadorId] = useState(null);
@@ -37,7 +44,7 @@ const ConsultaTrabajadores = () => {
 
   const actualizarSaldoDivision = async (idDivision, nuevoSaldo) => {
     try {
-      const response = await axios.put(`http://localhost:8080/division/${idDivision}/saldo`, null, { params: { newSaldo: nuevoSaldo } });
+      const response = await axios.put(`${apiUrl}/division/${idDivision}/saldo`, null, { params: { newSaldo: nuevoSaldo } });
       return response.data;
     } catch (error) {
       console.error("Error al actualizar el saldo de la división:", error);
@@ -51,7 +58,7 @@ const ConsultaTrabajadores = () => {
   useEffect(() => {
     const fetchDivisiones = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/division/");
+        const response = await axios.get(`${apiUrl}/division/`);
         setDivisiones(response.data.body);
 
         // Crear un mapa con el ID y el saldo de cada división
@@ -74,7 +81,7 @@ const ConsultaTrabajadores = () => {
   useEffect(() => {
     const fetchTrabajadores = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/worker/");
+        const response = await axios.get(`${apiUrl}/worker/`);
         setTrabajadores(response.data.body);
       } catch (error) {
         console.error("Error al obtener los trabajadores:", error);
@@ -199,13 +206,13 @@ const ConsultaTrabajadores = () => {
       }
 
       // Verificar si ya existe un trabajador con el mismo correo electrónico
-      const emailExists = await axios.get(`http://localhost:8080/worker/email/${formData.email}`);
+      const emailExists = await axios.get(`${apiUrl}/worker/email/${formData.email}`);
       if (emailExists.data) {
         throw new Error("Ya existe un trabajador con el mismo correo electrónico.");
       }
 
       // Verificar si ya existe un trabajador con el mismo nombre de usuario
-      const userWorkerExists = await axios.get(`http://localhost:8080/worker/userWorker/${formData.userWorker}`);
+      const userWorkerExists = await axios.get(`${apiUrl}/worker/userWorker/${formData.userWorker}`);
       if (userWorkerExists.data) {
         throw new Error("Ya existe un trabajador con el mismo nombre de usuario.");
       }
@@ -229,7 +236,7 @@ const ConsultaTrabajadores = () => {
       };
 
       // Realizar la inserción del trabajador
-      await axios.post("http://localhost:8080/worker/", data);
+      await axios.post(`${apiUrl}/worker/`, data);
 
       
       // Restar el saldo asignado al trabajador del saldo disponible en la división
@@ -284,11 +291,11 @@ const ConsultaTrabajadores = () => {
 
   const handleEditShow = async (id) => {
     try {
-      const response = await axios.get(`http://localhost:8080/worker/${id}`);
+      const response = await axios.get(`${apiUrl}/worker/${id}`);
       const trabajador = response.data.body;
 
       // Obtener la división correspondiente al trabajador
-      const divisionResponse = await axios.get(`http://localhost:8080/division/${trabajador.division.id}`);
+      const divisionResponse = await axios.get(`${apiUrl}/division/${trabajador.division.id}`);
       const division = divisionResponse.data.body;
 
       setSelectedTrabajador({ ...trabajador, divisionName: division.name });
@@ -321,16 +328,16 @@ const ConsultaTrabajadores = () => {
         updatedTrabajador.saldo = 0;
 
         // Obtener la división del trabajador
-        const divisionResponse = await axios.get(`http://localhost:8080/division/${selectedTrabajador.division.id}`);
+        const divisionResponse = await axios.get(`${apiUrl}/division/${selectedTrabajador.division.id}`);
         const division = divisionResponse.data.body;
 
         // Sumar el saldo original del trabajador al saldo de la división
         const nuevoSaldoDivision = division.saldo + selectedTrabajador.saldo;
-        await axios.put(`http://localhost:8080/division/${selectedTrabajador.division.id}/saldo`, { saldo: nuevoSaldoDivision });
+        await axios.put(`${apiUrl}/division/${selectedTrabajador.division.id}/saldo`, { saldo: nuevoSaldoDivision });
       }
 
       // Actualizar el trabajador en la base de datos utilizando el nuevo endpoint
-      await axios.put(`http://localhost:8080/worker/${editTrabajadorId}/infoPersonal`, updatedTrabajador);
+      await axios.put(`${apiUrl}/worker/${editTrabajadorId}/infoPersonal`, updatedTrabajador);
 
       // Mostrar mensaje de éxito
       await Swal.fire({
@@ -374,19 +381,19 @@ const ConsultaTrabajadores = () => {
       };
 
       // Actualizar el trabajador en la base de datos
-      await axios.put(`http://localhost:8080/worker/${editTrabajadorId}`, updatedTrabajador);
+      await axios.put(`${apiUrl}/worker/${editTrabajadorId}`, updatedTrabajador);
 
       // Cambiar la división del trabajador
-      await axios.put(`http://localhost:8080/worker/${editTrabajadorId}/division`, null, { params: { idNuevaDivision: updatedTrabajador.idDivision } });
+      await axios.put(`${apiUrl}/worker/${editTrabajadorId}/division`, null, { params: { idNuevaDivision: updatedTrabajador.idDivision } });
 
       // Devolver el saldo a la división anterior
       const saldoDevuelto = parseFloat(trabajadorActual.saldo);
       const nuevoSaldoDivisionActual = divisionMap[trabajadorActual.division.id] + saldoDevuelto;
-      await axios.put(`http://localhost:8080/division/${trabajadorActual.division.id}/saldo`, null, { params: { newSaldo: nuevoSaldoDivisionActual } });
+      await axios.put(`${apiUrl}/division/${trabajadorActual.division.id}/saldo`, null, { params: { newSaldo: nuevoSaldoDivisionActual } });
 
       // Restar el saldo de la nueva división
       const nuevoSaldoDivisionNueva = divisionMap[updatedTrabajador.idDivision] - parseFloat(updatedTrabajador.saldo);
-      await axios.put(`http://localhost:8080/division/${updatedTrabajador.idDivision}/saldo`, null, { params: { newSaldo: nuevoSaldoDivisionNueva } });
+      await axios.put(`${apiUrl}/division/${updatedTrabajador.idDivision}/saldo`, null, { params: { newSaldo: nuevoSaldoDivisionNueva } });
 
       // Mostrar mensaje de éxito
       await Swal.fire({

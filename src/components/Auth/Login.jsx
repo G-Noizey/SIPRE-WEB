@@ -3,6 +3,11 @@ import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 
+
+//RUTA DE LA API
+const apiUrl = import.meta.env.VITE_API_URL;
+
+
 const Login = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
@@ -10,8 +15,8 @@ const Login = () => {
 
   const handleIniciar = () => {
     axios
-      .post("http://localhost:8080/admin/login", {
-        userAdmin: username,
+    .post(`${apiUrl}/admin/login`, {
+      userAdmin: username,
         password,
       })
       .then((response) => {
