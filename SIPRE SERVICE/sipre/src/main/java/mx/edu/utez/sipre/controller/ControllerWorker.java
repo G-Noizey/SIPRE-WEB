@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -153,7 +154,30 @@ public class ControllerWorker {
 
     ////Cambios Jair
 
-    @PutMapping("/worker/{id}/saldo")
+    @GetMapping("/{id}/details")
+    public ResponseEntity<Map<String, Object>> getWorkerDetails(@PathVariable Long id) {
+        // Buscar el trabajador por su ID
+        Optional<BeanWorker> workerOptional = repoWorker.findById(id);
+
+        // Verificar si el trabajador existe
+        if (workerOptional.isPresent()) {
+            BeanWorker worker = workerOptional.get();
+
+            // Crear un mapa para almacenar los detalles del trabajador
+            Map<String, Object> workerDetails = new HashMap<>();
+            workerDetails.put("saldo", worker.getSaldo());
+            workerDetails.put("nuCuenta", worker.getNuCuenta());
+
+            return ResponseEntity.ok(workerDetails);
+        } else {
+            // Devolver un error si el trabajador no se encuentra
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+
+  /*
+    @PutMapping("/{id}/saldo")
     public ResponseEntity<?> updateWorkerSaldo(@PathVariable Long id, @RequestBody Map<String, Double> saldoData) {
         try {
             // Obtener el trabajador por su ID
@@ -169,6 +193,6 @@ public class ControllerWorker {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error al actualizar el saldo del trabajador: " + e.getMessage());
         }
-    }
+    } */
 
 }

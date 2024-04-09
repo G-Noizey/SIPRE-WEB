@@ -129,55 +129,29 @@ public class ControllerDivision{
             BeanDivision division = divisionOptional.get();
             division.setName(updatedDivision.getName());
             division.setSiglas(updatedDivision.getSiglas());
-            division.setSaldo(updatedDivision.getSaldo());
-            division.setStatus(updatedDivision.getStatus());
-
-            // Actualizar el saldo total
-            division.setSaldototal(updatedDivision.getSaldo());
 
             if (!updatedDivision.getStatus()) {
-                // Si el nuevo estado es "Inactivo", establecer los saldos de los trabajadores a cero
+                // Si el nuevo estado es "Inactivo", establecer los saldos de los trabajadores a cero y sumarlos al saldo de la división
                 List<BeanWorker> workers = workerRepository.findByDivision(division);
+                double totalSaldoReintegrado = 0.0;
                 for (BeanWorker worker : workers) {
-                    worker.setSaldo(0); // Eliminar el saldo del trabajador
+                    totalSaldoReintegrado += worker.getSaldo();
+                    worker.setSaldo(0.0); // Establecer el saldo del trabajador a cero
+                    workerRepository.save(worker); // Guardar los cambios del trabajador
                 }
-                // Actualizar el saldo de la división (suma de los saldos de los trabajadores)
-                double totalSaldo = workers.stream().mapToDouble(BeanWorker::getSaldo).sum();
-                division.setSaldo(totalSaldo);
+                division.setSaldo(division.getSaldo() + totalSaldoReintegrado); // Sumar el saldo reintegrado al saldo de la división
+            } else {
+                division.setSaldo(updatedDivision.getSaldo()); // Actualizar el saldo de la división si está activa
             }
+
+            division.setStatus(updatedDivision.getStatus()); // Actualizar el estado de la división
 
             // Guardar los cambios en la base de datos
-            BeanDivision savedDivision = divisionRepository.save(division);
-
-            // Validar si el saldo es igual al saldototal y volver a guardar si es necesario
-            if (savedDivision.getSaldo() != savedDivision.getSaldototal()) {
-                savedDivision.setSaldototal(savedDivision.getSaldo());
-                divisionRepository.save(savedDivision);
-            }
+            divisionRepository.save(division);
 
             return ResponseEntity.ok("División actualizada exitosamente.");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar la división: " + e.getMessage());
-        }
-    }
-
-    ///Cambios Jair
-
-    @PutMapping("/division/{id}/saldo")
-    public ResponseEntity<?> updateDivisionSaldo(@PathVariable Long id, @RequestBody Map<String, Double> saldoData) {
-        try {
-            // Obtener la división por su ID
-            BeanDivision division = serviceDivision.findById(id);
-
-            // Establecer el nuevo saldo
-            division.setSaldo(saldoData.get("saldo"));
-
-            // Guardar la división actualizada
-            serviceDivision.save(division);
-
-            return ResponseEntity.ok().body("Saldo de la división actualizado con éxito.");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error al actualizar el saldo de la división: " + e.getMessage());
         }
     }
 

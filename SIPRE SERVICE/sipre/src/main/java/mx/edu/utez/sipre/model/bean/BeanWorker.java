@@ -31,8 +31,6 @@ public class BeanWorker {
     private String userWorker;
     @Column(name = "saldo", length = 9, nullable = false)
     private double saldo;
-    @Column(name = "saldototal", length = 9, nullable = false)
-    private double saldototal;
     @Column(name = "telefono", length = 11, nullable = false)
     private int telefono;
     @Column(name = "direccion", length = 150, nullable = false)
