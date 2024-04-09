@@ -31,6 +31,7 @@ public class ServiceWorker {
                             .id(worker.getId())
                             .name(worker.getName())
                             .saldo(worker.getSaldo())
+                            .saldototal(worker.getSaldototal())
                             .build())
                     .collect(Collectors.toList());
             return ResponseEntity.ok().body(workerDtos);
@@ -82,11 +83,16 @@ public class ServiceWorker {
                 .status(dtoWorker.getStatus())
                 .userWorker(dtoWorker.getUserWorker())
                 .saldo(dtoWorker.getSaldo())
+                .saldototal(dtoWorker.getSaldototal())
                 .telefono(dtoWorker.getTelefono())
                 .direccion(dtoWorker.getDireccion())
                 .nuCuenta(dtoWorker.getNuCuenta()) // Asignar nuCuenta solo si no es nulo
                 .division(division)
                 .build();
+
+        // Establecer el saldo total basado en el saldo
+        dtoWorker.setSaldototal(dtoWorker.getSaldo());
+
 
         // Imprimir los datos del trabajador antes de la inserción
         System.out.println("Datos del trabajador a insertar:");
@@ -96,6 +102,9 @@ public class ServiceWorker {
 
         // Guardar el trabajador en la base de datos
         try {
+            repoWorker.save(worker);
+            // Establecer el saldo total basado en el saldo
+            dtoWorker.setSaldototal(dtoWorker.getSaldo());
             repoWorker.save(worker);
 
             // Imprimir mensaje de éxito después de la inserción

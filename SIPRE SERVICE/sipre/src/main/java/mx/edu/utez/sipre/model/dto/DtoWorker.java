@@ -16,6 +16,7 @@ public class DtoWorker {
     private Boolean status;
     private String userWorker;
     private double saldo;
+    private double saldototal;
     private int telefono;
     private String direccion;
     private String nuCuenta;
