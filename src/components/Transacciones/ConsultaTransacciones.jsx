@@ -22,6 +22,11 @@ const ConsultaTransacciones = () => {
   const [selectedStatus, setSelectedStatus] = useState("");
   const [updatedStatus, setUpdatedStatus] = useState("");
 
+  const [tablaHabilitada, setTablaHabilitada] = useState(true);
+
+  const [imagenUrl, setImagenUrl] = useState("");
+
+
   useEffect(() => {
     const fetchDivisiones = async () => {
       try {
@@ -93,6 +98,7 @@ const ConsultaTransacciones = () => {
               variant="success"
               size="sm"
               onClick={() => handleViewMoreShow(row.original)}
+              disabled={row.original.status === "Completado" || row.original.status === "Rechazado"}
             >
               <AiFillEdit />
             </Button>
@@ -104,39 +110,83 @@ const ConsultaTransacciones = () => {
   );
 
   const handleUpdateTransfer = async (transferData) => {
-    try {
-      // Construir el objeto con los datos actualizados
-      const updatedTrans = {
-        ...transferData, // Mantener los datos existentes de la compra
-        status: selectedStatus, // Actualizar el estado con el valor seleccionado
-      };
-
-      // Realizar la solicitud de actualización utilizando Axios
-      await axios.put(`${apiUrl}/transfer/`, updatedTrans);
-
-      // Mostrar una alerta de éxito si la actualización se realiza con éxito
-      await Swal.fire({
-        icon: "success",
-        title: "Transacción actualizada",
-        text: "La transacción se ha actualizado correctamente.",
-        confirmButtonColor: "#2D7541",
-        didClose: () => {
-          // Recargar la página para reflejar los cambios
-          window.location.reload();
-        },
-      });
-    } catch (error) {
-      // Manejar errores mostrando una alerta de error
-      console.error("Error al actualizar la transacción:", error);
-      await Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Ocurrió un error al actualizar la transaccion.",
-        confirmButtonColor: "#2D7541",
-      });
+    if (!transferData.beanWorkerTrans || !transferData.beanWorkerTrans.id) {
+        console.error("El ID del trabajador es indefinido o nulo.");
+        return;
     }
-  };
 
+    const workerId = transferData.beanWorkerTrans.id;
+
+    if (selectedStatus !== 'Completado' && selectedStatus !== 'Rechazado') {
+        // Mostrar una alerta de SweetAlert
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'El estado debe ser "Completado" o "Rechazado" para guardar los cambios.',
+            confirmButtonColor: '#2D7541',
+        });
+        return;
+    }
+
+    try {
+        // Construir el objeto con los datos actualizados de la transferencia
+        const updatedTrans = {
+            ...transferData,
+            status: selectedStatus,
+        };
+
+        // Realizar la solicitud de actualización de la transferencia utilizando Axios
+        await axios.put(`${apiUrl}/transfer/`, updatedTrans);
+
+        // Realizar el reintegro de saldo al trabajador solo si el estado es "Completado"
+        if (selectedStatus === 'Completado') {
+            await handleReintegroSaldo(workerId, parseFloat(transferData.monto));
+        }
+
+        // Deshabilitar la tabla
+        setTablaHabilitada(false);
+
+        // Mostrar una alerta de éxito si la actualización se realiza con éxito
+        await Swal.fire({
+            icon: 'success',
+            title: 'Transferencia actualizada',
+            text: 'La transferencia se ha actualizado correctamente.',
+            confirmButtonColor: '#2D7541',
+            didClose: () => {
+                // Recargar la página para reflejar los cambios
+                window.location.reload();
+            },
+        });
+    } catch (error) {
+        // Manejar errores mostrando una alerta de error
+        console.error("Error al actualizar la transferencia:", error);
+        await Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Ocurrió un error al actualizar la transferencia.',
+            confirmButtonColor: '#2D7541',
+        });
+    }
+};
+
+
+
+  const handleReintegroSaldo = async (workerId, amount) => {
+    try {
+        // Realizar el reintegro al trabajador utilizando Axios
+        await axios.put(`${apiUrl}/worker/${workerId}/reintegro`, null, {
+          params: {
+                cantidadReintegro: amount,
+            },
+        });
+    } catch (error) {
+        console.error("Error al realizar el reintegro de saldo:", error);
+        throw error; // Propagar el error para que sea manejado por el bloque catch externo
+    }
+};
+
+  
+  
   const {
     getTableProps,
     getTableBodyProps,
@@ -170,11 +220,28 @@ const ConsultaTransacciones = () => {
     setViewMoreData(null);
   };
 
-  const handleViewMoreShow = (data) => {
+
+  const handleViewMoreShow = async (data) => {
     setViewMoreData(data);
     setShowViewMore(true);
+  
+    try {
+      // Obtener la imagen del servidor
+      const response = await axios.get(`${apiUrl}/transfer/${data.id}/comprobante`, {
+        responseType: "arraybuffer",
+      });
+  
+      // Crear una URL a partir de los bytes de la imagen
+      const blob = new Blob([response.data], { type: "image/jpeg" });
+      const imageUrl = URL.createObjectURL(blob);
+      setImagenUrl(imageUrl);
+    } catch (error) {
+      console.error("Error al obtener la imagen:", error);
+    }
   };
-
+  
+  
+  
   const getCellStyle = (status) => {
     switch (status) {
       case "Pendiente":
@@ -211,7 +278,7 @@ const AmpliacionImagen = ({ show, handleClose }) => {
   return (
     <Modal show={show} onHide={handleClose} size="l"> {/* Tamaño 'xl' para un modal extra grande */}
       <Modal.Body>
-        <img src="../../../public/assets/images/trans.jpg" alt="Imagen Ampliada" style={{ width: '100%', height: 'auto' }} />
+        <img src={imagenUrl} alt="Imagen Ampliada" style={{ width: '100%', height: 'auto' }} />
       </Modal.Body>
     </Modal>
   );
@@ -263,7 +330,7 @@ const ImagenClickeable = () => {
         >
           {/* Imagen sin consumo */}
           <img
-            src="../../../public/assets/images/trans.jpg"
+           src={imagenUrl}
             alt="Imagen General"
             style={{ maxWidth: '100%', maxHeight: '100%' }}
           />
@@ -294,22 +361,7 @@ const ImagenClickeable = () => {
                   </select>
                 </Row>
 
-                <Row>
-  <label>Reintegrar saldo:</label>
-  <input
-    type="number"
-  // Para bloquear la edición del input
-    style={{
-      borderRadius: '5px',
-      padding: '5px',
-      border: '1px solid #ced4da',
-      backgroundColor: '#f5f5f5', 
-      outline: 'none', 
-      marginLeft: '10px',
-    }}
-  />
-</Row>
-
+      
 
               </Container>
             </Modal.Body>
