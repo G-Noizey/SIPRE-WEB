@@ -141,9 +141,13 @@ const ConsultaTrabajadores = () => {
         accessor: "division.name",
       },
       {
-        Header: "Estatus",
-        accessor: "status",
-        Cell: ({ value }) => (value ? "Activo" : "Inactivo"),
+        Header: 'Estatus',
+        accessor: 'status',
+        Cell: ({ value, row }) => (
+          <span className="badge" style={getCellStyle(value ? 'Activo' : 'Inactivo', row.original.status)}>
+            {value ? 'Activo' : 'Inactivo'}
+          </span>
+        ),
       },
       {
         Header: "Acciones",
@@ -162,6 +166,31 @@ const ConsultaTrabajadores = () => {
     ],
     []
   );
+
+  
+  const getCellStyle = (status) => {
+    switch (status) {
+      case "Activo":
+        return {
+        backgroundColor: "#198754",
+        width: "100px", // Ancho fijo para el color de fondo
+        height: "20px", // Alto fijo para el color de fondo
+        borderRadius: "5px",
+        color: "white",
+        };
+      case "Inactivo":
+        return {
+        backgroundColor: "#888888",
+        width: "100px", // Ancho fijo para el color de fondo
+        height: "20px", // Alto fijo para el color de fondo
+        borderRadius: "5px",
+        color: "white",
+        };
+      default:
+        return {};
+    }
+ 
+};
 
   const {
     getTableProps,
