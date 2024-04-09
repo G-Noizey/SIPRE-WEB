@@ -97,10 +97,22 @@ public class ControllerBuys {
     }
 
 
+
+    //ESTADO DE CUENTA DE DIVISIONES
+
+    @CrossOrigin(origins = {"*"})
     @GetMapping("/generatePDF/{divisionId}")
     public ResponseEntity<byte[]> generatePDF(@PathVariable Long divisionId) {
         return serviceBuys.generatePDF(divisionId);
     }
+
+   //ESTADO DE CUENTA DE TRABAJADORES
+    @CrossOrigin(origins = {"*"})
+    @GetMapping("/generatePDFWorker/{trabajadorId}")
+    public ResponseEntity<byte[]> generatePDFWorker(@PathVariable Long trabajadorId) {
+        return serviceBuys.generatePDFWorker(trabajadorId);
+    }
+
 
 
     @PostMapping("/")

@@ -216,7 +216,7 @@ public class ServiceBuys {
             document.add(new Paragraph(" "));
 
             // Agregar texto encima de la tabla de compras
-            document.add(new Paragraph("Compras realizadas:").setFont(font).setBold().setFontSize(16).setFontColor(new DeviceRgb(45, 117, 65)));
+            document.add(new Paragraph("Compras real    izadas:").setFont(font).setBold().setFontSize(16).setFontColor(new DeviceRgb(45, 117, 65)));
 
             // Agregar tabla con los detalles de las compras
             Table table = new Table(new float[]{4, 2, 2, 2}); // Añadir una columna más para el nombre del trabajador
@@ -303,4 +303,143 @@ public class ServiceBuys {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
+
+
+
+
+    public ResponseEntity<byte[]> generatePDFWorker(@PathVariable Long idTrabajador) {
+        try {
+            // Obtener el nombre del trabajador
+            String nombreTrabajador = repoWorker.findById(idTrabajador).get().getName();
+
+            // Obtener las compras completadas del trabajador especificado
+            List<BeanBuys> comprasCompletadas = repoBuys.findByBeanWorkerIdAndStatus(idTrabajador, "Completado");
+
+            // Obtener las transferencias completadas del trabajador especificado
+            List<BeanTransferencia> transferencias = repoTransfer.findByBeanWorkerTrans_Id(idTrabajador);
+
+            // Crear el documento PDF con los detalles de las compras completadas
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            PdfWriter writer = new PdfWriter(outputStream);
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf, PageSize.A4);
+
+            // Agregar espacio en blanco
+            document.add(new Paragraph(" "));
+
+            // Agregar campo para agregar imagen a la izquierda del título
+            Table imageTable = new Table(new float[]{1, 4});
+            imageTable.setWidth(UnitValue.createPercentValue(100));
+
+            Cell imageCell = new Cell();
+            Image img = new Image(ImageDataFactory.create("classpath:logo.png"));
+            img.setWidth(UnitValue.createPercentValue(10));
+
+            Paragraph paragraph = new Paragraph();
+            paragraph.add(img);
+
+            PdfFont font = PdfFontFactory.createFont();
+            Text text = new Text("Estado de cuenta del trabajador: " + nombreTrabajador)
+                    .setFont(font)
+                    .setFontSize(20)
+                    .setFontColor(new DeviceRgb(45, 117, 65))
+                    .setTextAlignment(TextAlignment.CENTER);
+
+            paragraph.add(text);
+
+            imageCell.add(paragraph);
+            imageCell.setBorder(Border.NO_BORDER); // Eliminar bordes de la celda
+            imageCell.setVerticalAlignment(VerticalAlignment.TOP); // Alinear el texto en la parte superior de la celda
+            imageTable.addCell(imageCell);
+
+            document.add(imageTable);
+
+            // Agregar espacio en blanco
+            document.add(new Paragraph(" "));
+
+            // Agregar texto encima de la tabla de compras
+            document.add(new Paragraph("Compras realizadas:").setFont(font).setBold().setFontSize(16).setFontColor(new DeviceRgb(45, 117, 65)));
+
+            // Agregar tabla con los detalles de las compras
+            Table table = new Table(new float[]{4, 2, 2}); // No es necesario añadir una columna más para el nombre del trabajador, ya que es el trabajador mismo
+            table.setWidth(UnitValue.createPercentValue(100));
+
+            // Establecer color de borde de las celdas
+            table.setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1)); // Grosor de borde 1pt
+
+            // Encabezados de la tabla
+            Cell cell = new Cell().add(new Paragraph("Descripción").setBold());
+            cell.setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1)); // Establecer color de borde
+            table.addCell(cell);
+
+            cell = new Cell().add(new Paragraph("Monto").setBold());
+            cell.setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1)); // Establecer color de borde
+            table.addCell(cell);
+
+            cell = new Cell().add(new Paragraph("Fecha de movimiento").setBold());
+            cell.setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1)); // Establecer color de borde
+            table.addCell(cell);
+
+            // Datos de las compras
+            for (BeanBuys compra : comprasCompletadas) {
+                table.addCell(new Cell().add(new Paragraph(compra.getDescripcion())).setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1))); // Establecer color de borde
+                table.addCell(new Cell().add(new Paragraph(String.valueOf(compra.getMonto()))).setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1))); // Establecer color de borde
+                table.addCell(new Cell().add(new Paragraph(String.valueOf(compra.getFecha()))).setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1))); // Establecer color de borde
+            }
+
+            document.add(table);
+
+            // Agregar espacio en blanco
+            document.add(new Paragraph(" "));
+
+            // Agregar texto encima de la tabla de transferencias
+            document.add(new Paragraph("Transacciones realizadas:").setFont(font).setBold().setFontSize(16).setFontColor(new DeviceRgb(45, 117, 65)));
+
+            // Agregar tabla con los detalles de las transferencias
+            Table transferTable = new Table(new float[]{4, 2, 2}); // No es necesario añadir una columna más para el nombre del trabajador, ya que es el trabajador mismo
+            transferTable.setWidth(UnitValue.createPercentValue(100));
+
+            // Establecer color de borde de las celdas
+            transferTable.setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1)); // Grosor de borde 1pt
+
+            // Encabezados de la tabla
+            Cell transferCell = new Cell().add(new Paragraph("Descripción").setBold());
+            transferCell.setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1)); // Establecer color de borde
+            transferTable.addCell(transferCell);
+
+            transferCell = new Cell().add(new Paragraph("Monto").setBold());
+            transferCell.setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1)); // Establecer color de borde
+            transferTable.addCell(transferCell);
+
+            transferCell = new Cell().add(new Paragraph("Fecha de movimiento").setBold());
+            transferCell.setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1)); // Establecer color de borde
+            transferTable.addCell(transferCell);
+
+            // Datos de las transferencias
+            for (BeanTransferencia transferencia : transferencias) {
+                transferTable.addCell(new Cell().add(new Paragraph(transferencia.getDescripcion())).setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1))); // Establecer color de borde
+                transferTable.addCell(new Cell().add(new Paragraph(String.valueOf(transferencia.getMonto()))).setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1))); // Establecer color de borde
+                transferTable.addCell(new Cell().add(new Paragraph(String.valueOf(transferencia.getFecha()))).setBorder(new SolidBorder(new DeviceRgb(45, 117, 65), 1))); // Establecer color de borde
+            }
+
+            document.add(transferTable);
+
+            document.close();
+
+            // Devolver el PDF como un array de bytes en la respuesta
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(outputStream.toByteArray());
+        } catch (Exception e) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+
+
+
+
+
+
 }

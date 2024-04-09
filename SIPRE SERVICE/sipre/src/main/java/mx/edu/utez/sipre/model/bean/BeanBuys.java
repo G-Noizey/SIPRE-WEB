@@ -42,6 +42,8 @@ public class BeanBuys {
 
     @Column(name="status", length = 20, nullable = false)
     private String status;
+
+
     @ManyToOne
     @JoinColumn(name = "idWorker", nullable = false)
     private BeanWorker beanWorker;

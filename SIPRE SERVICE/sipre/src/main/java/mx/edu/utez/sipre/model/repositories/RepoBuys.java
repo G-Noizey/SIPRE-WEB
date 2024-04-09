@@ -11,4 +11,5 @@ public interface RepoBuys extends JpaRepository<BeanBuys, Long> {
 
     List<BeanBuys> findByBeanDivisionIdAndStatus(Long divisionId, String status);
 
+    List<BeanBuys> findByBeanWorkerIdAndStatus(Long trabajadorId, String status);
 }

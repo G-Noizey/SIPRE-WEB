@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface RepoTransfer extends JpaRepository<BeanTransferencia, Long> {
     List<BeanTransferencia> findByBeanDivisionTrans_Id(Long idDivision);
+
+    List<BeanTransferencia> findByBeanWorkerTrans_Id(Long idTrabajador);
 }

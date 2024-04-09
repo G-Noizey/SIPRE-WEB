@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Container, Modal, Row, Form, Col } from "react-bootstrap";
 import { AiFillEdit } from "react-icons/ai";
 import { HiArrowSmRight, HiArrowSmLeft } from "react-icons/hi";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaFileAlt } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useTable, usePagination, useGlobalFilter } from "react-table";
 
@@ -161,9 +161,45 @@ const ConsultaTrabajadores = () => {
           </>
         ),
       },
+
+
+      {
+        Header: 'Estado de cuenta',
+        Cell: ({ row }) => (
+          <Button variant="success" size="sm" onClick={() => generatePDF(row.original.id)}>
+            <FaFileAlt /> {/* Icono de PDF */}
+          </Button>
+        ),
+      },
     ],
     []
   );
+
+
+
+  const generatePDF = async (id) => {
+    try {
+      const response = await axios.get(`${apiUrl}/buys/generatePDFWorker/${id}`, {
+        responseType: 'blob', // Indicar que la respuesta es un archivo binario
+      });
+
+      // Crear un objeto URL para el blob
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+
+      // Crear un enlace <a> y simular un clic para descargar el archivo
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'compras.pdf');
+      document.body.appendChild(link);
+      link.click();
+
+      // Liberar el objeto URL
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error al generar el PDF:', error);
+    }
+  };
+
 
   const getCellStyle = (status) => {
     switch (status) {
