@@ -351,23 +351,32 @@ const ConsultaTrabajadores = () => {
         status: selectedTrabajador.status,
         password: selectedTrabajador.password,
       };
-
-      // Si el estado del trabajador se cambió a inactivo, ajustar el saldo y actualizar el saldo de la división
-      if (selectedTrabajador.status === 0) {
-        updatedTrabajador.saldo = 0;
-
-        // Obtener la división del trabajador
-        const divisionResponse = await axios.get(`${apiUrl}/division/${selectedTrabajador.division.id}`);
-        const division = divisionResponse.data.body;
-
-        // Sumar el saldo original del trabajador al saldo de la división
-        const nuevoSaldoDivision = division.saldo + selectedTrabajador.saldo;
-        await axios.put(`${apiUrl}/division/${selectedTrabajador.division.id}/saldo`, { saldo: nuevoSaldoDivision });
+  
+      // Si el estado del trabajador se cambió a inactivo, mostrar alerta de confirmación
+      if (selectedTrabajador.status === false) {
+        // Mostrar alerta de confirmación
+        const result = await Swal.fire({
+          title: '¿Estás seguro?',
+          text: 'Si desactivas al trabajador, se ajustará su saldo a cero y se actualizará el saldo de la división correspondiente. ',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#2D7541',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Sí, desactivar trabajador'
+        });
+  
+        // Si el usuario confirma la acción, actualizar el estado del trabajador
+        if (result.isConfirmed) {
+          updatedTrabajador.status = false; // Establecer el estado del trabajador a inactivo
+        } else {
+          // Si el usuario cancela la acción, salir de la función
+          return;
+        }
       }
-
-      // Actualizar el trabajador en la base de datos utilizando el nuevo endpoint
+  
+      // Realizar la actualización del trabajador en la base de datos utilizando el nuevo endpoint
       await axios.put(`${apiUrl}/worker/${editTrabajadorId}/infoPersonal`, updatedTrabajador);
-
+  
       // Mostrar mensaje de éxito
       await Swal.fire({
         icon: "success",
@@ -390,6 +399,7 @@ const ConsultaTrabajadores = () => {
     }
     setShowEdit(false);
   };
+  
 
 
   const handleUpdateData = async () => {

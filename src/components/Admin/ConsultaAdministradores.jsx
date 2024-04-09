@@ -215,13 +215,34 @@ const ConsultaAdministradores = () => {
   };
 
    // CONSUMO DEL API - PUT EN ADMINISTRADORES
-  const handleEditSave = async () => {
+   const handleEditSave = async () => {
     try {
+      // Si el estado del administrador se cambió a inactivo, mostrar alerta de confirmación
+      if (selectedAdministrador.status === false) {
+        // Mostrar alerta de confirmación
+        const result = await Swal.fire({
+          title: '¿Estás seguro?',
+          text: 'Si desactivas al administrador perderá el acceso a la plataforma.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#2D7541',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Sí, desactivar administrador'
+        });
+  
+        // Si el usuario cancela la acción, salir de la función
+        if (!result.isConfirmed) {
+          return;
+        }
+      }
+  
+      // Realizar la actualización del administrador en la base de datos utilizando el nuevo endpoint
       await axios.put(`${apiUrl}/admin/${editAdministradorId}`, selectedAdministrador);
-      // Mostrar alerta de éxito
+  
+      // Mostrar mensaje de éxito
       await Swal.fire({
         icon: 'success',
-        title: 'Administrador modificada',
+        title: 'Administrador modificado',
         text: 'El administrador se modificó correctamente.',
         confirmButtonColor: '#2D7541',
         didClose: () => {
@@ -241,6 +262,7 @@ const ConsultaAdministradores = () => {
     }
     setShowEdit(false);
   };
+  
 
 
   // RENDERIZACIÓN DEL COMPONENTE

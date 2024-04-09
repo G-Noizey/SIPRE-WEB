@@ -231,29 +231,59 @@ const ConsultaDivisiones = () => {
 
  const handleEditSave = async () => {
   try {
-      // Enviar el formulario con los datos de selectedDivision
-      const response = await axios.put(`${apiUrl}/division/${editDivisionId}`, selectedDivision);
+    if (selectedDivision.status === false) { // Verificar si el estado es inactivo
+      // Mostrar alerta de confirmación
+      const result = await Swal.fire({
+        title: '¿Estás seguro?',
+        text: 'Si inactivas la división, quitarás el saldo a todos los trabajadores que le pertenecen.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#2D7541',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, inactivar división'
+      });
 
-      // Mostrar alerta de éxito
-      await Swal.fire({
+      if (result.isConfirmed) { // Si el usuario confirma la acción
+        // Enviar el formulario con los datos de selectedDivision
+        const response = await axios.put(`${apiUrl}/division/${editDivisionId}`, selectedDivision);
+
+        // Mostrar alerta de éxito
+        await Swal.fire({
           icon: 'success',
           title: 'División modificada',
           text: response.data,
           confirmButtonColor: '#2D7541',
           didClose: () => {
-              // Recargar la página después de cerrar la alerta
-              window.location.reload();
+            // Recargar la página después de cerrar la alerta
+            window.location.reload();
           }
-      });
-  } catch (error) {
-      console.error('Error al modificar la división:', error);
-      // Mostrar alerta de error
+        });
+      }
+    } else { // Si el estado es diferente de inactivo
+      // Enviar el formulario con los datos de selectedDivision
+      const response = await axios.put(`${apiUrl}/division/${editDivisionId}`, selectedDivision);
+
+      // Mostrar alerta de éxito
       await Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Ocurrió un error al modificar la división. Por favor, inténtalo de nuevo.',
-          confirmButtonColor: '#2D7541',
+        icon: 'success',
+        title: 'División modificada',
+        text: response.data,
+        confirmButtonColor: '#2D7541',
+        didClose: () => {
+          // Recargar la página después de cerrar la alerta
+          window.location.reload();
+        }
       });
+    }
+  } catch (error) {
+    console.error('Error al modificar la división:', error);
+    // Mostrar alerta de error
+    await Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Ocurrió un error al modificar la división. Por favor, inténtalo de nuevo.',
+      confirmButtonColor: '#2D7541',
+    });
   }
   setShowEdit(false);
 };
