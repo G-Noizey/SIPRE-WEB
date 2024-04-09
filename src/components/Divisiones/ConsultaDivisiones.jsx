@@ -354,6 +354,7 @@ const ConsultaDivisiones = () => {
                     placeholder=""
                     value={selectedDivision?.name || ''}
                     onChange={(e) => setSelectedDivision({ ...selectedDivision, name: e.target.value })}
+                    disabled={selectedDivision?.status === false}
                 />
             </Row>
             <Row>
@@ -363,10 +364,10 @@ const ConsultaDivisiones = () => {
                     placeholder=""
                     value={selectedDivision?.siglas || ''}
                     onChange={(e) => setSelectedDivision({ ...selectedDivision, siglas: e.target.value })}
+                    disabled={selectedDivision?.status === false}
                 />
             </Row>
             <Row>
-                
                 <Form.Control
                     type="hidden"
                     placeholder=""
@@ -380,6 +381,7 @@ const ConsultaDivisiones = () => {
                     as="select"
                     value={selectedDivision?.status ? 'Activo' : 'Inactivo'}
                     onChange={(e) => setSelectedDivision({ ...selectedDivision, status: e.target.value === 'Activo' })}
+                    disabled={false} // Permitir que este control siempre sea modificable
                 >
                     <option>Activo</option>
                     <option>Inactivo</option>

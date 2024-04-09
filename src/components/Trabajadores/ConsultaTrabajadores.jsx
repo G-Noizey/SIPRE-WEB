@@ -672,105 +672,110 @@ const ConsultaTrabajadores = () => {
 
           {/* Modal para modificar trabajador */}
 
+         
           <Modal show={showEdit} onHide={handleEditClose}>
-            <Modal.Header closeButton>
-              <Modal.Title>Modificar Trabajador</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Container>
-                <Row>
-                  <Col>
-                    <label>Nombre:</label>
-                    <Form.Control
-                      type="text"
-                      placeholder=""
-                      value={selectedTrabajador?.name || ""}
-                      onChange={(e) =>
-                        setSelectedTrabajador({
-                          ...selectedTrabajador,
-                          name: e.target.value,
-                        })
-                      }
-                    />
-                  </Col>
-                  <Col>
-                    <label>Apellido:</label>
-                    <Form.Control
-                      type="text"
-                      placeholder=""
-                      value={selectedTrabajador?.lastname || ""}
-                      onChange={(e) =>
-                        setSelectedTrabajador({
-                          ...selectedTrabajador,
-                          lastname: e.target.value,
-                        })
-                      }
-                    />
-                  </Col>
-                </Row>
-                <Row>
-                  <Col>
-                    <label>Correo Electrónico:</label>
-                    <Form.Control
-                      type="text"
-                      placeholder=""
-                      value={selectedTrabajador?.email || ""}
-                      onChange={(e) =>
-                        setSelectedTrabajador({
-                          ...selectedTrabajador,
-                          email: e.target.value,
-                        })
-                      }
-                    />
-                  </Col>
-                  <Col>
-                    <label>Usuario:</label>
-                    <Form.Control
-                      type="text"
-                      placeholder=""
-                      value={selectedTrabajador?.userWorker || ""}
-                      onChange={(e) =>
-                        setSelectedTrabajador({
-                          ...selectedTrabajador,
-                          userWorker: e.target.value,
-                        })
-                      }
-                    />
-                  </Col>
-                </Row>
-                <Row>
-                  <Col>
-                    <label>Telefono:</label>
-                    <Form.Control
-                      type="text"
-                      placeholder=""
-                      value={selectedTrabajador?.telefono || ""}
-                      onChange={(e) =>
-                        setSelectedTrabajador({
-                          ...selectedTrabajador,
-                          telefono: e.target.value,
-                        })
-                      }
-                    />
-                  </Col>
-                  <Col>
-                    <label>Direccion:</label>
-                    <Form.Control
-                      type="text"
-                      placeholder=""
-                      value={selectedTrabajador?.direccion || ""}
-                      onChange={(e) =>
-                        setSelectedTrabajador({
-                          ...selectedTrabajador,
-                          direccion: e.target.value,
-                        })
-                      }
-                    />
-                  </Col>
-                </Row>
-
-
-                <Row>
+  <Modal.Header closeButton>
+    <Modal.Title>Modificar Trabajador</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    <Container>
+      <Row>
+        <Col>
+          <label>Nombre:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={selectedTrabajador?.name || ""}
+            onChange={(e) =>
+              setSelectedTrabajador({
+                ...selectedTrabajador,
+                name: e.target.value,
+              })
+            }
+            disabled={selectedTrabajador?.status === false}
+          />
+        </Col>
+        <Col>
+          <label>Apellido:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={selectedTrabajador?.lastname || ""}
+            onChange={(e) =>
+              setSelectedTrabajador({
+                ...selectedTrabajador,
+                lastname: e.target.value,
+              })
+            }
+            disabled={selectedTrabajador?.status === false}
+          />
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <label>Correo Electrónico:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={selectedTrabajador?.email || ""}
+            onChange={(e) =>
+              setSelectedTrabajador({
+                ...selectedTrabajador,
+                email: e.target.value,
+              })
+            }
+            disabled={selectedTrabajador?.status === false}
+          />
+        </Col>
+        <Col>
+          <label>Usuario:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={selectedTrabajador?.userWorker || ""}
+            onChange={(e) =>
+              setSelectedTrabajador({
+                ...selectedTrabajador,
+                userWorker: e.target.value,
+              })
+            }
+            disabled={selectedTrabajador?.status === false}
+          />
+        </Col>
+      </Row>
+      <Row>
+        <Col>
+          <label>Teléfono:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={selectedTrabajador?.telefono || ""}
+            onChange={(e) =>
+              setSelectedTrabajador({
+                ...selectedTrabajador,
+                telefono: e.target.value,
+              })
+            }
+            disabled={selectedTrabajador?.status === false}
+          />
+        </Col>
+        <Col>
+          <label>Dirección:</label>
+          <Form.Control
+            type="text"
+            placeholder=""
+            value={selectedTrabajador?.direccion || ""}
+            onChange={(e) =>
+              setSelectedTrabajador({
+                ...selectedTrabajador,
+                direccion: e.target.value,
+              })
+            }
+            disabled={selectedTrabajador?.status === false}
+          />
+        </Col>
+      </Row>
+      <Row>
         <Col>
           <label>Número de cuenta:</label>
           <Form.Control
@@ -783,116 +788,120 @@ const ConsultaTrabajadores = () => {
                 nuCuenta: e.target.value,
               })
             }
+            disabled={selectedTrabajador?.status === false}
           />
         </Col>
       </Row>
-                <Row>
-                  <Col>
-                    <label>Estatus:</label>
-                    <Form.Control
-                      as="select"
-                      value={selectedTrabajador?.status ? "Activo" : "Inactivo"}
-                      onChange={(e) =>
-                        setSelectedTrabajador({
-                          ...selectedTrabajador,
-                          status: e.target.value === "Activo",
-                        })
-                      }
-                    >
-                      <option>Activo</option>
-                      <option>Inactivo</option>
-                    </Form.Control>
-                  </Col>
-                </Row>
-
-                <Button variant="success" onClick={handleOpenSecondModal} style={{ marginTop: '20px' }}>
-                  Cambiar de División al Trabajador
-                </Button>
-
-              </Container>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="success" onClick={handleEditSave}>
-                Guardar cambios
-              </Button>
-            </Modal.Footer>
-          </Modal>
-
-          {/* Segundo modal */}
-          {/* Segundo modal */}
-          <Modal show={showSecondModal} onHide={handleCloseSecondModal}
+      <Row>
+        <Col>
+          <label>Estatus:</label>
+          <Form.Control
+            as="select"
+            value={selectedTrabajador?.status ? "Activo" : "Inactivo"}
+            onChange={(e) =>
+              setSelectedTrabajador({
+                ...selectedTrabajador,
+                status: e.target.value === "Activo",
+              })
+            }
+            disabled={false} // Permitir que este control siempre sea modificable
           >
-            <Modal.Header closeButton>
-              <Modal.Title>Cambiar de División</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              {/* Contenido del segundo modal */}
-              <Row style={{ marginTop: '50px' }}>
-                <Col>
-                  <label>División actual:</label>
-                  <Form.Control
-                    type="text"
-                    placeholder=""
-                    value={selectedTrabajador?.division?.name || ""}
-                    disabled
-                  />
-                </Col>
-                <Col>
-                  <label>Seleccionar nueva división:</label>
-                  <Form.Control
-                    as="select"
-                    value={nuevaDivision.idDivision}
-                    onChange={(e) => {
-                      const idNuevaDivision = e.target.value;
-                      setNuevaDivision({
-                        ...nuevaDivision,
-                        idDivision: idNuevaDivision,
-                      });
-                      setSelectedDivisionSaldo(divisionMap[idNuevaDivision]);
-                    }}
-                  >
-                    <option value="">Escoge una nueva división</option>
-                    {divisiones.map((division) => (
-                      <option key={division.id} value={division.id}>
-                        {division.name}
-                      </option>
-                    ))}
-                  </Form.Control>
-                </Col>
-              </Row>
+            <option>Activo</option>
+            <option>Inactivo</option>
+          </Form.Control>
+        </Col>
+      </Row>
+      <Button
+        variant="success"
+        onClick={handleOpenSecondModal}
+        style={{ marginTop: "20px" }}
+      >
+        Cambiar de División al Trabajador
+      </Button>
+    </Container>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="success" onClick={handleEditSave}>
+      Guardar cambios
+    </Button>
+  </Modal.Footer>
+</Modal>
 
-              <Row style={{ marginTop: '50px' }}>
-                <Col>
-                  <label>Saldo disponible de la nueva división:</label>
-                  <p>${selectedDivisionSaldo}</p>
-                </Col>
-                <Col>
-                  <label>Asignar nuevo saldo:</label>
-                  <Form.Control
-                    type="text"
-                    placeholder=""
-                    value={nuevaDivision.saldo}
-                    onChange={(e) =>
-                      setNuevaDivision({
-                        ...nuevaDivision,
-                        saldo: e.target.value,
-                      })
-                    }
-                  />
-                </Col>
+          {/* Segundo modal */}
+          {/* Segundo modal */}
+          <Modal show={showSecondModal} onHide={handleCloseSecondModal}>
+  <Modal.Header closeButton>
+    <Modal.Title>Cambiar de División</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    {/* Contenido del segundo modal */}
+    <Row style={{ marginTop: "50px" }}>
+      <Col>
+        <label>División actual:</label>
+        <Form.Control
+          type="text"
+          placeholder=""
+          value={selectedTrabajador?.division?.name || ""}
+          disabled
+        />
+      </Col>
+      <Col>
+        <label>Seleccionar nueva división:</label>
+        <Form.Control
+          as="select"
+          value={nuevaDivision.idDivision}
+          onChange={(e) => {
+            const idNuevaDivision = e.target.value;
+            setNuevaDivision({
+              ...nuevaDivision,
+              idDivision: idNuevaDivision,
+            });
+            setSelectedDivisionSaldo(divisionMap[idNuevaDivision]);
+          }}
+          disabled={selectedTrabajador?.status === false}
+        >
+          <option value="">Escoge una nueva división</option>
+          {divisiones.map((division) => (
+            <option key={division.id} value={division.id}>
+              {division.name}
+            </option>
+          ))}
+        </Form.Control>
+      </Col>
+    </Row>
 
-              </Row>
-              <Row style={{ marginTop: '100px' }}></Row>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="success" onClick={handleUpdateData}>
-                Guardar cambios
-              </Button>
-              <Button variant="secondary" onClick={handleCloseSecondModal}>
-                Cerrar
-              </Button>
-            </Modal.Footer>
-          </Modal>
+    <Row style={{ marginTop: "50px" }}>
+      <Col>
+        <label>Saldo disponible de la nueva división:</label>
+        <p>${selectedDivisionSaldo}</p>
+      </Col>
+      <Col>
+        <label>Asignar nuevo saldo:</label>
+        <Form.Control
+          type="text"
+          placeholder=""
+          value={nuevaDivision.saldo}
+          onChange={(e) =>
+            setNuevaDivision({
+              ...nuevaDivision,
+              saldo: e.target.value,
+            })
+          }
+          disabled={selectedTrabajador?.status === false}
+        />
+      </Col>
+    </Row>
+    <Row style={{ marginTop: "100px" }}></Row>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="success" onClick={handleUpdateData}>
+      Guardar cambios
+    </Button>
+    <Button variant="secondary" onClick={handleCloseSecondModal}>
+      Cerrar
+    </Button>
+  </Modal.Footer>
+</Modal>
 
           {/* Modal para ver mas informacion del trabajador */}
           <Modal show={showViewMore} onHide={handleViewMoreClose}>
