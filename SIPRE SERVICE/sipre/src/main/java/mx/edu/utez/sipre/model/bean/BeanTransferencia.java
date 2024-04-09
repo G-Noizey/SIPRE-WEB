@@ -12,23 +12,29 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "transfer")
+
+
 public class BeanTransferencia {
     @Id
     @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
     @Column(name = "descripcion", length = 200, nullable = false)
     private String descripcion;
+
     @Column(name = "fecha", nullable = false)
     private LocalDate fecha;
-    // @Column(name="nuTransferencia", length = 16, nullable = false)
-    //private Long nuTransferencia;
+
+
     @Column(name = "monto", length = 100, nullable = false)
     private double monto;
+
     @Lob
     @Column(name = "comprobante", columnDefinition = "LONGBLOB", nullable = false)
     private byte[] comprobante;
+
     @Column(name = "status", length = 20, nullable = false)
     private String status;
+
     @ManyToOne
     @JoinColumn(name = "idWorker", nullable = false)
     private BeanWorker beanWorkerTrans;
@@ -37,3 +43,4 @@ public class BeanTransferencia {
     @JoinColumn(name = "idDivision", nullable = false)
     private BeanDivision beanDivisionTrans;
 }
+

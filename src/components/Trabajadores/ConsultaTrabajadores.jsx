@@ -1036,11 +1036,7 @@ const ConsultaTrabajadores = () => {
                 </Row>
               </Container>
             </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleViewMoreClose}>
-                Cerrar
-              </Button>
-            </Modal.Footer>
+        
           </Modal>
 
           {/* Tabla de Trabajadores*/}
