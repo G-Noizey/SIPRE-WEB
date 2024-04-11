@@ -167,6 +167,7 @@ public class ControllerWorker {
             Map<String, Object> workerDetails = new HashMap<>();
             workerDetails.put("saldo", worker.getSaldo());
             workerDetails.put("nuCuenta", worker.getNuCuenta());
+            workerDetails.put("divisionStatus", worker.getDivision().getStatus());
 
             return ResponseEntity.ok(workerDetails);
         } else {

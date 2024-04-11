@@ -306,15 +306,15 @@
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "Contraseña incorrecta"));
             }
 
-            // Verificar si el trabajador está inactivo
             if (!storedWorker.getStatus()) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.singletonMap("error", "El trabajador está inactivo"));
             }
 
-            // Añadir nuCuenta al mapa de respuesta
+            // Generar datos de respuesta para el trabajador activo
             Map<String, String> responseData = new HashMap<>();
             responseData.put("token", generateToken());
             responseData.put("id", String.valueOf(storedWorker.getId()));
+            responseData.put("password", String.valueOf(storedWorker.getPassword()));
             responseData.put("name", storedWorker.getName());
             responseData.put("lastname", storedWorker.getLastname());
             responseData.put("email", storedWorker.getEmail());
@@ -324,10 +324,12 @@
             responseData.put("telefono", String.valueOf(storedWorker.getTelefono()));
             responseData.put("direccion", storedWorker.getDireccion());
             responseData.put("idDivision", String.valueOf(storedWorker.getDivision().getId()));
-            responseData.put("nuCuenta", storedWorker.getNuCuenta()); // Agregar nuCuenta al mapa
-
+            responseData.put("divisionStatus", String.valueOf(storedWorker.getDivision().getStatus()));
+            responseData.put("nuCuenta", storedWorker.getNuCuenta());
             return ResponseEntity.ok(responseData);
         }
+
+
 
         @Transactional(rollbackFor = {SQLException.class})
         public ResponseEntity<BeanWorker> updateByEmail(String email, String newPassword) {
