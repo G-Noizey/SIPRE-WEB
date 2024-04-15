@@ -52,6 +52,7 @@ public class ControllerBuys {
                                         @RequestParam String status,
                                         @RequestParam Long idWorker,
                                         @RequestParam Long idDivision,
+                                        @RequestParam(required = false, defaultValue = "") String comentario,
                                         @RequestParam MultipartFile comprobante) throws IOException {
         // Obtener la instancia de BeanWorker
         BeanWorker worker = repoWorker.findById(idWorker)
@@ -78,6 +79,7 @@ public class ControllerBuys {
         compra.setStatus(status);
         compra.setBeanWorker(worker);
         compra.setBeanDivision(division);
+        compra.setComentario(comentario);
         // Asignar el comprobante
         compra.setComprobante(comprobante.getBytes()); // Asumiendo que comprobante es un byte[]
 

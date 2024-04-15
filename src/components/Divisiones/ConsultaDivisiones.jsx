@@ -7,6 +7,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { useTable, usePagination, useGlobalFilter } from 'react-table';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { useFormik } from "formik";
+import * as Yup from 'yup';
 
 
 //RUTA DE LA API
@@ -17,6 +19,12 @@ const ConsultaDivisiones = () => {
   const [divisiones, setDivisiones] = useState([]);
   const [editDivisionId, setEditDivisionId] = useState(null); // Estado para almacenar el ID de la división en edición
   const [selectedDivision, setSelectedDivision] = useState(null); // Estado para almacenar la división seleccionada para edición
+  const [formData, setFormData] = useState({
+    name: '',
+    siglas: '',
+    saldo: '',
+    status: true, // Establecer el status por defecto como true
+  });
 
   useEffect(() => {
     const fetchDivisiones = async () => {
@@ -32,14 +40,48 @@ const ConsultaDivisiones = () => {
   }, []);
 
 
-
-  const [formData, setFormData] = useState({
-    name: '',
-    siglas: '',
-    saldo: '',
-    status: true, // Establecer el status por defecto como true
+  const validationSchema = Yup.object().shape({
+    name: Yup
+      .string()
+      .required('El nombre es requerido')
+      .max(50, 'El nombre no puede tener más de 50 caracteres')
+      .min(5, 'El nombre no puede tener menos de 5 caracteres')
+      .test('existingName', 'Nombre existente. Ingresa un nuevo nombre', function (value) {
+        const lowerCaseName = value.toLowerCase();
+        return !divisiones.find(division => division.name.toLowerCase() === lowerCaseName);
+      }),
+    siglas: Yup
+      .string()
+      .required('Las siglas son requeridas')
+      .max(6, 'Las siglas no pueden tener más de 6 caracteres')
+      .min(2, 'Las siglas no pueden tener menos de 2 caracteres')
+      .test('existingSiglas', 'Siglas existentes. Ingresa nuevas siglas', function (value) {
+        const lowerCaseSiglas = value.toLowerCase();
+        return !divisiones.find(division => division.siglas.toLowerCase() === lowerCaseSiglas);
+      }),
+    saldo: Yup
+      .string()
+      .required('El monto es requerido')
+      .test('saldo-validation', 'El monto debe ser mayor que cero', saldo => {
+        const saldoNumber = parseFloat(saldo);
+        return saldoNumber > 0;
+      }),
   });
-  
+
+  const formik = useFormik({
+    initialValues: {
+      name: '',
+      siglas: '',
+      saldo: '',
+      status: true
+    },
+    validationSchema: validationSchema,
+    onSubmit: (values) => {
+      handleAdd(values);
+    },
+  });
+
+
   const generatePDF = async (id) => {
     try {
       const response = await axios.get(`${apiUrl}/buys/generatePDF/${id}`, {
@@ -96,7 +138,7 @@ const ConsultaDivisiones = () => {
           }}>
             <AiFillEdit />
           </Button>
-          
+
         ),
       },
       {
@@ -115,25 +157,25 @@ const ConsultaDivisiones = () => {
     switch (status) {
       case "Activo":
         return {
-        backgroundColor: "#198754",
-        width: "100px", // Ancho fijo para el color de fondo
-        height: "20px", // Alto fijo para el color de fondo
-        borderRadius: "5px",
-        color: "white",
+          backgroundColor: "#198754",
+          width: "100px", // Ancho fijo para el color de fondo
+          height: "20px", // Alto fijo para el color de fondo
+          borderRadius: "5px",
+          color: "white",
         };
       case "Inactivo":
         return {
-        backgroundColor: "#904949",
-        width: "100px", // Ancho fijo para el color de fondo
-        height: "20px", // Alto fijo para el color de fondo
-        borderRadius: "5px",
-        color: "white",
+          backgroundColor: "#888888",
+          width: "100px", // Ancho fijo para el color de fondo
+          height: "20px", // Alto fijo para el color de fondo
+          borderRadius: "5px",
+          color: "white",
         };
       default:
         return {};
     }
- 
-};
+
+  };
 
   const {
     getTableProps,
@@ -159,23 +201,46 @@ const ConsultaDivisiones = () => {
   );
 
 
-  
+
   const { globalFilter, pageIndex } = state;
 
   const [show, setShow] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const handleClose = () => {
+    formik.resetForm();
+    setShow(false);
+    setFormData({
+      name: '',
+      siglas: '',
+      saldo: '',
+      status: true,
+    });
+  };
+
+  const handleShow = () => {
+    formik.resetForm();
+    setFormData({
+      name: '',
+      siglas: '',
+      saldo: '',
+      status: true,
+    });
+    setShow(true);
+  };
+
 
   const handleAdd = async () => {
     try {
-      // Enviar el formulario con los datos de formData
-      const response = await axios.post(`${apiUrl}/division/`, formData);
-  
+      // Agregar status al formData
+      formData.status = true;
+
+      // Enviar el formulario con los datos de formik.values
+      await axios.post(`${apiUrl}/division/`, formik.values);
+
       // Actualizar saldototal con el valor de saldo
-      formData.saldototal = formData.saldo;
-  
+      formik.values.saldototal = formik.values.saldo;
+
       // Mostrar alerta de éxito
       await Swal.fire({
         icon: 'success',
@@ -201,7 +266,7 @@ const ConsultaDivisiones = () => {
   };
 
 
-  
+
   const handleEditClose = () => {
     setShowEdit(false);
     setEditDivisionId(null); // Limpiar el ID de la división en edición
@@ -224,26 +289,42 @@ const ConsultaDivisiones = () => {
     }
   };
 
-  
 
-  
- // Dentro de handleEditSave en ConsultaDivisiones.js
 
- const handleEditSave = async () => {
-  try {
-    if (selectedDivision.status === false) { // Verificar si el estado es inactivo
-      // Mostrar alerta de confirmación
-      const result = await Swal.fire({
-        title: '¿Estás seguro?',
-        text: 'Si inactivas la división, quitarás el saldo a todos los trabajadores que le pertenecen.',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#2D7541',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Sí, inactivar división'
-      });
 
-      if (result.isConfirmed) { // Si el usuario confirma la acción
+  // Dentro de handleEditSave en ConsultaDivisiones.js
+
+  const handleEditSave = async () => {
+    try {
+      if (selectedDivision.status === false) { // Verificar si el estado es inactivo
+        // Mostrar alerta de confirmación
+        const result = await Swal.fire({
+          title: '¿Estás seguro?',
+          text: 'Si inactivas la división, quitarás el saldo a todos los trabajadores que le pertenecen.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#2D7541',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Sí, inactivar división'
+        });
+
+        if (result.isConfirmed) { // Si el usuario confirma la acción
+          // Enviar el formulario con los datos de selectedDivision
+          const response = await axios.put(`${apiUrl}/division/${editDivisionId}`, selectedDivision);
+
+          // Mostrar alerta de éxito
+          await Swal.fire({
+            icon: 'success',
+            title: 'División modificada',
+            text: response.data,
+            confirmButtonColor: '#2D7541',
+            didClose: () => {
+              // Recargar la página después de cerrar la alerta
+              window.location.reload();
+            }
+          });
+        }
+      } else { // Si el estado es diferente de inactivo
         // Enviar el formulario con los datos de selectedDivision
         const response = await axios.put(`${apiUrl}/division/${editDivisionId}`, selectedDivision);
 
@@ -259,37 +340,21 @@ const ConsultaDivisiones = () => {
           }
         });
       }
-    } else { // Si el estado es diferente de inactivo
-      // Enviar el formulario con los datos de selectedDivision
-      const response = await axios.put(`${apiUrl}/division/${editDivisionId}`, selectedDivision);
-
-      // Mostrar alerta de éxito
+    } catch (error) {
+      console.error('Error al modificar la división:', error);
+      // Mostrar alerta de error
       await Swal.fire({
-        icon: 'success',
-        title: 'División modificada',
-        text: response.data,
+        icon: 'error',
+        title: 'Error',
+        text: 'Ocurrió un error al modificar la división. Por favor, inténtalo de nuevo.',
         confirmButtonColor: '#2D7541',
-        didClose: () => {
-          // Recargar la página después de cerrar la alerta
-          window.location.reload();
-        }
       });
     }
-  } catch (error) {
-    console.error('Error al modificar la división:', error);
-    // Mostrar alerta de error
-    await Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Ocurrió un error al modificar la división. Por favor, inténtalo de nuevo.',
-      confirmButtonColor: '#2D7541',
-    });
-  }
-  setShowEdit(false);
-};
+    setShowEdit(false);
+  };
 
 
-  
+
   return (
     <>
       <div className='container-fluid p-3 my-3'>
@@ -306,13 +371,84 @@ const ConsultaDivisiones = () => {
             </Modal.Header>
             <Modal.Body>
               <Container>
+                <Form onSubmit={formik.handleSubmit}>
+                  <Row>
+                    <label>Nombre de la división:</label>
+                    <Form.Control
+                      type="text"
+                      maxLength="50"
+                      placeholder=""
+                      {...formik.getFieldProps('name')}
+                      onBlur={formik.handleBlur}
+                    />
+                    {formik.touched.name && formik.errors.name ? (
+                      <div className="text-danger">{formik.errors.name}</div>
+                    ) : null}
+                  </Row>
+                  <Row>
+                    <label>Siglas:</label>
+                    <Form.Control
+                      type="text"
+                      maxLength="6"
+                      placeholder=""
+                      {...formik.getFieldProps('siglas')}
+                      onChange={(e) => {
+                        const value = e.target.value.toUpperCase();
+                        formik.setFieldValue('siglas', value);
+                      }}
+                      onBlur={formik.handleBlur}
+                    />
+                    {formik.touched.siglas && formik.errors.siglas ? (
+                      <div className="text-danger">{formik.errors.siglas}</div>
+                    ) : null}
+                  </Row>
+                  <Row>
+                    <label>Monto:</label>
+                    <Form.Control
+                      type="text"
+                      maxLength="8"
+                      placeholder=""
+                      {...formik.getFieldProps('saldo')}
+                      onKeyDown={(e) => {
+                        if (e.key === "Backspace" || e.key === "Delete" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                          return; // Permitir estas teclas sin restricciones
+                        }
+                        const regex = /^[0-9.]$/; // Permitir solo números y el punto decimal
+                        if (!regex.test(e.key)) {
+                          e.preventDefault(); // Evitar la entrada de otros caracteres
+                        }
+                      }}
+                    />
+                    {formik.touched.saldo && formik.errors && formik.errors.saldo ? (
+                      <div className="text-danger">{formik.errors.saldo}</div>
+                    ) : null}
+
+                  </Row>
+
+                </Form>
+              </Container>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="success" onClick={formik.handleSubmit}>Crear</Button>
+            </Modal.Footer>
+          </Modal>
+
+          {/* Modal de edición */}
+          <Modal show={showEdit} onHide={handleEditClose}>
+            <Modal.Header closeButton>
+              <Modal.Title>Modificar división</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <Container>
                 <Row>
                   <label>Nombre de la división:</label>
                   <Form.Control
                     type="text"
                     placeholder=""
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    maxLength="50"
+                    value={selectedDivision?.name || ''}
+                    onChange={(e) => setSelectedDivision({ ...selectedDivision, name: e.target.value })}
+                    disabled={selectedDivision?.status === false}
                   />
                 </Row>
                 <Row>
@@ -320,87 +456,46 @@ const ConsultaDivisiones = () => {
                   <Form.Control
                     type="text"
                     placeholder=""
-                    value={formData.siglas}
-                    onChange={(e) => setFormData({ ...formData, siglas: e.target.value })}
-                  />
-                </Row>
-                <Row>
-                  <label>Monto:</label>
-                  <Form.Control
-                    type="text"
-                    placeholder=""
-                    value={formData.saldo}
-                    onChange={(e) => setFormData({ ...formData, saldo: e.target.value })}
-                  />
-                </Row>
-              </Container>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="success" onClick={handleAdd}>Crear</Button>
-            </Modal.Footer>
-          </Modal>
-
-{/* Modal de edición */}
-<Modal show={showEdit} onHide={handleEditClose}>
-    <Modal.Header closeButton>
-        <Modal.Title>Modificar división</Modal.Title>
-    </Modal.Header>
-    <Modal.Body>
-        <Container>
-            <Row>
-                <label>Nombre de la división:</label>
-                <Form.Control
-                    type="text"
-                    placeholder=""
-                    value={selectedDivision?.name || ''}
-                    onChange={(e) => setSelectedDivision({ ...selectedDivision, name: e.target.value })}
-                    disabled={selectedDivision?.status === false}
-                />
-            </Row>
-            <Row>
-                <label>Siglas:</label>
-                <Form.Control
-                    type="text"
-                    placeholder=""
+                    maxLength="6"
                     value={selectedDivision?.siglas || ''}
                     onChange={(e) => setSelectedDivision({ ...selectedDivision, siglas: e.target.value })}
                     disabled={selectedDivision?.status === false}
-                />
-            </Row>
-            <Row>
-                <Form.Control
+                  />
+                </Row>
+                <Row>
+                  <Form.Control
                     type="hidden"
                     placeholder=""
                     value={selectedDivision?.saldo || ''}
                     onChange={(e) => setSelectedDivision({ ...selectedDivision, saldo: e.target.value })}
-                />
-            </Row>
-            <Row>
-                <label>Estatus:</label>
-                <Form.Control
+                  />
+                </Row>
+                <Row>
+                  <label>Estatus:</label>
+                  <Form.Control
                     as="select"
                     value={selectedDivision?.status ? 'Activo' : 'Inactivo'}
                     onChange={(e) => setSelectedDivision({ ...selectedDivision, status: e.target.value === 'Activo' })}
                     disabled={false} // Permitir que este control siempre sea modificable
-                >
+                  >
                     <option>Activo</option>
                     <option>Inactivo</option>
-                </Form.Control>
-            </Row>
-        </Container>
-    </Modal.Body>
-    <Modal.Footer>
-        <Button variant="success" onClick={handleEditSave}>Guardar cambios</Button>
-    </Modal.Footer>
-</Modal>
+                  </Form.Control>
+                </Row>
+              </Container>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="success" onClick={handleEditSave}>Guardar cambios</Button>
+            </Modal.Footer>
+          </Modal>
 
           <div className='col-6 d-flex justify-content-end'>
             <input
               type="text"
               value={globalFilter || ''}
               onChange={e => setGlobalFilter(e.target.value)}
-              placeholder="Buscar Division"
-              style={{ marginLeft: "10px", borderRadius: "5px", border: "1px solid #ccc"}}
+              placeholder="Buscar División"
+              style={{ marginLeft: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
             />
           </div>
         </div>

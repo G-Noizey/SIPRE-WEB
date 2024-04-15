@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
+import SIPREImage from "../../../dist/assets/images/SIPRE 1.png";
+import SIPRElogo from "../../../dist/assets/images/logo2.png";
 
 
 //RUTA DE LA API
@@ -100,7 +102,7 @@ const Login = () => {
                   style={{ backgroundColor: "#2D7541" }}
                 >
                   <img
-                    src="../../public/assets/images/SIPRE 1.png"
+                    src={SIPREImage}
                     alt="login form"
                     className="img-fluid"
                     style={{ width: "250px", margin: "140px 100px" }}
@@ -115,7 +117,7 @@ const Login = () => {
                           style={{ color: "#ff6219" }}
                         ></i>
                         <img
-                          src="../../public/assets/images/logo2.png"
+                          src={SIPRElogo}
                           alt="Descripción de la imagen"
                           style={{ width: "100px" }}
                         />

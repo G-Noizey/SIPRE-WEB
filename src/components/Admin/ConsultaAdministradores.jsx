@@ -7,6 +7,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useTable, usePagination, useGlobalFilter } from "react-table";
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import { useFormik } from "formik";
+import * as Yup from 'yup';
 
 
 //RUTA DE LA API
@@ -17,8 +19,17 @@ const apiUrl = import.meta.env.VITE_API_URL;
 // HOOKS PARA EL MANEJO DE ESTADOS DE ADMINISTRADORES AL MOMENTO DE EDITAR Y SELECCIONAR
 const ConsultaAdministradores = () => {
   const [administradores, setAdministradores] = useState([]);
-  const [editAdministradorId, setEditAdministradorId] = useState(null); 
+  const [editAdministradorId, setEditAdministradorId] = useState(null);
   const [selectedAdministrador, setSelectedAdministrador] = useState(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    apellido: '',
+    userAdmin: '',
+    email: '',
+    password: '',
+    status: true,
+  });
+
 
   // CONSUMO DEL API - GET EN ADMINISTRADORES PARA LA OBTENCIION DE DATOS Y PINTARLOS EN LA TABLA
   useEffect(() => {
@@ -34,18 +45,61 @@ const ConsultaAdministradores = () => {
     fetchAdministradores();
   }, []);
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-   // Estado para el formulario de añadir/editar administrador
-  const [formData, setFormData] = useState({
-    name: '',
-    apellido: '',
-    userAdmin: '',
-    email: '',
-    status: true, 
+  const validationSchema = Yup.object().shape({
+    name: Yup
+      .string()
+      .required('El nombre es requerido')
+      .min(5, 'El nombre no puede tener menos de 5 caracteres'),
+    apellido: Yup
+      .string()
+      .required('Los apellidos son requeridos')
+      .min(5, 'Los apellidos no pueden tener menos de 5 caracteres'),
+    userAdmin: Yup
+      .string()
+      .required('El usuario es requerido')
+      .min(5, 'El usuario no puede tener menos de 5 caracteres')
+      .test('existingUserAdmin', 'Usuario existente. Ingresa un nuevo usuario', function (value) {
+        const lowerCaseUserAdmin = value.toLowerCase();
+        return !administradores.find(administrador => administrador.userAdmin.toLowerCase() === lowerCaseUserAdmin);
+      }),
+    email: Yup
+      .string()
+      .required('El correo electrónico es requerido')
+      .min(5, 'El correo electrónico no puede tener menos de 5 caracteres')
+      .matches(emailRegex, 'El correo electrónico no tiene un formato válido')
+      .test('emailExists', 'El correo electrónico ya está en uso', function (value) {
+        return !administradores.some(administrador => administrador.email === value);
+      }),
+    password: Yup
+      .string()
+      .required('La contraseña es requerida')
+      .min(8, 'La contraseña no puede tener menos de 8 caracteres')
+      .matches(
+        /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_])(?!.*\s).*$/,
+        'La contraseña debe contener al menos 1 número, 1 letra mayúscula, 1 letra minúscula, 1 carácter especial y no debe contener espacios en blanco'
+      )
   });
-  
+
+  const formik = useFormik({
+    initialValues: {
+      name: '',
+      apellido: '',
+      userAdmin: '',
+      email: '',
+      password: '',
+      status: true,
+    },
+    validationSchema: validationSchema,
+    onSubmit: (values) => {
+      handleAdd(values);
+    },
+  });
+
+
   // ESTRUCTURACIÓN DE LA TABLA
-    
+
   const columns = React.useMemo(
     () => [
       {
@@ -82,86 +136,98 @@ const ConsultaAdministradores = () => {
           }}>
             <AiFillEdit />
           </Button>
-          
+
         ),
       },
-   
+
     ],
     []
   );
 
   const getCellStyle = (status) => {
-      switch (status) {
-        case "Activo":
-          return {
+    switch (status) {
+      case "Activo":
+        return {
           backgroundColor: "#198754",
           width: "100px", // Ancho fijo para el color de fondo
           height: "20px", // Alto fijo para el color de fondo
           borderRadius: "5px",
           color: "white",
-          };
-        case "Inactivo":
-          return {
+        };
+      case "Inactivo":
+        return {
           backgroundColor: "#888888",
           width: "100px", // Ancho fijo para el color de fondo
           height: "20px", // Alto fijo para el color de fondo
           borderRadius: "5px",
           color: "white",
-          };
-        default:
-          return {};
-      }
-   
+        };
+      default:
+        return {};
+    }
+
   };
-  
 
 
 
-    // Hooks de react-table para configurar la tabla y la paginación
 
-    const {
-      getTableProps,
-      getTableBodyProps,
-      headerGroups,
-      prepareRow,
-      page,
-      nextPage,
-      previousPage,
-      canNextPage,
-      canPreviousPage,
-      pageOptions,
-      state,
-      setGlobalFilter,
-    } = useTable(
-      {
-        columns,
-        data: administradores,
-        initialState: { pageSize: 10 },
-      },
-      useGlobalFilter,
-      usePagination
-    );
+  // Hooks de react-table para configurar la tabla y la paginación
 
-    const { globalFilter, pageIndex } = state;
+  const {
+    getTableProps,
+    getTableBodyProps,
+    headerGroups,
+    prepareRow,
+    page,
+    nextPage,
+    previousPage,
+    canNextPage,
+    canPreviousPage,
+    pageOptions,
+    state,
+    setGlobalFilter,
+  } = useTable(
+    {
+      columns,
+      data: administradores,
+      initialState: { pageSize: 10 },
+    },
+    useGlobalFilter,
+    usePagination
+  );
+
+  const { globalFilter, pageIndex } = state;
 
 
-    // Estado y funciones para manejar modales
+  // Estado y funciones para manejar modales
 
-    const [show, setShow] = useState(false);
-    const [showEdit, setShowEdit] = useState(false);
+  const [show, setShow] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+  const handleClose = () => {
+    formik.resetForm();
+    setShow(false);
+    setFormData({
+      name: '',
+      apellido: '',
+      userAdmin: '',
+      email: '',
+      status: true,
+    });
+  };
+
+  const handleShow = () => setShow(true);
 
 
 
   //CONSUMO DEL API - POST EN ADMINISTRADORES PARA AÑADIR NUEVOS DATOS DENTRO DEL MODAL
   const handleAdd = async () => {
-    try {
 
+    try {
+      formData.status = true;
       const response = await axios.get(`${apiUrl}/admin/`);
 
-      await axios.post(`${apiUrl}/admin/`, formData);
+      await axios.post(`${apiUrl}/admin/`, formik.values);
       // Mostrar alerta de éxito
       await Swal.fire({
         icon: 'success',
@@ -193,11 +259,11 @@ const ConsultaAdministradores = () => {
     setShowEdit(false);
     setEditAdministradorId(null); // Limpiar el ID de la división en edición
     setFormData({
-    name: '',
-    apellido: '',
-    userAdmin: '',
-    email: '',
-    status: true, 
+      name: '',
+      apellido: '',
+      userAdmin: '',
+      email: '',
+      status: true,
     });
   };
 
@@ -214,8 +280,8 @@ const ConsultaAdministradores = () => {
     }
   };
 
-   // CONSUMO DEL API - PUT EN ADMINISTRADORES
-   const handleEditSave = async () => {
+  // CONSUMO DEL API - PUT EN ADMINISTRADORES
+  const handleEditSave = async () => {
     try {
       // Si el estado del administrador se cambió a inactivo, mostrar alerta de confirmación
       if (selectedAdministrador.status === false) {
@@ -229,16 +295,16 @@ const ConsultaAdministradores = () => {
           cancelButtonColor: '#d33',
           confirmButtonText: 'Sí, desactivar administrador'
         });
-  
+
         // Si el usuario cancela la acción, salir de la función
         if (!result.isConfirmed) {
           return;
         }
       }
-  
+
       // Realizar la actualización del administrador en la base de datos utilizando el nuevo endpoint
       await axios.put(`${apiUrl}/admin/${editAdministradorId}`, selectedAdministrador);
-  
+
       // Mostrar mensaje de éxito
       await Swal.fire({
         icon: 'success',
@@ -262,7 +328,7 @@ const ConsultaAdministradores = () => {
     }
     setShowEdit(false);
   };
-  
+
 
 
   // RENDERIZACIÓN DEL COMPONENTE
@@ -283,60 +349,77 @@ const ConsultaAdministradores = () => {
             </Modal.Header>
             <Modal.Body>
               <Container>
-                <Row>
-                  <label>Nombre:</label>
-                  <Form.Control 
-                  type="text" 
-                  placeholder=" " 
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  />
-                </Row>
-                <Row>
-                  <label>Apellidos:</label>
-                  <Form.Control 
-                  type="text" 
-                  placeholder="" 
-                  value={formData.apellido}
-                   onChange={(e) => setFormData({ ...formData, apellido: e.target.value })}
-                  />
-                </Row>
-                <Row>
-                  <label>Usuario:</label>
-                  <Form.Control 
-                  type="text" 
-                  placeholder="" 
-                  value={formData.userAdmin}
-                  onChange={(e) => setFormData({ ...formData, userAdmin: e.target.value })}
-                  />
-                </Row>
-                <Row>
-                  <label>Correo Electrónico:</label>
-                  <Form.Control 
-                  type="text" 
-                  placeholder="" 
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </Row>
-                <Row>
-                  <label>Contraseña:</label>
-                  <Form.Control 
-                  type="text" 
-                  placeholder="" 
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  />
-                </Row>
-             
+                <Form onSubmit={formik.handleSubmit}>
+                  <Row>
+                    <label>Nombre:</label>
+                    <Form.Control
+                      type="text"
+                      placeholder=" "
+                      maxLength="50"
+                      {...formik.getFieldProps('name')}
+                    />
+                    {formik.touched.name && formik.errors.name ? (
+                      <div className="text-danger">{formik.errors.name}</div>
+                    ) : null}
+                  </Row>
+                  <Row>
+                    <label>Apellidos:</label>
+                    <Form.Control
+                      type="text"
+                      placeholder=""
+                      maxLength="50"
+                      {...formik.getFieldProps('apellido')}
+                    />
+                    {formik.touched.apellido && formik.errors.apellido ? (
+                      <div className="text-danger">{formik.errors.apellido}</div>
+                    ) : null}
+                  </Row>
+                  <Row>
+                    <label>Usuario:</label>
+                    <Form.Control
+                      type="text"
+                      placeholder=""
+                      maxLength="25"
+                      {...formik.getFieldProps('userAdmin')}
+                    />
+                    {formik.touched.userAdmin && formik.errors.userAdmin ? (
+                      <div className="text-danger">{formik.errors.userAdmin}</div>
+                    ) : null}
+                  </Row>
+                  <Row>
+                    <label>Correo electrónico:</label>
+                    <Form.Control
+                      type="text"
+                      placeholder=""
+                      maxLength="25"
+                      {...formik.getFieldProps('email')}
+                    />
+                    {formik.touched.email && formik.errors.email ? (
+                      <div className="text-danger">{formik.errors.email}</div>
+                    ) : null}
+                  </Row>
+                  <Row>
+                    <label>Contraseña:</label>
+                    <Form.Control
+                      type="text"
+                      placeholder=""
+                      maxLength="12"
+                      {...formik.getFieldProps('password')}
+                    />
+                    {formik.touched.password && formik.errors.password ? (
+                      <div className="text-danger">{formik.errors.password}</div>
+                    ) : null}
+                  </Row>
+                </Form>
               </Container>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="success" onClick={handleAdd}>
+              <Button variant="success" onClick={formik.handleSubmit}>
                 Crear
               </Button>
             </Modal.Footer>
           </Modal>
+
 
           <Modal show={showEdit} onHide={handleEditClose}>
             <Modal.Header closeButton>
@@ -344,54 +427,58 @@ const ConsultaAdministradores = () => {
             </Modal.Header>
             <Modal.Body>
               <Container>
-              <Row>
-              <label>Nombre de el administrador:</label>
-              <Form.Control
-                type="text"
-                placeholder=""
-                value={selectedAdministrador?.name || ''}
-                onChange={(e) => setSelectedAdministrador({ ...selectedAdministrador, name: e.target.value })}
-              />
-            </Row>
-            <Row>
-              <label>Apellido de el administrador:</label>
-              <Form.Control
-                type="text"
-                placeholder=""
-                value={selectedAdministrador?.apellido   || ''}
-                onChange={(e) => setSelectedAdministrador({ ...selectedAdministrador, apellido: e.target.value })}
-              />
-            </Row>
-            <Row>
-              <label>Usuario:</label>
-              <Form.Control
-                type="text"
-                placeholder=""
-                value={selectedAdministrador?.userAdmin || ''}
-                onChange={(e) => setSelectedAdministrador({ ...selectedAdministrador, userAdmin: e.target.value })}
-              />
-            </Row>
-            <Row>
-              <label>Correo Electrónico:</label>
-              <Form.Control
-                type="text"
-                placeholder=""
-                value={selectedAdministrador?.email || ''}
-                onChange={(e) => setSelectedAdministrador({ ...selectedAdministrador, email: e.target.value })}
-              />
-            </Row>
-           
-            <Row>
-              <label>Estatus:</label>
-              <Form.Control
-                as="select"
-                value={selectedAdministrador?.status ? 'Activo' : 'Inactivo'}
-                onChange={(e) => setSelectedAdministrador({ ...selectedAdministrador, status: e.target.value === 'Activo' })}
-              >
-                <option>Activo</option>
-                <option>Inactivo</option>
-              </Form.Control>
-            </Row>
+                <Row>
+                  <label>Nombre de el administrador:</label>
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    maxLength="50"
+                    value={selectedAdministrador?.name || ''}
+                    onChange={(e) => setSelectedAdministrador({ ...selectedAdministrador, name: e.target.value })}
+                  />
+                </Row>
+                <Row>
+                  <label>Apellido de el administrador:</label>
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    maxLength="50"
+                    value={selectedAdministrador?.apellido || ''}
+                    onChange={(e) => setSelectedAdministrador({ ...selectedAdministrador, apellido: e.target.value })}
+                  />
+                </Row>
+                <Row>
+                  <label>Usuario:</label>
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    maxLength="25"
+                    value={selectedAdministrador?.userAdmin || ''}
+                    onChange={(e) => setSelectedAdministrador({ ...selectedAdministrador, userAdmin: e.target.value })}
+                  />
+                </Row>
+                <Row>
+                  <label>Correo electrónico:</label>
+                  <Form.Control
+                    type="text"
+                    placeholder=""
+                    maxLength="25"
+                    value={selectedAdministrador?.email || ''}
+                    onChange={(e) => setSelectedAdministrador({ ...selectedAdministrador, email: e.target.value })}
+                  />
+                </Row>
+
+                <Row>
+                  <label>Estatus:</label>
+                  <Form.Control
+                    as="select"
+                    value={selectedAdministrador?.status ? 'Activo' : 'Inactivo'}
+                    onChange={(e) => setSelectedAdministrador({ ...selectedAdministrador, status: e.target.value === 'Activo' })}
+                  >
+                    <option>Activo</option>
+                    <option>Inactivo</option>
+                  </Form.Control>
+                </Row>
               </Container>
             </Modal.Body>
             <Modal.Footer>
@@ -407,7 +494,7 @@ const ConsultaAdministradores = () => {
               value={globalFilter || ""}
               onChange={(e) => setGlobalFilter(e.target.value)}
               placeholder="Buscar Administrador"
-              style={{ marginLeft: "10px", borderRadius: "5px", border: "1px solid #ccc"}}
+              style={{ marginLeft: "10px", borderRadius: "5px", border: "1px solid #ccc" }}
             />
           </div>
         </div>

@@ -15,6 +15,7 @@ public class DtoBuys {
     private LocalDate fecha;
     private String status;
     private double monto;
+    private String comentario;
     private Long idWorker;
     private Long idDivision;
 }

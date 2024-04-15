@@ -62,6 +62,8 @@ public class ServiceTransfer {
                     .fecha(dtoTransfer.getFecha())
                     .status(dtoTransfer.getStatus())
                     .descripcion(dtoTransfer.getDescripcion())
+                    //NUEVO DATO
+                    .comentario(dtoTransfer.getComentario())
                     .build();
             // Guardar la transferencia
             repoTransfer.save(transfer);
@@ -95,6 +97,7 @@ public class ServiceTransfer {
             existingTransfer.setFecha(dtoTransfer.getFecha());
             existingTransfer.setStatus(dtoTransfer.getStatus());
             existingTransfer.setDescripcion(dtoTransfer.getDescripcion());
+            existingTransfer.setComentario(dtoTransfer.getComentario());
 
             //Guardar los cambios en la base de datos
             repoTransfer.save(existingTransfer);

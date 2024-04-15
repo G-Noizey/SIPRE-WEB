@@ -249,7 +249,7 @@ const App = () => {
             />
             <BotonConContenido
               contenidoInicial="Saldos por Trabajador"
-              contenidoHover="Observa el saldo total de cada trabajador de acuerdo al saldo de su división"
+              contenidoHover="Observa el saldo total de cada trabajador por división"
               onClick={() => handleButtonClick('trabajador')}
             />
           </div>

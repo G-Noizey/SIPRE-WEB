@@ -16,7 +16,7 @@ public class PasswordRecoveryController {
     @PostMapping("/enviar-correo")
     public ResponseEntity<?> sendRecoveryEmail(@RequestBody PasswordResetRequestDto requestDto) {
         String to = requestDto.getEmail();
-        String resetLink = "http://localhost:5173/cambiar-contra?email=" + to;
+        String resetLink = "http://sipre-front.s3-website-us-east-1.amazonaws.com/cambiar-contra?email=" + to;
 
         emailService.sendResetPasswordEmail(to, resetLink);
 

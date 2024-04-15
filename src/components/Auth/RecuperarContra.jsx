@@ -5,6 +5,8 @@ import { Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from 'yup';
+import SIPREImage from "../../../dist/assets/images/SIPRE 1.png";
+import SIPRElogo from "../../../dist/assets/images/logo2.png";
 
 
 
@@ -44,7 +46,7 @@ const RecuperarContra = () => {
         Swal.fire({
           icon: 'success',
           title: '¡Correo enviado con éxito!',
-          text: 'El correo con ha sido enviado exitosamente. Revisa tu bandeja de entrada.',
+          text: 'El correo de recuperación de contraseña ha sido enviado exitosamente. Revisa tu bandeja de entrada.',
           confirmButtonColor: '#2D7541'
         }).then(() => {
           navigate('/');
@@ -77,7 +79,7 @@ const RecuperarContra = () => {
                   style={{ backgroundColor: "#2D7541" }}
                 >
                   <img
-                    src="../../public/assets/images/SIPRE 1.png"
+                    src={SIPREImage}
                     alt="login form"
                     className="img-fluid"
                     style={{ width: "250px", margin: "140px 100px" }}
@@ -92,7 +94,7 @@ const RecuperarContra = () => {
                           style={{ color: "#ff6219" }}
                         ></i>
                         <img
-                          src="../../public/assets/images/logo2.png"
+                          src={SIPRElogo}
                           alt="Descripción de la imagen"
                           style={{ width: "100px" }}
                         />

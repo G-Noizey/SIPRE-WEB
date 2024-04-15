@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button, Container, Modal, Row, Form } from "react-bootstrap";
 import { AiFillEdit } from "react-icons/ai";
 import { HiArrowSmRight, HiArrowSmLeft } from "react-icons/hi";
@@ -15,16 +15,32 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 const ConsultaTransacciones = () => {
   const [trans, setTrans] = useState([]);
+  
   const [divisiones, setDivisiones] = useState([]);
+
   const [divisionMap, setDivisionMap] = useState({});
+
   const [trabajadores, setTrabajadores] = useState([]);
+
   const [trabajadoresMap, setTrabajadoresMap] = useState({});
+
   const [selectedStatus, setSelectedStatus] = useState("");
+
+     // Declaración del estado comentario
+const [comentario, setComentario] = useState("");
+
+// Memoizar la función setComentario con useCallback
+const handleSetComentario = useCallback((e) => {
+  setComentario(e.target.value);
+}, []);
+
   const [updatedStatus, setUpdatedStatus] = useState("");
 
   const [tablaHabilitada, setTablaHabilitada] = useState(true);
 
   const [imagenUrl, setImagenUrl] = useState("");
+
+
 
 
   useEffect(() => {
@@ -108,7 +124,6 @@ const ConsultaTransacciones = () => {
     ],
     []
   );
-
   const handleUpdateTransfer = async (transferData) => {
     if (!transferData.beanWorkerTrans || !transferData.beanWorkerTrans.id) {
         console.error("El ID del trabajador es indefinido o nulo.");
@@ -133,7 +148,10 @@ const ConsultaTransacciones = () => {
         const updatedTrans = {
             ...transferData,
             status: selectedStatus,
+            comentario: comentario, // Incluye el comentario actualizado
         };
+
+        console.log("Parámetros actualizados:", updatedTrans); // Log para verificar los parámetros
 
         // Realizar la solicitud de actualización de la transferencia utilizando Axios
         await axios.put(`${apiUrl}/transfer/`, updatedTrans);
@@ -168,7 +186,6 @@ const ConsultaTransacciones = () => {
         });
     }
 };
-
 
 
   const handleReintegroSaldo = async (workerId, amount) => {
@@ -361,6 +378,25 @@ const ImagenClickeable = () => {
                   </select>
                 </Row>
 
+                 
+      <Row>
+  <label>Comentario:</label>
+  <textarea
+    value={comentario}
+    onChange={handleSetComentario}
+    onKeyDown={(e) => e.stopPropagation()}
+    style={{
+      borderRadius: "5px",
+      padding: "5px",
+      border: "1px solid #ccc",
+      backgroundColor: "#f9f9f9",
+      outline: "none",
+      marginLeft: "3px",
+    }}
+  ></textarea>
+</Row>
+
+
       
 
               </Container>
@@ -382,7 +418,7 @@ const ImagenClickeable = () => {
               type="text"
               value={globalFilter || ""}
               onChange={(e) => setGlobalFilter(e.target.value)}
-              placeholder="Buscar Transacción..."
+              placeholder="Buscar Transacción"
               style={{
                 marginLeft: "0px",
 

@@ -63,6 +63,7 @@ public class ControllerTransfer {
                                                //      @RequestParam Long nuTransferencia,
                                                @RequestParam Long idWorker,
                                                @RequestParam Long idDivision,
+                                               @RequestParam(required = false, defaultValue = "") String comentario,
                                                @RequestParam MultipartFile comprobante) throws IOException {
         // Obtener la instancia de BeanWorker
         BeanWorker worker = repoWorker.findById(idWorker)
@@ -92,7 +93,7 @@ public class ControllerTransfer {
         transferencia.setBeanDivisionTrans(division);
         // Asignar el comprobante
         transferencia.setComprobante(comprobante.getBytes()); // Asumiendo que comprobante es un byte[]
-
+        transferencia.setComentario(comentario);
         // Guardar la compra
         BeanTransferencia savedTransferencia = repoTransfer.save(transferencia);
 

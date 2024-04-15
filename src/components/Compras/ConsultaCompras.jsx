@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button, Container, Modal, Row, Form } from "react-bootstrap";
 import { AiFillEdit } from "react-icons/ai";
 import { HiArrowSmRight, HiArrowSmLeft } from "react-icons/hi";
@@ -22,16 +22,23 @@ const ConsultaCompras = () => {
   const [trabajadores, setTrabajadores] = useState([]);
   const [trabajadoresMap, setTrabajadoresMap] = useState({});
   const [selectedStatus, setSelectedStatus] = useState("");
-  const [updatedStatus, setUpdatedStatus] = useState("");
+  
+  // Declaración del estado comentario
+const [comentario, setComentario] = useState("");
+
+// Memoizar la función setComentario con useCallback
+const handleSetComentario = useCallback((e) => {
+  setComentario(e.target.value);
+}, []);
 
 
-  const [reintegroSaldo, setReintegroSaldo] = useState("");
 
 
   const [tablaHabilitada, setTablaHabilitada] = useState(true);
 
 
   const [imagenUrl, setImagenUrl] = useState("");
+  
 
 
 
@@ -118,13 +125,12 @@ const ConsultaCompras = () => {
     []
   );
 
-
   const handleUpdateBuy = async (buyData) => {
     if (!buyData.beanWorker || !buyData.beanWorker.id) {
         console.error("El ID del trabajador es indefinido o nulo.");
         return;
     }
-  
+
     if (selectedStatus !== 'Completado' && selectedStatus !== 'Rechazado') {
         // Mostrar una alerta de SweetAlert
         Swal.fire({
@@ -135,25 +141,26 @@ const ConsultaCompras = () => {
         });
         return;
     }
-  
+
     try {
         // Construir el objeto con los datos actualizados de la compra
         const updatedBuy = {
             ...buyData,
             status: selectedStatus,
+            comentario: comentario, // Incluye el comentario solo si está definido
         };
-  
+
         // Realizar la solicitud de actualización de la compra utilizando Axios
         await axios.put(`${apiUrl}/buys/`, updatedBuy);
-  
+
         // Realizar el reintegro de saldo al trabajador solo si el estado es "Completado"
         if (selectedStatus === 'Completado') {
             await handleReintegroSaldo(buyData.beanWorker.id, parseFloat(buyData.monto));
         }
-  
+
         // Deshabilitar la tabla
         setTablaHabilitada(false);
-  
+
         // Mostrar una alerta de éxito si la actualización se realiza con éxito
         await Swal.fire({
             icon: 'success',
@@ -175,9 +182,7 @@ const ConsultaCompras = () => {
             confirmButtonColor: '#2D7541',
         });
     }
-  };
-  
-
+};
 
 const handleReintegroSaldo = async (workerId, amount) => {
     try {
@@ -318,38 +323,39 @@ const ImagenClickeable = () => {
 
 
 
+
+  //
+
   //VISTA
 
 
   return (
     <>
+
+
       <div className="container-fluid p-3 my-3">
         <div className="row">
-          <Modal show={showViewMore} onHide={handleViewMoreClose}>
-            <Modal.Header closeButton>
-              <Modal.Title>Reintegrar y modificar</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Container>
-                <Row>
-                  <label>Nombre:</label>
-                  <p>{viewMoreData?.descripcion}</p>
-                </Row>
-                <Row>
-                  <label>Fecha:</label>
-                  <p>{viewMoreData?.fecha}</p>
-                </Row>
-                
-                <Row>
-
-
+        <Modal show={showViewMore} onHide={handleViewMoreClose}>
+  <Modal.Header closeButton>
+    <Modal.Title>Reintegrar y modificar</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    <Container>
+      <Row>
+        <label>Nombre:</label>
+        <p>{viewMoreData?.descripcion}</p>
+      </Row>
+      <Row>
+        <label>Fecha:</label>
+        <p>{viewMoreData?.fecha}</p>
+      </Row>
+      <Row>
         <label>Comprobante:</label>
-        {/* Espacio para la imagen del comprobante clickeable */}
         <div
           style={{
             width: '95%',
-            height: '200px', // Altura de la simulación
-            border: '1px solid #ced4da', // Borde para delimitar el espacio
+            height: '200px',
+            border: '1px solid #ced4da',
             borderRadius: '5px',
             display: 'flex',
             justifyContent: 'center',
@@ -357,58 +363,68 @@ const ImagenClickeable = () => {
             marginTop: '10px',
             marginLeft: '10px',
           }}
-          onClick={handleAmpliacionShow} // Al hacer clic en la imagen, muestra la imagen ampliada
+          onClick={handleAmpliacionShow}
         >
-          {/* Imagen sin consumo */}
           <img src={imagenUrl} alt="Imagen Ampliada" style={{ maxWidth: "100%", maxHeight: "100%" }} />
         </div>
-
-
       </Row>
-
-
-
-
-
-
       {/* Componente de la imagen ampliada */}
       <AmpliacionImagen show={showAmpliacion} handleClose={handleAmpliacionClose} />
-   
-                
+      <Row>
+        <label>Estado:</label>
+        <select
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+          style={{
+            borderRadius: "5px",
+            padding: "5px",
+            border: "transparent",
+            backgroundColor: "transparent",
+            outline: "none",
+            marginLeft: "3px",
+          }}
+        >
+          <option value="Pendiente">Pendiente</option>
+          <option value="Completado">Completado</option>
+          <option value="Rechazado">Rechazado</option>
+        </select>
+      </Row>
+      
+      <Row>
 
-                <Row>
-                  <label>Estado:</label>
-                  <select
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
-                    style={{
-                      borderRadius: "5px",
-                      padding: "5px",
-                      border: "transparent",
-                      backgroundColor: "transparent", // Fondo transparente
-                      outline: "none", // Quita el contorno al enfocar
-                      marginLeft: "3px",
-                    }}
-                  >
-                    <option value="Pendiente">Pendiente</option>
-                    <option value="Completado">Completado</option>
-                    <option value="Rechazado">Rechazado</option>
-                  </select>
-                </Row>
+  <label>Comentario:</label>
+  <textarea
+    value={comentario}
+    onChange={handleSetComentario}
+    onKeyDown={(e) => e.stopPropagation()}
+    style={{
+      borderRadius: "5px",
+      padding: "5px",
+      border: "1px solid #ccc",
+      backgroundColor: "#f9f9f9",
+      outline: "none",
+      marginLeft: "3px",
+    }}
+  ></textarea>
+  
+</Row>
+
+
+    </Container>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="success" onClick={() => handleUpdateBuy(viewMoreData)}>
+      Guardar Cambios
+    </Button>
+  </Modal.Footer>
+</Modal>
 
 
 
-              </Container>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button
-                variant="success"
-                onClick={() => handleUpdateBuy(viewMoreData)}
-              >
-                Guardar Cambios
-              </Button>
-            </Modal.Footer>
-          </Modal>
+
+
+
+
 
           {/* Tabla de Compras*/}
 
@@ -417,7 +433,7 @@ const ImagenClickeable = () => {
               type="text"
               value={globalFilter || ""}
               onChange={(e) => setGlobalFilter(e.target.value)}
-              placeholder="Buscar Compra..."
+              placeholder="Buscar Compra"
               style={{
                 marginLeft: "0px",
 

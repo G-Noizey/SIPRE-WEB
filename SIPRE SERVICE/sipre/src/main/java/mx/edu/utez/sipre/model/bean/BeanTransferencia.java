@@ -35,6 +35,10 @@ public class BeanTransferencia {
     @Column(name = "status", length = 20, nullable = false)
     private String status;
 
+    @Column(name = "comentario", length = 400)
+    private String comentario;
+
+
     @ManyToOne
     @JoinColumn(name = "idWorker", nullable = false)
     private BeanWorker beanWorkerTrans;

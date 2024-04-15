@@ -578,6 +578,7 @@ const ConsultaTrabajadores = () => {
                       type="text"
                       placeholder=""
                       value={formData.name}
+                      maxLength="50"
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
@@ -589,6 +590,7 @@ const ConsultaTrabajadores = () => {
                       type="text"
                       placeholder=""
                       value={formData.lastname}
+                      maxLength="50"
                       onChange={(e) =>
                         setFormData({ ...formData, lastname: e.target.value })
                       }
@@ -601,10 +603,20 @@ const ConsultaTrabajadores = () => {
                     <Form.Control
                       type="text"
                       placeholder=""
+                      maxLength="9"
                       value={formData.telefono}
                       onChange={(e) =>
                         setFormData({ ...formData, telefono: e.target.value })
                       }
+                      onKeyDown={(e) => {
+                        if (e.key === "Backspace" || e.key === "Delete" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                          return; // Permitir estas teclas sin restricciones
+                        }
+                        const regex = /^[0-9]$/; // Permitir solo números
+                        if (!regex.test(e.key)) {
+                          e.preventDefault(); // Evitar la entrada de otros caracteres
+                        }
+                      }}
                     />
                   </Col>
                   <Col>
@@ -612,6 +624,7 @@ const ConsultaTrabajadores = () => {
                     <Form.Control
                       type="text"
                       placeholder=""
+                      maxLength="25"
                       value={formData.email}
                       onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
@@ -626,6 +639,7 @@ const ConsultaTrabajadores = () => {
                     <Form.Control
                       type="text"
                       placeholder=""
+                      maxLength="24"
                       value={formData.nuCuenta}
                       onChange={(e) =>
                         setFormData({ ...formData, nuCuenta: e.target.value })
@@ -639,6 +653,7 @@ const ConsultaTrabajadores = () => {
                     <Form.Control
                       type="text"
                       placeholder=""
+                      maxLength="80"
                       value={formData.direccion}
                       onChange={(e) =>
                         setFormData({ ...formData, direccion: e.target.value })
@@ -662,6 +677,7 @@ const ConsultaTrabajadores = () => {
                     <Form.Control
                       type="text"
                       placeholder=""
+                      maxLength="25"
                       value={formData.userWorker}
                       onChange={(e) =>
                         setFormData({ ...formData, userWorker: e.target.value })
@@ -673,6 +689,7 @@ const ConsultaTrabajadores = () => {
                     <Form.Control
                       type="text"
                       placeholder=""
+                      maxLength="12"
                       value={formData.password}
                       onChange={(e) =>
                         setFormData({ ...formData, password: e.target.value })
@@ -734,10 +751,20 @@ const ConsultaTrabajadores = () => {
                     <Form.Control
                       type="text"
                       placeholder=""
+                      maxLength="8"
                       value={formData.saldo}
                       onChange={(e) =>
                         setFormData({ ...formData, saldo: e.target.value })
                       }
+                      onKeyDown={(e) => {
+                        if (e.key === "Backspace" || e.key === "Delete" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                          return; // Permitir estas teclas sin restricciones
+                        }
+                        const regex = /^[0-9.]$/; // Permitir solo números
+                        if (!regex.test(e.key)) {
+                          e.preventDefault(); // Evitar la entrada de otros caracteres
+                        }
+                      }}
                     />
                   </Col>
                 </Row>
@@ -781,6 +808,7 @@ const ConsultaTrabajadores = () => {
                     <Form.Control
                       type="text"
                       placeholder=""
+                      maxLength="50"
                       value={selectedTrabajador?.name || ""}
                       onChange={(e) =>
                         setSelectedTrabajador({
@@ -796,6 +824,7 @@ const ConsultaTrabajadores = () => {
                     <Form.Control
                       type="text"
                       placeholder=""
+                      maxLength="50"
                       value={selectedTrabajador?.lastname || ""}
                       onChange={(e) =>
                         setSelectedTrabajador({
@@ -814,6 +843,7 @@ const ConsultaTrabajadores = () => {
                     <Form.Control
                       type="text"
                       placeholder=""
+                      maxLength="9"
                       value={selectedTrabajador?.telefono || ""}
                       onChange={(e) =>
                         setSelectedTrabajador({
@@ -821,6 +851,15 @@ const ConsultaTrabajadores = () => {
                           telefono: e.target.value,
                         })
                       }
+                      onKeyDown={(e) => {
+                        if (e.key === "Backspace" || e.key === "Delete" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                          return; // Permitir estas teclas sin restricciones
+                        }
+                        const regex = /^[0-9]$/; // Permitir solo números
+                        if (!regex.test(e.key)) {
+                          e.preventDefault(); // Evitar la entrada de otros caracteres
+                        }
+                      }}
                       disabled={selectedTrabajador?.status === false}
                     />
                   </Col>
@@ -829,6 +868,7 @@ const ConsultaTrabajadores = () => {
                     <Form.Control
                       type="text"
                       placeholder=""
+                      maxLength="80"
                       value={selectedTrabajador?.direccion || ""}
                       onChange={(e) =>
                         setSelectedTrabajador({
@@ -846,6 +886,7 @@ const ConsultaTrabajadores = () => {
                     <Form.Control
                       type="text"
                       placeholder=""
+                      maxLength="24"
                       value={selectedTrabajador?.nuCuenta || ""}
                       onChange={(e) =>
                         setSelectedTrabajador({
@@ -863,6 +904,7 @@ const ConsultaTrabajadores = () => {
                     <Form.Control
                       type="text"
                       placeholder=""
+                      maxLength="25"
                       value={selectedTrabajador?.email || ""}
                       onChange={(e) =>
                         setSelectedTrabajador({
@@ -908,6 +950,7 @@ const ConsultaTrabajadores = () => {
                     <Form.Control
                       type="text"
                       placeholder=""
+                      maxLength="25"
                       value={selectedTrabajador?.userWorker || ""}
                       onChange={(e) =>
                         setSelectedTrabajador({
@@ -988,6 +1031,7 @@ const ConsultaTrabajadores = () => {
                   <Form.Control
                     type="text"
                     placeholder=""
+                    maxLength="8"
                     value={nuevaDivision.saldo}
                     onChange={(e) =>
                       setNuevaDivision({
@@ -995,6 +1039,15 @@ const ConsultaTrabajadores = () => {
                         saldo: e.target.value,
                       })
                     }
+                    onKeyDown={(e) => {
+                      if (e.key === "Backspace" || e.key === "Delete" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                        return; // Permitir estas teclas sin restricciones
+                      }
+                      const regex = /^[0-9.]$/; // Permitir solo números
+                      if (!regex.test(e.key)) {
+                        e.preventDefault(); // Evitar la entrada de otros caracteres
+                      }
+                    }}
                     disabled={selectedTrabajador?.status === false}
                   />
                 </Col>

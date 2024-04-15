@@ -88,6 +88,8 @@ public class ServiceBuys {
                     .status(dtoBuys.getStatus())
                     .fecha(dtoBuys.getFecha())
                     .descripcion(dtoBuys.getDescripcion())
+                    //NUEVO DATO (NOIZEY)
+                    .comentario(dtoBuys.getComentario())
                     .build();
 
             // Guardar la compra en la base de datos y dejar que la base de datos genere automáticamente el ID
@@ -126,6 +128,8 @@ public class ServiceBuys {
             existingBuys.setStatus(dtoBuys.getStatus());
             existingBuys.setFecha(dtoBuys.getFecha());
             existingBuys.setDescripcion(dtoBuys.getDescripcion());
+            //NUEVO DATO
+            existingBuys.setComentario(dtoBuys.getComentario());
 
             // Guardar la compra actualizada en la base de datos
             repoBuys.save(existingBuys);
@@ -216,7 +220,7 @@ public class ServiceBuys {
             document.add(new Paragraph(" "));
 
             // Agregar texto encima de la tabla de compras
-            document.add(new Paragraph("Compras real    izadas:").setFont(font).setBold().setFontSize(16).setFontColor(new DeviceRgb(45, 117, 65)));
+            document.add(new Paragraph("Compras realizadas:").setFont(font).setBold().setFontSize(16).setFontColor(new DeviceRgb(45, 117, 65)));
 
             // Agregar tabla con los detalles de las compras
             Table table = new Table(new float[]{4, 2, 2, 2}); // Añadir una columna más para el nombre del trabajador

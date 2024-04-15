@@ -16,6 +16,7 @@ public class DtoTransfer {
     // private Long nuTransferencia;
     private String status;
     private double monto;
+    private String comentario;
     private Long idWorker;
     private Long idDivision;
 }

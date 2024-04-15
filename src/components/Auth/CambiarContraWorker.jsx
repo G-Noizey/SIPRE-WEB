@@ -5,6 +5,8 @@ import Swal from "sweetalert2";
 import { useLocation } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from 'yup';
+import SIPREImage from "../../../dist/assets/images/SIPRE 1.png";
+import SIPRElogo from "../../../dist/assets/images/logo2.png";
 
 //RUTA DE LA API
 const apiUrl = import.meta.env.VITE_API_URL;
@@ -79,7 +81,7 @@ const CambiarContraWorker = () => {
                                     style={{ backgroundColor: "#2D7541" }}
                                 >
                                     <img
-                                        src="../../public/assets/images/SIPRE 1.png"
+                                        src={SIPREImage}
                                         alt="login form"
                                         className="img-fluid"
                                         style={{ width: "250px", margin: "140px 100px" }}
@@ -94,7 +96,7 @@ const CambiarContraWorker = () => {
                                                     style={{ color: "#ff6219" }}
                                                 ></i>
                                                 <img
-                                                    src="../../public/assets/images/logo2.png"
+                                                    src={SIPRElogo}
                                                     alt="Descripción de la imagen"
                                                     style={{ width: "100px" }}
                                                 />

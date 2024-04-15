@@ -11,6 +11,7 @@ import { Link, Outlet, useNavigate } from "react-router-dom";
 import { IoIosLogOut } from "react-icons/io";
 import Swal from "sweetalert2"; // Importa SweetAlert
 import React, { useState, useEffect } from "react";
+import SIPREImage from "../../../dist/assets/images/SIPRE 1.png";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -92,7 +93,7 @@ const Dashboard = () => {
             <div className="row  ">
               <div className="col-2">
                 <img
-                  src="../../../public/assets/images/SIPRE 1.png"
+                  src={SIPREImage}
                   alt="Logo"
                   style={{
                     width: "100px",
