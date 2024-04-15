@@ -111,16 +111,21 @@ const handleSetComentario = useCallback((e) => {
         Cell: ({ row }) => (
           <>
             <Button
-              variant="primary"
+              variant="warning"
               size="sm"
               onClick={() => handleViewMoreShow(row.original)}
               disabled={row.original.status === "Completado" || row.original.status === "Rechazado"}
+              style={{
+                backgroundColor: row.original.status === "Completado" || row.original.status === "Rechazado" ? "rgba(255, 0, 0, 0.5)" : undefined,
+                pointerEvents: row.original.status === "Completado" || row.original.status === "Rechazado" ? "none" : "auto",
+              }}
             >
               <AiFillEdit />
             </Button>
           </>
         ),
       },
+      
     ],
     []
   );
@@ -290,23 +295,7 @@ const handleSetComentario = useCallback((e) => {
     }
   };
 
-  // Componente funcional que contiene la imagen ampliada
-const AmpliacionImagen = ({ show, handleClose }) => {
-  return (
-    <Modal show={show} onHide={handleClose} size="l"> {/* Tamaño 'xl' para un modal extra grande */}
-      <Modal.Body>
-        <img src={imagenUrl} alt="Imagen Ampliada" style={{ width: '100%', height: 'auto' }} />
-      </Modal.Body>
-    </Modal>
-  );
-};
 
-// Componente que renderiza la imagen principal y maneja su clic para mostrarla ampliada
-const ImagenClickeable = () => {
-  const [showAmpliacion, setShowAmpliacion] = useState(false);
-
-  const handleAmpliacionClose = () => setShowAmpliacion(false);
-  const handleAmpliacionShow = () => setShowAmpliacion(true);
 
   //VISTA
   return (
@@ -343,7 +332,6 @@ const ImagenClickeable = () => {
             marginTop: '10px',
             marginLeft: '10px',
           }}
-          onClick={handleAmpliacionShow} // Al hacer clic en la imagen, muestra la imagen ampliada
         >
           {/* Imagen sin consumo */}
           <img
@@ -353,8 +341,6 @@ const ImagenClickeable = () => {
           />
         </div>
       </Row>
-      {/* Componente de la imagen ampliada */}
-      <AmpliacionImagen show={showAmpliacion} handleClose={handleAmpliacionClose} />
    
                 
 
@@ -509,10 +495,6 @@ const ImagenClickeable = () => {
   );
 };
   
-    return (
-      <>
-        <ImagenClickeable />
-      </>
-    );
-  }
+   
+  
 export default ConsultaTransacciones;

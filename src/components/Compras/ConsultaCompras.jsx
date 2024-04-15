@@ -110,10 +110,14 @@ const handleSetComentario = useCallback((e) => {
         Cell: ({ row }) => (
           <>
             <Button
-              variant="primary"
+              variant="warning"
               size="sm"
               onClick={() => handleViewMoreShow(row.original)}
               disabled={row.original.status === "Completado" || row.original.status === "Rechazado"}
+              style={{
+                backgroundColor: row.original.status === "Completado" || row.original.status === "Rechazado" ? "rgba(255, 0, 0, 0.5)" : undefined,
+                pointerEvents: row.original.status === "Completado" || row.original.status === "Rechazado" ? "none" : "auto",
+              }}
             >
               <AiFillEdit />
             </Button>
@@ -121,9 +125,17 @@ const handleSetComentario = useCallback((e) => {
         ),
       },
       
+      
     ],
     []
   );
+
+
+
+
+
+
+  
 
   const handleUpdateBuy = async (buyData) => {
     if (!buyData.beanWorker || !buyData.beanWorker.id) {
@@ -262,13 +274,6 @@ const handleReintegroSaldo = async (workerId, amount) => {
 
 
 
-
-
-
-
-
-
-
   const getCellStyle = (status) => {
     switch (status) {
       case "Pendiente":
@@ -303,34 +308,19 @@ const handleReintegroSaldo = async (workerId, amount) => {
 
   
 
-  const AmpliacionImagen = ({ show, handleClose }) => {
-    return (
-      <Modal show={show} onHide={handleClose} size="xl">
-        <Modal.Body>
-          <img src={imagenUrl} alt="Imagen Ampliada" style={{ width: "100%", height: "auto" }} />
-        </Modal.Body>
-      </Modal>
-    );
-  };
-  
-// Componente que renderiza la imagen principal y maneja su clic para mostrarla ampliada
-const ImagenClickeable = () => {
-  const [showAmpliacion, setShowAmpliacion] = useState(false);
-
-  const handleAmpliacionClose = () => setShowAmpliacion(false);
-  const handleAmpliacionShow = () => setShowAmpliacion(true);
 
 
 
 
 
-  //
 
   //VISTA
-
-
   return (
     <>
+
+
+
+
 
 
       <div className="container-fluid p-3 my-3">
@@ -363,13 +353,10 @@ const ImagenClickeable = () => {
             marginTop: '10px',
             marginLeft: '10px',
           }}
-          onClick={handleAmpliacionShow}
         >
           <img src={imagenUrl} alt="Imagen Ampliada" style={{ maxWidth: "100%", maxHeight: "100%" }} />
         </div>
       </Row>
-      {/* Componente de la imagen ampliada */}
-      <AmpliacionImagen show={showAmpliacion} handleClose={handleAmpliacionClose} />
       <Row>
         <label>Estado:</label>
         <select
@@ -526,12 +513,8 @@ const ImagenClickeable = () => {
   );
 };
   
-    return (
-      <>
-        <ImagenClickeable />
-      </>
-    );
-  }
+    
+  
 
   
 export default ConsultaCompras;

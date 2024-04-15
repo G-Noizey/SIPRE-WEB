@@ -130,7 +130,7 @@ const ConsultaAdministradores = () => {
       {
         Header: 'Acciones',
         Cell: ({ row }) => (
-          <Button variant="primary" size="sm" onClick={() => {
+          <Button variant="warning" size="sm" onClick={() => {
             console.log('Edit ID:', row.original.id);
             handleEditShow(row.original.id);
           }}>

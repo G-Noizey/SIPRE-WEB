@@ -145,7 +145,7 @@ const ConsultaTrabajadores = () => {
         Cell: ({ row }) => (
           <>
             <Button
-              variant="primary"
+              variant="warning"
               size="sm"
               onClick={() => handleEditShow(row.original.id)}
             >
@@ -166,7 +166,7 @@ const ConsultaTrabajadores = () => {
       {
         Header: 'Estado de cuenta',
         Cell: ({ row }) => (
-          <Button variant="primary" size="sm" onClick={() => generatePDF(row.original.id)}>
+          <Button variant="danger" size="sm" onClick={() => generatePDF(row.original.id)}>
             <FaFileAlt /> {/* Icono de PDF */}
           </Button>
         ),

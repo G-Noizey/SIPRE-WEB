@@ -132,7 +132,7 @@ const ConsultaDivisiones = () => {
       {
         Header: 'Acciones',
         Cell: ({ row }) => (
-          <Button variant="primary" size="sm" onClick={() => {
+          <Button variant="warning" size="sm" onClick={() => {
             console.log('Edit ID:', row.original.id);
             handleEditShow(row.original.id);
           }}>
@@ -144,7 +144,7 @@ const ConsultaDivisiones = () => {
       {
         Header: 'Estado de cuenta',
         Cell: ({ row }) => (
-          <Button variant="primary" size="sm" onClick={() => generatePDF(row.original.id)}>
+          <Button variant="danger " size="sm" onClick={() => generatePDF(row.original.id)}>
             <FaFileAlt /> {/* Icono de PDF */}
           </Button>
         ),
