@@ -11,12 +11,18 @@ import java.time.LocalDate;
 @Builder
 public class DtoTransfer {
     private Long id;
+
     private String descripcion;
+
     private LocalDate fecha;
-    // private Long nuTransferencia;
+
     private String status;
+
     private double monto;
+
     private String comentario;
+
     private Long idWorker;
+
     private Long idDivision;
 }

@@ -145,14 +145,14 @@ const ConsultaTrabajadores = () => {
         Cell: ({ row }) => (
           <>
             <Button
-              variant="success"
+              variant="primary"
               size="sm"
               onClick={() => handleEditShow(row.original.id)}
             >
               <AiFillEdit />
             </Button>{" "}
             <Button
-              variant="success"
+              variant="primary"
               size="sm"
               onClick={() => handleViewMoreShow(row.original)}
             >
@@ -166,7 +166,7 @@ const ConsultaTrabajadores = () => {
       {
         Header: 'Estado de cuenta',
         Cell: ({ row }) => (
-          <Button variant="success" size="sm" onClick={() => generatePDF(row.original.id)}>
+          <Button variant="primary" size="sm" onClick={() => generatePDF(row.original.id)}>
             <FaFileAlt /> {/* Icono de PDF */}
           </Button>
         ),
@@ -205,7 +205,7 @@ const ConsultaTrabajadores = () => {
     switch (status) {
       case "Activo":
         return {
-          backgroundColor: "#198754",
+          backgroundColor: "green",
           width: "100px", // Ancho fijo para el color de fondo
           height: "20px", // Alto fijo para el color de fondo
           borderRadius: "5px",
@@ -213,7 +213,7 @@ const ConsultaTrabajadores = () => {
         };
       case "Inactivo":
         return {
-          backgroundColor: "#888888",
+          backgroundColor: "red",
           width: "100px", // Ancho fijo para el color de fondo
           height: "20px", // Alto fijo para el color de fondo
           borderRadius: "5px",

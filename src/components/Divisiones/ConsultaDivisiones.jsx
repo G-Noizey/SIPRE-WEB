@@ -132,7 +132,7 @@ const ConsultaDivisiones = () => {
       {
         Header: 'Acciones',
         Cell: ({ row }) => (
-          <Button variant="success" size="sm" onClick={() => {
+          <Button variant="primary" size="sm" onClick={() => {
             console.log('Edit ID:', row.original.id);
             handleEditShow(row.original.id);
           }}>
@@ -144,7 +144,7 @@ const ConsultaDivisiones = () => {
       {
         Header: 'Estado de cuenta',
         Cell: ({ row }) => (
-          <Button variant="success" size="sm" onClick={() => generatePDF(row.original.id)}>
+          <Button variant="primary" size="sm" onClick={() => generatePDF(row.original.id)}>
             <FaFileAlt /> {/* Icono de PDF */}
           </Button>
         ),
@@ -157,7 +157,7 @@ const ConsultaDivisiones = () => {
     switch (status) {
       case "Activo":
         return {
-          backgroundColor: "#198754",
+          backgroundColor: "green",
           width: "100px", // Ancho fijo para el color de fondo
           height: "20px", // Alto fijo para el color de fondo
           borderRadius: "5px",
@@ -165,7 +165,7 @@ const ConsultaDivisiones = () => {
         };
       case "Inactivo":
         return {
-          backgroundColor: "#888888",
+          backgroundColor: "red",
           width: "100px", // Ancho fijo para el color de fondo
           height: "20px", // Alto fijo para el color de fondo
           borderRadius: "5px",

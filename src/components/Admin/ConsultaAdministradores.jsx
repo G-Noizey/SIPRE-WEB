@@ -130,7 +130,7 @@ const ConsultaAdministradores = () => {
       {
         Header: 'Acciones',
         Cell: ({ row }) => (
-          <Button variant="success" size="sm" onClick={() => {
+          <Button variant="primary" size="sm" onClick={() => {
             console.log('Edit ID:', row.original.id);
             handleEditShow(row.original.id);
           }}>
@@ -148,7 +148,7 @@ const ConsultaAdministradores = () => {
     switch (status) {
       case "Activo":
         return {
-          backgroundColor: "#198754",
+          backgroundColor: "green",
           width: "100px", // Ancho fijo para el color de fondo
           height: "20px", // Alto fijo para el color de fondo
           borderRadius: "5px",
@@ -156,7 +156,7 @@ const ConsultaAdministradores = () => {
         };
       case "Inactivo":
         return {
-          backgroundColor: "#888888",
+          backgroundColor: "red",
           width: "100px", // Ancho fijo para el color de fondo
           height: "20px", // Alto fijo para el color de fondo
           borderRadius: "5px",

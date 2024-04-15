@@ -119,6 +119,7 @@ public class ControllerTransfer {
                     transferenciaMap.put("fecha", transferencia.getFecha());
                     transferenciaMap.put("monto", transferencia.getMonto());
                     transferenciaMap.put("status", transferencia.getStatus());
+                    transferenciaMap.put("comentario", transferencia.getComentario());
                     transferenciaMap.put("idWorker", transferencia.getBeanWorkerTrans().getId());
                     transferenciaMap.put("idDivision", transferencia.getBeanDivisionTrans().getId());
                     return transferenciaMap;

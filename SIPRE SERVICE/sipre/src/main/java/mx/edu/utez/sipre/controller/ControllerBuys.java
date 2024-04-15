@@ -141,6 +141,7 @@ public class ControllerBuys {
                     compraMap.put("fecha", compra.getFecha());
                     compraMap.put("monto", compra.getMonto());
                     compraMap.put("status", compra.getStatus());
+                    compraMap.put("comentario", compra.getComentario());
                     compraMap.put("idWorker", compra.getBeanWorker().getId());
                     compraMap.put("idDivision", compra.getBeanDivision().getId());
                     return compraMap;

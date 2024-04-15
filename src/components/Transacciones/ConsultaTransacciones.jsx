@@ -111,7 +111,7 @@ const handleSetComentario = useCallback((e) => {
         Cell: ({ row }) => (
           <>
             <Button
-              variant="success"
+              variant="primary"
               size="sm"
               onClick={() => handleViewMoreShow(row.original)}
               disabled={row.original.status === "Completado" || row.original.status === "Rechazado"}
@@ -263,7 +263,7 @@ const handleSetComentario = useCallback((e) => {
     switch (status) {
       case "Pendiente":
         return {
-          backgroundColor: "#7A8719",
+          backgroundColor: "orange",
           width: "100px", // Ancho fijo para el color de fondo
           height: "20px", // Alto fijo para el color de fondo
           borderRadius: "5px",
@@ -271,7 +271,7 @@ const handleSetComentario = useCallback((e) => {
         };
       case "Completado":
         return {
-          backgroundColor: "#198754",
+          backgroundColor: "green",
           width: "100px", // Ancho fijo para el color de fondo
           height: "20px", // Alto fijo para el color de fondo
           borderRadius: "5px",
@@ -279,7 +279,7 @@ const handleSetComentario = useCallback((e) => {
         };
       case "Rechazado":
         return {
-          backgroundColor: "#876919",
+          backgroundColor: "red",
           width: "100px", // Ancho fijo para el color de fondo
           height: "20px", // Alto fijo para el color de fondo
           borderRadius: "5px",
